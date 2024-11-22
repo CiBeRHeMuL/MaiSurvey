@@ -1,0 +1,724 @@
+openapi: 3.0.0
+info:
+  title: 'MAI Survey Service'
+  description: 'MAI Survey Service'
+  version: 1.0.0
+servers:
+  -
+    url: 'https://mai-survey.net'
+  -
+    url: 'http://mai-survey.loc'
+    description: 'Local development server'
+paths:
+  /auth/sign-in:
+    post:
+      tags:
+        - auth
+      summary: 'Вход в приложение.'
+      operationId: post_sign-in
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignInDto'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/SuccessResponse' }
+                  - { properties: { data: { $ref: '#/components/schemas/SigningInUser' } }, type: object }
+        '400':
+          description: 'Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: 'Unprocessable Entity'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResponse'
+        '500':
+          description: 'Internal Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CriticalResponse'
+      security: []
+  /auth/sign-up/1:
+    post:
+      tags:
+        - auth
+      summary: 'Регистрация в приложении. Шаг 1'
+      operationId: post_sign-up-1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignUpStep1Dto'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/SuccessResponse' }
+                  - { properties: { data: { $ref: '#/components/schemas/SigningInUser' } }, type: object }
+        '400':
+          description: 'Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: 'Unprocessable Entity'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResponse'
+        '500':
+          description: 'Internal Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CriticalResponse'
+      security: []
+  /auth/sign-up/2:
+    post:
+      tags:
+        - auth
+      summary: 'Регистрация в приложении. Шаг 2'
+      operationId: post_sign-up-2
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignUpStep2Dto'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/SuccessResponse' }
+                  - { properties: { data: { $ref: '#/components/schemas/User' } }, type: object }
+        '400':
+          description: 'Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: 'Unprocessable Entity'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResponse'
+        '500':
+          description: 'Internal Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CriticalResponse'
+  /auth/refresh:
+    put:
+      tags:
+        - auth
+      summary: 'Обновить токен доступа.'
+      operationId: put_refresh-credentials
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshCredentialsDto'
+      responses:
+        default:
+          description: ''
+  /groups:
+    get:
+      tags:
+        - groups
+      summary: 'Получить список групп с фильтрацией и пагинацией.'
+      operationId: get_get-all-groups
+      parameters:
+        -
+          name: name
+          in: query
+          required: false
+          schema:
+            type: string
+            default: null
+            maxLength: 255
+            minLength: 1
+            nullable: true
+        -
+          name: sort_by
+          in: query
+          required: false
+          schema:
+            type: string
+            default: name
+            enum:
+              - name
+        -
+          name: sort_type
+          in: query
+          required: false
+          schema:
+            type: string
+            default: asc
+            enum:
+              - asc
+              - desc
+        -
+          name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+        -
+          name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+            minimum: 0
+            nullable: true
+      responses:
+        '500':
+          description: 'Internal Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CriticalResponse'
+        '422':
+          description: 'Unprocessable Entity'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResponse'
+        '400':
+          description: 'Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/SuccessWithPaginationResponse' }
+                  - { properties: { data: { properties: { items: { type: array, items: { $ref: '#/components/schemas/Group' } } }, type: object } }, type: object }
+  /health:
+    get:
+      tags:
+        - health
+      summary: 'Проверка того, что сервер в рабочем состоянии'
+      operationId: get_check-health
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+      security: []
+  /user-data/all:
+    get:
+      tags:
+        - user-data
+      summary: 'Получить список данных пользователей с фильтрацией и пагинацией.'
+      operationId: get_get-all-user-data
+      parameters:
+        -
+          name: name
+          in: query
+          required: false
+          schema:
+            type: string
+            default: null
+            maxLength: 255
+            minLength: 1
+            nullable: true
+        -
+          name: only_with_group
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+        -
+          name: 'group_ids[]'
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+            default: null
+            maxItems: 50
+            nullable: true
+        -
+          name: sort_by
+          in: query
+          required: false
+          schema:
+            type: string
+            default: name
+            enum:
+              - name
+        -
+          name: sort_type
+          in: query
+          required: false
+          schema:
+            type: string
+            default: asc
+            enum:
+              - asc
+              - desc
+        -
+          name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+        -
+          name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+            minimum: 0
+            nullable: true
+      responses:
+        '500':
+          description: 'Internal Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CriticalResponse'
+        '422':
+          description: 'Unprocessable Entity'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResponse'
+        '400':
+          description: 'Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/SuccessWithPaginationResponse' }
+                  - { properties: { data: { properties: { items: { type: array, items: { $ref: '#/components/schemas/UserData' } } }, type: object } }, type: object }
+components:
+  schemas:
+    SignInDto:
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+      type: object
+    SignUpStep1Dto:
+      required:
+        - email
+        - password
+        - repeat_password
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+        repeat_password:
+          type: string
+      type: object
+    SignUpStep2Dto:
+      required:
+        - user_data_id
+      properties:
+        user_data_id:
+          type: string
+      type: object
+    RefreshCredentialsDto:
+      required:
+        - refresh_token
+      properties:
+        refresh_token:
+          type: string
+      type: object
+    GetAllGroupsDto:
+      properties:
+        name:
+          type: string
+          default: null
+          maxLength: 255
+          minLength: 1
+          nullable: true
+        sort_by:
+          type: string
+          default: name
+          enum:
+            - name
+        sort_type:
+          type: string
+          default: asc
+          enum:
+            - asc
+            - desc
+        offset:
+          type: integer
+          default: 0
+          minimum: 0
+        limit:
+          type: integer
+          default: 20
+          maximum: 100
+          minimum: 0
+          nullable: true
+      type: object
+    GetAllUserDataDto:
+      properties:
+        name:
+          type: string
+          default: null
+          maxLength: 255
+          minLength: 1
+          nullable: true
+        only_with_group:
+          type: boolean
+          default: false
+        group_ids:
+          type: array
+          items:
+            type: string
+          default: null
+          maxItems: 50
+          nullable: true
+        sort_by:
+          type: string
+          default: name
+          enum:
+            - name
+        sort_type:
+          type: string
+          default: asc
+          enum:
+            - asc
+            - desc
+        offset:
+          type: integer
+          default: 0
+          minimum: 0
+        limit:
+          type: integer
+          default: 20
+          maximum: 100
+          minimum: 0
+          nullable: true
+      type: object
+    SuccessResponse:
+      properties:
+        data:
+          type: object
+          default: null
+          nullable: true
+          anyOf:
+            -
+              type: boolean
+            -
+              type: integer
+            -
+              type: number
+            -
+              type: string
+            -
+              type: array
+              items: {  }
+            -
+              type: object
+              additionalProperties: true
+        meta:
+          $ref: '#/components/schemas/Meta'
+      type: object
+    SigningInUser:
+      required:
+        - credentials
+        - user
+      properties:
+        credentials:
+          $ref: '#/components/schemas/UserCredentials'
+        user:
+          $ref: '#/components/schemas/User'
+      type: object
+    ErrorResponse:
+      required:
+        - error
+      properties:
+        error:
+          $ref: '#/components/schemas/Error'
+      type: object
+    ValidationResponse:
+      properties:
+        errors:
+          type: object
+          default: []
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Error'
+      type: object
+    CriticalResponse:
+      required:
+        - exception
+      properties:
+        exception:
+          $ref: '#/components/schemas/ExceptionModel'
+      type: object
+    User:
+      required:
+        - id
+        - email
+        - status
+        - deleted
+        - permissions
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+          format: email
+        data:
+          nullable: true
+          oneOf:
+            -
+              $ref: '#/components/schemas/UserData'
+        status:
+          $ref: '#/components/schemas/UserStatusEnum'
+        deleted:
+          type: boolean
+        deleted_at:
+          type: string
+          format: date-time
+          nullable: true
+        permissions:
+          type: array
+          items:
+            $ref: '#/components/schemas/PermissionEnum'
+      type: object
+    SuccessWithPaginationResponse:
+      properties:
+        data:
+          $ref: '#/components/schemas/PaginatedData'
+        meta:
+          $ref: '#/components/schemas/Meta'
+      type: object
+    Group:
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+      type: object
+    UserData:
+      required:
+        - id
+        - first_name
+        - last_name
+      properties:
+        id:
+          type: string
+        first_name:
+          type: string
+        last_name:
+          type: string
+        patronymic:
+          type: string
+          nullable: true
+        group:
+          nullable: true
+          oneOf:
+            -
+              $ref: '#/components/schemas/UserDataGroup'
+      type: object
+    Meta:
+      required:
+        - mode
+      properties:
+        mode:
+          type: string
+      type: object
+    UserCredentials:
+      required:
+        - access_token
+        - refresh_token
+      properties:
+        access_token:
+          type: string
+          maxLength: 40
+          minLength: 40
+        refresh_token:
+          type: string
+          maxLength: 40
+          minLength: 40
+      type: object
+    Error:
+      required:
+        - slug
+        - message
+      properties:
+        slug:
+          type: string
+        message:
+          type: string
+      type: object
+    ExceptionModel:
+      required:
+        - exception_class
+        - code
+        - file
+        - line
+        - message
+        - trace
+      properties:
+        exception_class:
+          type: string
+        code:
+          type: integer
+        file:
+          type: string
+        line:
+          type: integer
+        message:
+          type: string
+        trace:
+          type: array
+          items:
+            properties:
+              function:
+                type: string
+              line:
+                type: integer
+              file:
+                type: string
+              class:
+                type: string
+                nullable: true
+              object:
+                type: object
+                nullable: true
+                additionalProperties: true
+              type:
+                type: string
+                nullable: true
+              args:
+                type: array
+                items:
+                  type: string
+            type: object
+      type: object
+    UserStatusEnum:
+      type: string
+      enum:
+        - draft
+        - active
+    PermissionEnum:
+      type: string
+      enum:
+        - ROLE_survey.view
+        - ROLE_survey.complete
+        - ROLE_survey.create
+        - ROLE_survey.update
+        - ROLE_survey.delete
+        - ROLE_survey.view_result
+        - ROLE_survey.view_all
+    PaginatedData:
+      properties:
+        items:
+          type: array
+          items: {  }
+          default: []
+        offset:
+          type: integer
+          default: null
+          nullable: true
+        limit:
+          type: integer
+          default: null
+          nullable: true
+        count:
+          type: integer
+          default: null
+          nullable: true
+        sort_by:
+          type: string
+          default: null
+          nullable: true
+        sort_type:
+          type: string
+          default: null
+          nullable: true
+      type: object
+    UserDataGroup:
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          format: uuid
+      type: object
+  securitySchemes:
+    Bearer:
+      type: http
+      bearerFormat: JWT
+      scheme: bearer
+security:
+  -
+    Bearer: []
+tags:
+  -
+    name: health
+    description: 'Ручки для проверки работоспособности сервера'
+  -
+    name: auth
+    description: 'Ручки для авторизации и аутентификации'
+  -
+    name: user-data
+    description: 'Ручки для получения данных пользователей'
+  -
+    name: groups
+    description: 'Ручки для получения групп'
+

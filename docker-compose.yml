@@ -1,0 +1,57 @@
+version: "3.9"
+services:
+  mai-survey-postgresql:
+    image: postgres:17
+    container_name: mai-survey-postgresql-container
+    hostname: mai-survey-postgresql
+    restart: always
+    ports:
+      - "${PG_EXTERNAL_PORT}:5432"
+    environment:
+      POSTGRES_USER: "${PG_USER}"
+      POSTGRES_PASSWORD: "${PG_PASSWORD}"
+      POSTGRES_DB: "${PG_DBNAME}"
+  mai-survey-php:
+    build:
+      context: ./
+      dockerfile: docker/php/Dockerfile
+    container_name: mai-survey-php-container
+    environment:
+      PHP_IDE_CONFIG: 'serverName=development'
+      XDEBUG_SESSION: PHPSTORM
+    volumes:
+      - type: bind
+        source: .
+        target: /app
+      - type: volume
+        source: mai-survey_phpsocket
+        target: /var/run
+    networks:
+      - caddy
+  mai-survey-nginx:
+    image: nginx
+    container_name: mai-survey-nginx-container
+    volumes:
+      - type: bind
+        source: ./docker/nginx/dev.nginx.conf
+        target: /etc/nginx/nginx.conf
+      - type: bind
+        source: .
+        target: /app
+      - type: volume
+        source: mai-survey_phpsocket
+        target: /var/run
+        volume:
+          nocopy: true
+    depends_on:
+      - mai-survey-php
+    networks:
+      - caddy
+    ports:
+      - "${NGINX_EXTERNAL_PORT}:80"
+
+volumes:
+  mai-survey_phpsocket:
+networks:
+  caddy:
+    external: true

@@ -1,0 +1,30 @@
+nelmio_api_doc:
+  documentation:
+    info:
+      title: MAI Survey Service
+      description: MAI Survey Service
+      version: 1.0.0
+    tags:
+      - name: health
+        description: Ручки для проверки работоспособности сервера
+      - name: auth
+        description: Ручки для авторизации и аутентификации
+      - name: user-data
+        description: Ручки для получения данных пользователей
+      - name: groups
+        description: Ручки для получения групп
+    servers:
+      - url: https://mai-survey.net
+      - url: http://mai-survey.loc
+        description: Local development server
+    components:
+      securitySchemes:
+        Bearer:
+          type: http
+          scheme: bearer
+          bearerFormat: JWT
+    security:
+      - Bearer: [ ]
+  areas: # to filter documented areas
+    path_patterns:
+      - ^(?!(/doc|/_.*)$) # Accepts routes under /api except /api/doc and /_* (development debug routes)

@@ -1,0 +1,57 @@
+# This file is the entry point to configure your own services.
+# Files in the packages/ subdirectory configure your dependencies.
+
+# Put parameters here that don't need to change on each machine where the app is deployed
+# https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
+parameters:
+
+services:
+  # default configuration for services in *this* file
+  _defaults:
+    autowire: true      # Automatically injects dependencies in your services.
+    autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+
+  # makes classes in src/ available to be used as services
+  # this creates a service per class whose id is the fully-qualified class name
+  App\:
+    resource: '../src/'
+    exclude:
+      - '../src/Domain/Entity/'
+      - '../src/Kernel.php'
+
+    # add more service definitions when explicit configuration is needed
+    # please note that last definitions always *replace* previous ones
+
+  # --- start services
+  App\Domain\Service\Jwt\JwtServiceInterface:
+    class: App\Infrastructure\Service\Jwt\JwtService
+    arguments:
+      $key: '%env(APP_SECRET)%'
+  App\Domain\Service\Security\EmailCheckerServiceInterface:
+    class: App\Infrastructure\Service\Security\EmailCheckerService
+  App\Domain\Service\Security\PasswordVerificationServiceInterface:
+    class: App\Infrastructure\Service\Security\PasswordVerificationService
+  App\Domain\Service\Security\PasswordHasherServiceInterface:
+    class: App\Infrastructure\Service\Security\PasswordHasherService
+  App\Domain\Service\Security\PasswordCheckerServiceInterface:
+    class: App\Infrastructure\Service\Security\PasswordCheckerService
+  # --- end services
+
+  # --- start repositories
+  App\Domain\Repository\UserRepositoryInterface:
+    class: App\Infrastructure\Repository\UserRepository
+  App\Domain\Repository\UserDataRepositoryInterface:
+    class: App\Infrastructure\Repository\UserDataRepository
+  App\Domain\Repository\GroupRepositoryInterface:
+    class: App\Infrastructure\Repository\GroupRepository
+  # --- end repositories
+
+  # --- start serializer
+  App\Presentation\Web\Serializer\Normalizer\EmailNormalizer:
+    tags: [ 'serializer.normalizer', 'serializer.denormalizer' ]
+  # --- end serializer
+
+  # --- start security
+  App\Presentation\Web\Security\Voter\StatusVoter:
+    tags: [ 'security.voter' ]
+  # --- end security

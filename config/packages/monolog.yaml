@@ -1,0 +1,66 @@
+# Как использовать в консольных командах
+#https://symfony.com/doc/current/logging/monolog_console.html
+
+#  LoggerInterface	Verbosity	                            Command line
+#  ->error()	    OutputInterface::VERBOSITY_QUIET	    stderr
+#  ->warning()	    OutputInterface::VERBOSITY_NORMAL	    stdout
+#  ->notice()	    OutputInterface::VERBOSITY_VERBOSE	    -v
+#  ->info()	        OutputInterface::VERBOSITY_VERY_VERBOSE	-vv
+#  ->debug()	    OutputInterface::VERBOSITY_DEBUG	    -vvv
+
+# Список существующих хэндлеров
+# https://github.com/symfony/monolog-bundle/blob/master/DependencyInjection/Configuration.php#L25
+
+monolog:
+  channels:
+    - deprecation # Deprecations are logged in the dedicated "deprecation" channel when it exists
+
+when@dev:
+  monolog:
+    handlers:
+      main:
+        type: stream
+        path: "%kernel.logs_dir%/%kernel.environment%.log"
+        level: debug
+        channels: [ "!event" ]
+      console:
+        type: console
+        process_psr_3_messages: false
+        channels: [ "!event", "!doctrine", "!console", "!deprecation" ]
+
+when@test:
+  monolog:
+    handlers:
+      main:
+        type: fingers_crossed
+        action_level: error
+        handler: nested
+        excluded_http_codes: [ 404, 405 ]
+        channels: [ "!event" ]
+      nested:
+        type: stream
+        path: "%kernel.logs_dir%/%kernel.environment%.log"
+        level: debug
+
+when@prod:
+  monolog:
+    handlers:
+      app:
+        type: rotating_file
+        path: '%kernel.logs_dir%/error.log'
+        level: error
+        max_files: 30
+        channels: [ "!event" ]
+      console:
+        type: console
+        process_psr_3_messages: false
+        channels: [ "!event", "!doctrine", "!deprecation" ]
+      filter_for_telegram:
+        type: fingers_crossed
+        action_level: error
+        handler: telegram_error
+        excluded_http_codes: [ 401, 403, 404, 405 ]
+      telegram_error:
+        type: service
+        id: monolog.custom_handlers.telegram.error
+        level: error
