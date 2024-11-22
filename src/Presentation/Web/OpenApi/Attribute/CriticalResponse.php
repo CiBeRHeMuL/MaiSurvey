@@ -9,7 +9,7 @@ use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes\JsonContent;
 use OpenApi\Attributes\Response;
 
-#[Attribute]
+#[Attribute(Attribute::IS_REPEATABLE | Attribute::TARGET_CLASS | Attribute::TARGET_METHOD)]
 class CriticalResponse extends Response
 {
     public function __construct()

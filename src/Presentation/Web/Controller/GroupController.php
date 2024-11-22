@@ -22,7 +22,8 @@ class GroupController extends BaseController
     #[OA\Tag('groups')]
     #[LOA\CriticalResponse]
     #[LOA\ValidationResponse]
-    #[LOA\ErrorResponse]
+    #[LOA\ErrorResponse(400)]
+    #[LOA\ErrorResponse(401)]
     #[LOA\SuccessPaginationResponse(Group::class)]
     public function getAll(
         GetAllUseCase $useCase,

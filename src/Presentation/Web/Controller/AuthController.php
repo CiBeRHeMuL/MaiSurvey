@@ -94,7 +94,8 @@ class AuthController extends BaseController
     #[Route('/auth/sign-up/2', 'sign-up-2', methods: ['POST'])]
     #[OA\Tag('auth')]
     #[LOA\SuccessResponse(User::class)]
-    #[LOA\ErrorResponse]
+    #[LOA\ErrorResponse(400)]
+    #[LOA\ErrorResponse(401)]
     #[LOA\ValidationResponse]
     #[LOA\CriticalResponse]
     public function signUpStep2(
@@ -115,7 +116,8 @@ class AuthController extends BaseController
     #[OA\Post(security: [])]
     #[OA\Tag('auth')]
     #[LOA\SuccessResponse(UserCredentials::class)]
-    #[LOA\ErrorResponse]
+    #[LOA\ErrorResponse(400)]
+    #[LOA\ErrorResponse(401)]
     #[LOA\ValidationResponse]
     #[LOA\CriticalResponse]
     public function refreshCredentials(

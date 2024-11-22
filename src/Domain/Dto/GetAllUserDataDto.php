@@ -9,7 +9,8 @@ readonly class GetAllUserDataDto
 {
     /**
      * @param string|null $name
-     * @param bool $onlyWithGroup
+     * @param bool|null $withGroup
+     * @param bool|null $withUser
      * @param Uuid[]|null $groupIds
      * @param string $sortBy
      * @param SortTypeEnum $sortType
@@ -18,7 +19,8 @@ readonly class GetAllUserDataDto
      */
     public function __construct(
         private string|null $name = null,
-        private bool $onlyWithGroup = false,
+        private bool|null $withGroup = false,
+        private bool|null $withUser = null,
         private array|null $groupIds = null,
         private string $sortBy = 'name',
         private SortTypeEnum $sortType = SortTypeEnum::Asc,
@@ -32,9 +34,14 @@ readonly class GetAllUserDataDto
         return $this->name;
     }
 
-    public function isOnlyWithGroup(): bool
+    public function withGroup(): bool|null
     {
-        return $this->onlyWithGroup;
+        return $this->withGroup;
+    }
+
+    public function withUser(): bool|null
+    {
+        return $this->withUser;
     }
 
     public function getGroupIds(): array|null

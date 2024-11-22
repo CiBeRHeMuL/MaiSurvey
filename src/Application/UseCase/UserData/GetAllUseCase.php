@@ -35,7 +35,8 @@ class GetAllUseCase
             ->getAll(
                 new DomainGetAllUserDataDto(
                     $dto->name,
-                    $dto->only_with_group,
+                    $dto->with_group,
+                    $dto->with_user,
                     $dto->group_ids !== null
                         ? array_map(fn(string $e) => new Uuid($e), $dto->group_ids)
                         : null,

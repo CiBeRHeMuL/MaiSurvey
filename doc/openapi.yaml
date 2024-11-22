@@ -115,6 +115,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '422':
           description: 'Unprocessable Entity'
           content:
@@ -153,6 +159,7 @@ paths:
           in: query
           required: false
           schema:
+            title: 'Имя для фильтрации'
             type: string
             default: null
             maxLength: 255
@@ -162,6 +169,7 @@ paths:
           in: query
           required: false
           schema:
+            title: 'Сортировка по'
             type: string
             default: name
             enum:
@@ -170,6 +178,7 @@ paths:
           in: query
           required: false
           schema:
+            title: 'Тип сортировки'
             type: string
             default: asc
             enum:
@@ -206,6 +215,12 @@ paths:
                 $ref: '#/components/schemas/ValidationResponse'
         '400':
           description: 'Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
           content:
             application/json:
               schema:
@@ -243,21 +258,32 @@ paths:
           in: query
           required: false
           schema:
+            title: 'Имя для фильтрации'
             type: string
             default: null
             maxLength: 255
             minLength: 1
             nullable: true
-        - name: only_with_group
+        - name: with_group
           in: query
           required: false
           schema:
+            title: 'Учитывать только данные с группой'
             type: boolean
-            default: false
+            default: null
+        - name: with_user
+          in: query
+          required: false
+          schema:
+            title: 'Учитывать только данные с пользователем'
+            type: boolean
+            default: null
+            nullable: true
         - name: 'group_ids[]'
           in: query
           required: false
           schema:
+            title: 'Группы для фильтрации'
             type: array
             items:
               type: string
@@ -268,6 +294,7 @@ paths:
           in: query
           required: false
           schema:
+            title: 'Сортировка по'
             type: string
             default: name
             enum:
@@ -276,6 +303,7 @@ paths:
           in: query
           required: false
           schema:
+            title: 'Тип сортировки'
             type: string
             default: asc
             enum:
@@ -316,6 +344,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '200':
           description: OK
           content:
@@ -332,8 +366,10 @@ components:
         - password
       properties:
         email:
+          title: Почта
           type: string
         password:
+          title: Пароль
           type: string
       type: object
     SignUpStep1Dto:
@@ -343,10 +379,13 @@ components:
         - repeat_password
       properties:
         email:
+          title: Почта
           type: string
         password:
+          title: Пароль
           type: string
         repeat_password:
+          title: 'Повторный пароль'
           type: string
       type: object
     SignUpStep2Dto:
@@ -354,6 +393,7 @@ components:
         - user_data_id
       properties:
         user_data_id:
+          title: 'ID данных пользователя'
           type: string
       type: object
     RefreshCredentialsDto:
@@ -361,22 +401,26 @@ components:
         - refresh_token
       properties:
         refresh_token:
+          title: 'Токен для обновления'
           type: string
       type: object
     GetAllGroupsDto:
       properties:
         name:
+          title: 'Имя для фильтрации'
           type: string
           default: null
           maxLength: 255
           minLength: 1
           nullable: true
         sort_by:
+          title: 'Сортировка по'
           type: string
           default: name
           enum:
             - name
         sort_type:
+          title: 'Тип сортировки'
           type: string
           default: asc
           enum:
@@ -396,15 +440,23 @@ components:
     GetAllUserDataDto:
       properties:
         name:
+          title: 'Имя для фильтрации'
           type: string
           default: null
           maxLength: 255
           minLength: 1
           nullable: true
-        only_with_group:
+        with_group:
+          title: 'Учитывать только данные с группой'
           type: boolean
-          default: false
+          default: null
+        with_user:
+          title: 'Учитывать только данные с пользователем'
+          type: boolean
+          default: null
+          nullable: true
         group_ids:
+          title: 'Группы для фильтрации'
           type: array
           items:
             type: string
@@ -412,11 +464,13 @@ components:
           maxItems: 50
           nullable: true
         sort_by:
+          title: 'Сортировка по'
           type: string
           default: name
           enum:
             - name
         sort_type:
+          title: 'Тип сортировки'
           type: string
           default: asc
           enum:

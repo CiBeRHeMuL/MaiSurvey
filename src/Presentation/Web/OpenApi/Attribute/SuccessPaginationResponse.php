@@ -11,7 +11,7 @@ use OpenApi\Attributes\Property;
 use OpenApi\Attributes\Response;
 use OpenApi\Attributes\Schema;
 
-#[Attribute]
+#[Attribute(Attribute::IS_REPEATABLE | Attribute::TARGET_CLASS | Attribute::TARGET_METHOD)]
 class SuccessPaginationResponse extends Response
 {
     public function __construct(

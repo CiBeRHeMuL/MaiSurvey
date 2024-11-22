@@ -55,9 +55,23 @@ class UserDataRepository extends AbstractRepository implements UserDataRepositor
                     )
                     : null,
             ]);
-        if ($dto->isOnlyWithGroup()) {
-            $q
-                ->andWhere(new Expr('udg IS NOT NULL'));
+        if ($dto->withGroup() !== null) {
+            if ($dto->withGroup()) {
+                $q
+                    ->andWhere(new Expr('udg IS NOT NULL'));
+            } else {
+                $q
+                    ->andWhere(new Expr('udg IS NULL'));
+            }
+        }
+        if ($dto->withUser() !== null) {
+            if ($dto->withUser()) {
+                $q
+                    ->andWhere(new Expr('ud.user_id IS NOT NULL'));
+            } else {
+                $q
+                    ->andWhere(new Expr('ud.user_id IS NULL'));
+            }
         }
         if ($dto->getName() !== null) {
             $q

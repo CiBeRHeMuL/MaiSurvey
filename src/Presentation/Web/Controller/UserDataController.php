@@ -22,7 +22,8 @@ class UserDataController extends BaseController
     #[OA\Tag('user-data')]
     #[LOA\CriticalResponse]
     #[LOA\ValidationResponse]
-    #[LOA\ErrorResponse]
+    #[LOA\ErrorResponse(400)]
+    #[LOA\ErrorResponse(401)]
     #[LOA\SuccessPaginationResponse(UserData::class)]
     public function getAll(
         GetAllUseCase $useCase,
