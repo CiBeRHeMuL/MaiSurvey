@@ -3,7 +3,6 @@
 namespace App\Domain\Dto;
 
 use App\Domain\Enum\SortTypeEnum;
-use Symfony\Component\Uid\Uuid;
 
 readonly class GetAllGroupsDto
 {

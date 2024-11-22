@@ -7,18 +7,12 @@ use App\Domain\DataProvider\DataSort;
 use App\Domain\DataProvider\LimitOffset;
 use App\Domain\DataProvider\SortColumn;
 use App\Domain\Dto\GetAllGroupsDto;
-use App\Domain\Dto\GetAllUserDataDto;
 use App\Domain\Entity\Group;
-use App\Domain\Entity\UserData;
-use App\Domain\Entity\UserDataGroup;
 use App\Domain\Repository\GroupRepositoryInterface;
-use App\Domain\Repository\UserDataRepositoryInterface;
-use App\Infrastructure\Db\Expr\FullNameExpr;
 use App\Infrastructure\Db\Expr\ILikeExpr;
 use App\Infrastructure\Repository\Common\AbstractRepository;
 use Qstart\Db\QueryBuilder\DML\Expression\Expr;
 use Qstart\Db\QueryBuilder\Query;
-use Symfony\Component\Uid\Uuid;
 
 class GroupRepository extends AbstractRepository implements GroupRepositoryInterface
 {
@@ -41,7 +35,7 @@ class GroupRepository extends AbstractRepository implements GroupRepositoryInter
             sort: new DataSort([
                 new SortColumn(
                     $dto->getSortBy(),
-                    $dto->getSortType()->getPhpSort()
+                    $dto->getSortType()->getPhpSort(),
                 ),
             ]),
         );

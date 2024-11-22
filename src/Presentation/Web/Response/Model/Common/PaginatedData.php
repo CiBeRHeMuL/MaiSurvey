@@ -3,7 +3,6 @@
 namespace App\Presentation\Web\Response\Model\Common;
 
 use App\Domain\DataProvider\DataProviderInterface;
-use App\Presentation\Web\Enum\SortTypeEnum;
 use Closure;
 
 /**

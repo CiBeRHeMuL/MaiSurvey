@@ -42,7 +42,7 @@ class SuccessPaginationResponse extends Response
                         type: 'object',
                     ),
                 ],
-            )
+            ),
         );
     }
 }

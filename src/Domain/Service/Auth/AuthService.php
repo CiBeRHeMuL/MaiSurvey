@@ -28,7 +28,7 @@ class AuthService
         LoggerInterface $logger,
         private UserService $userService,
         private PasswordVerificationServiceInterface $passwordVerificationService,
-        private GroupService $userDataService,
+        private UserDataService $userDataService,
         private PasswordCheckerServiceInterface $passwordCheckerService,
     ) {
         $this->setLogger($logger);

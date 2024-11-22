@@ -4,10 +4,8 @@ info:
   description: 'MAI Survey Service'
   version: 1.0.0
 servers:
-  -
-    url: 'https://mai-survey.net'
-  -
-    url: 'http://mai-survey.loc'
+  - url: 'https://mai-survey.net'
+  - url: 'http://mai-survey.loc'
     description: 'Local development server'
 paths:
   /auth/sign-in:
@@ -49,7 +47,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CriticalResponse'
-      security: []
+      security: [ ]
   /auth/sign-up/1:
     post:
       tags:
@@ -89,7 +87,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CriticalResponse'
-      security: []
+      security: [ ]
   /auth/sign-up/2:
     post:
       tags:
@@ -151,8 +149,7 @@ paths:
       summary: 'Получить список групп с фильтрацией и пагинацией.'
       operationId: get_get-all-groups
       parameters:
-        -
-          name: name
+        - name: name
           in: query
           required: false
           schema:
@@ -161,8 +158,7 @@ paths:
             maxLength: 255
             minLength: 1
             nullable: true
-        -
-          name: sort_by
+        - name: sort_by
           in: query
           required: false
           schema:
@@ -170,8 +166,7 @@ paths:
             default: name
             enum:
               - name
-        -
-          name: sort_type
+        - name: sort_type
           in: query
           required: false
           schema:
@@ -180,16 +175,14 @@ paths:
             enum:
               - asc
               - desc
-        -
-          name: offset
+        - name: offset
           in: query
           required: false
           schema:
             type: integer
             default: 0
             minimum: 0
-        -
-          name: limit
+        - name: limit
           in: query
           required: false
           schema:
@@ -238,7 +231,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SuccessResponse'
-      security: []
+      security: [ ]
   /user-data/all:
     get:
       tags:
@@ -246,8 +239,7 @@ paths:
       summary: 'Получить список данных пользователей с фильтрацией и пагинацией.'
       operationId: get_get-all-user-data
       parameters:
-        -
-          name: name
+        - name: name
           in: query
           required: false
           schema:
@@ -256,15 +248,13 @@ paths:
             maxLength: 255
             minLength: 1
             nullable: true
-        -
-          name: only_with_group
+        - name: only_with_group
           in: query
           required: false
           schema:
             type: boolean
             default: false
-        -
-          name: 'group_ids[]'
+        - name: 'group_ids[]'
           in: query
           required: false
           schema:
@@ -274,8 +264,7 @@ paths:
             default: null
             maxItems: 50
             nullable: true
-        -
-          name: sort_by
+        - name: sort_by
           in: query
           required: false
           schema:
@@ -283,8 +272,7 @@ paths:
             default: name
             enum:
               - name
-        -
-          name: sort_type
+        - name: sort_type
           in: query
           required: false
           schema:
@@ -293,16 +281,14 @@ paths:
             enum:
               - asc
               - desc
-        -
-          name: offset
+        - name: offset
           in: query
           required: false
           schema:
             type: integer
             default: 0
             minimum: 0
-        -
-          name: limit
+        - name: limit
           in: query
           required: false
           schema:
@@ -454,19 +440,13 @@ components:
           default: null
           nullable: true
           anyOf:
-            -
-              type: boolean
-            -
-              type: integer
-            -
-              type: number
-            -
-              type: string
-            -
-              type: array
-              items: {  }
-            -
-              type: object
+            - type: boolean
+            - type: integer
+            - type: number
+            - type: string
+            - type: array
+              items: { }
+            - type: object
               additionalProperties: true
         meta:
           $ref: '#/components/schemas/Meta'
@@ -492,7 +472,7 @@ components:
       properties:
         errors:
           type: object
-          default: []
+          default: [ ]
           additionalProperties:
             type: array
             items:
@@ -521,8 +501,7 @@ components:
         data:
           nullable: true
           oneOf:
-            -
-              $ref: '#/components/schemas/UserData'
+            - $ref: '#/components/schemas/UserData'
         status:
           $ref: '#/components/schemas/UserStatusEnum'
         deleted:
@@ -571,8 +550,7 @@ components:
         group:
           nullable: true
           oneOf:
-            -
-              $ref: '#/components/schemas/UserDataGroup'
+            - $ref: '#/components/schemas/UserDataGroup'
       type: object
     Meta:
       required:
@@ -669,8 +647,8 @@ components:
       properties:
         items:
           type: array
-          items: {  }
-          default: []
+          items: { }
+          default: [ ]
         offset:
           type: integer
           default: null
@@ -706,19 +684,14 @@ components:
       bearerFormat: JWT
       scheme: bearer
 security:
-  -
-    Bearer: []
+  - Bearer: [ ]
 tags:
-  -
-    name: health
+  - name: health
     description: 'Ручки для проверки работоспособности сервера'
-  -
-    name: auth
+  - name: auth
     description: 'Ручки для авторизации и аутентификации'
-  -
-    name: user-data
+  - name: user-data
     description: 'Ручки для получения данных пользователей'
-  -
-    name: groups
+  - name: groups
     description: 'Ручки для получения групп'
 

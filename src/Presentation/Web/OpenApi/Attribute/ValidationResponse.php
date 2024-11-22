@@ -12,7 +12,8 @@ use OpenApi\Attributes\Response;
 #[Attribute]
 class ValidationResponse extends Response
 {
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct(
             response: 422,
             description: HttpStatusCodeEnum::UnprocessableEntity->getName(),

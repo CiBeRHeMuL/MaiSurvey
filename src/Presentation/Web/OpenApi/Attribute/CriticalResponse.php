@@ -12,7 +12,8 @@ use OpenApi\Attributes\Response;
 #[Attribute]
 class CriticalResponse extends Response
 {
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct(
             response: 500,
             description: HttpStatusCodeEnum::InternalServerError->getName(),

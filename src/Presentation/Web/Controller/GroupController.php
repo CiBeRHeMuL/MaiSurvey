@@ -4,17 +4,16 @@ namespace App\Presentation\Web\Controller;
 
 use App\Application\Dto\Group\GetAllGroupsDto;
 use App\Application\UseCase\Group\GetAllUseCase;
+use App\Presentation\Web\OpenApi\Attribute as LOA;
 use App\Presentation\Web\Response\Model\Common\PaginatedData;
 use App\Presentation\Web\Response\Model\Common\SuccessWithPaginationResponse;
 use App\Presentation\Web\Response\Model\Group;
-use App\Presentation\Web\Response\Model\UserData;
 use App\Presentation\Web\Response\Response;
+use OpenApi\Attributes as OA;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Attribute\MapQueryString;
 use Symfony\Component\Routing\Attribute\Route;
-use OpenApi\Attributes as OA;
-use App\Presentation\Web\OpenApi\Attribute as LOA;
 
 class GroupController extends BaseController
 {
