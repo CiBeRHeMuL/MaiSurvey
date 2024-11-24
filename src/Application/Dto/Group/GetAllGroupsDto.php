@@ -5,6 +5,7 @@ namespace App\Application\Dto\Group;
 use App\Domain\Enum\SortTypeEnum;
 use App\Domain\Service\Group\GroupService;
 use Symfony\Component\Validator\Constraints as Assert;
+use App\Application\Validator\Constraints as LAssert;
 
 readonly class GetAllGroupsDto
 {
@@ -25,7 +26,7 @@ readonly class GetAllGroupsDto
         /** Сортировка по */
         public string $sort_by = 'name',
         #[Assert\Type('string', message: 'Значение должно быть строкой')]
-        #[Assert\Choice(choices: [SortTypeEnum::Asc->value, SortTypeEnum::Desc->value], message: 'Значение должно входить в список допустимых')]
+        #[LAssert\EnumChoice(enum: SortTypeEnum::class, message: 'Значение должно входить в список допустимых')]
         /** Тип сортировки */
         public string $sort_type = SortTypeEnum::Asc->value,
         #[Assert\Type('integer', message: 'Значение должно быть целым числом')]

@@ -2,9 +2,11 @@
 
 namespace App\Application\Dto\UserData;
 
+use App\Domain\Enum\RoleEnum;
 use App\Domain\Enum\SortTypeEnum;
 use App\Domain\Service\UserData\UserDataService;
 use Symfony\Component\Validator\Constraints as Assert;
+use App\Application\Validator\Constraints as LAssert;
 
 readonly class GetAllUserDataDto
 {
@@ -17,6 +19,7 @@ readonly class GetAllUserDataDto
      * @param string $sort_type тип сортировки
      * @param int $offset
      * @param int|null $limit
+     * @param string|null $for_role роль для которой фильтруем значения
      */
     public function __construct(
         #[Assert\Type('string', message: 'Значение должно быть строкой')]
@@ -41,7 +44,7 @@ readonly class GetAllUserDataDto
         /** Сортировка по */
         public string $sort_by = 'name',
         #[Assert\Type('string', message: 'Значение должно быть строкой')]
-        #[Assert\Choice(choices: [SortTypeEnum::Asc->value, SortTypeEnum::Desc->value], message: 'Значение должно входить в список допустимых')]
+        #[LAssert\EnumChoice(enum: SortTypeEnum::class, message: 'Значение должно входить в список допустимых')]
         /** Тип сортировки */
         public string $sort_type = SortTypeEnum::Asc->value,
         #[Assert\Type('integer', message: 'Значение должно быть целым числом')]
@@ -51,6 +54,9 @@ readonly class GetAllUserDataDto
         #[Assert\GreaterThanOrEqual(0, message: 'Значение должно быть больше или равно 0')]
         #[Assert\LessThanOrEqual(100, message: 'Значение должно быть меньше или равно 100')]
         public int|null $limit = 20,
+        #[Assert\Type('string', message: 'Значение должно быть строкой')]
+        #[LAssert\EnumChoice(enum: RoleEnum::class, message: 'Значение должно входить в список допустимых')]
+        public string|null $for_role = null,
     ) {
     }
 }

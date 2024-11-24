@@ -178,6 +178,14 @@ class AuthService
                             'Данные пользователя уже привязаны к другому пользователю',
                         ),
                     ]);
+                } elseif (!in_array($userData->getForRole(), $user->getRoles(), true)) {
+                    throw ValidationException::new([
+                        new ValidationError(
+                            'user_data_id',
+                            ValidationErrorSlugEnum::WrongField->getSlug(),
+                            'Невозможно привязать данные к пользователю',
+                        ),
+                    ]);
                 } else {
                     $user->setData($userData);
                     if (

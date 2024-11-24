@@ -2,6 +2,7 @@
 
 namespace App\Domain\Entity;
 
+use App\Domain\Enum\RoleEnum;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\IdGenerator\UuidGenerator;
@@ -25,6 +26,8 @@ class UserData
     private string|null $patronymic = null;
     #[ORM\Column(name: 'user_id', type: 'uuid', nullable: true)]
     private Uuid|null $userId = null;
+    #[ORM\Column(name: 'for_role', type: 'string', length: 255, nullable: false, enumType: RoleEnum::class)]
+    private RoleEnum $forRole;
     #[ORM\Column(name: 'created_at', type: 'datetime_immutable', nullable: false, options: ['default' => 'CURRENT_TIMESTAMP'])]
     private DateTimeImmutable $createdAt;
     #[ORM\Column(name: 'updated_at', type: 'datetime_immutable', nullable: false, options: ['default' => 'CURRENT_TIMESTAMP'])]
@@ -89,6 +92,17 @@ class UserData
     public function setUserId(Uuid|null $userId): UserData
     {
         $this->userId = $userId;
+        return $this;
+    }
+
+    public function getForRole(): RoleEnum
+    {
+        return $this->forRole;
+    }
+
+    public function setForRole(RoleEnum $forRole): UserData
+    {
+        $this->forRole = $forRole;
         return $this;
     }
 

@@ -31,4 +31,14 @@ enum RoleEnum: string
             ],
         };
     }
+
+    public function isMain(): true
+    {
+        return match ($this) {
+            self::Admin,
+            self::Student,
+            self::Teacher => true,
+            default => false,
+        };
+    }
 }
