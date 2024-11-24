@@ -5,6 +5,7 @@ namespace App\Application\UseCase\UserData;
 use App\Application\Dto\UserData\GetAllUserDataDto;
 use App\Domain\DataProvider\DataProviderInterface;
 use App\Domain\Dto\GetAllUserDataDto as DomainGetAllUserDataDto;
+use App\Domain\Enum\RoleEnum;
 use App\Domain\Enum\SortTypeEnum;
 use App\Domain\Service\UserData\UserDataService;
 use Psr\Log\LoggerInterface;
@@ -44,6 +45,7 @@ class GetAllUseCase
                     SortTypeEnum::from($dto->sort_type),
                     $dto->offset,
                     $dto->limit,
+                    RoleEnum::tryFrom((string)$dto->for_role),
                 ),
             );
     }

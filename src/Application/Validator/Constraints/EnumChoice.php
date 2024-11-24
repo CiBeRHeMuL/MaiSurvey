@@ -5,6 +5,7 @@ namespace App\Application\Validator\Constraints;
 use App\Domain\Helper\HEnum;
 use Attribute;
 use Symfony\Component\Validator\Constraints\Choice;
+use Symfony\Component\Validator\Constraints\ChoiceValidator;
 
 #[Attribute(Attribute::TARGET_PROPERTY | Attribute::TARGET_METHOD | Attribute::IS_REPEATABLE)]
 class EnumChoice extends Choice
@@ -24,7 +25,7 @@ class EnumChoice extends Choice
         bool|null $match = null,
     ) {
         parent::__construct(
-            callback: HEnum::choices($enum),
+            choices: HEnum::choices($enum),
             multiple: $multiple,
             strict: $strict,
             min: $min,
@@ -37,5 +38,10 @@ class EnumChoice extends Choice
             payload: $payload,
             match: $match,
         );
+    }
+
+    public function validatedBy(): string
+    {
+        return ChoiceValidator::class;
     }
 }

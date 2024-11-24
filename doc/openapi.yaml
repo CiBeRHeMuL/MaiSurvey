@@ -247,6 +247,33 @@ paths:
               schema:
                 $ref: '#/components/schemas/SuccessResponse'
       security: [ ]
+  /me:
+    get:
+      tags:
+        - me
+      summary: 'Информация обо мне.'
+      operationId: get_get-me
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/SuccessResponse' }
+                  - { properties: { data: { $ref: '#/components/schemas/User' } }, type: object }
+        '400':
+          description: 'Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: 'Internal Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CriticalResponse'
   /user-data/all:
     get:
       tags:
@@ -324,6 +351,18 @@ paths:
             default: 20
             maximum: 100
             minimum: 0
+            nullable: true
+        - name: for_role
+          in: query
+          required: false
+          schema:
+            type: string
+            default: null
+            enum:
+              - admin
+              - student
+              - teacher
+              - survey_creator
             nullable: true
       responses:
         '500':
@@ -485,6 +524,15 @@ components:
           default: 20
           maximum: 100
           minimum: 0
+          nullable: true
+        for_role:
+          type: string
+          default: null
+          enum:
+            - admin
+            - student
+            - teacher
+            - survey_creator
           nullable: true
       type: object
     SuccessResponse:
@@ -690,13 +738,13 @@ components:
     PermissionEnum:
       type: string
       enum:
-        - ROLE_survey.view
-        - ROLE_survey.complete
-        - ROLE_survey.create
-        - ROLE_survey.update
-        - ROLE_survey.delete
-        - ROLE_survey.view_result
-        - ROLE_survey.view_all
+        - survey.view
+        - survey.complete
+        - survey.create
+        - survey.update
+        - survey.delete
+        - survey.view_result
+        - survey.view_all
     PaginatedData:
       properties:
         items:
@@ -748,4 +796,6 @@ tags:
     description: 'Ручки для получения данных пользователей'
   - name: groups
     description: 'Ручки для получения групп'
+  - name: me
+    description: 'Ручки для работы с "собой"'
 

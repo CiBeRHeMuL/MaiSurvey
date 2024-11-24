@@ -2,6 +2,7 @@
 
 namespace App\Domain\Dto;
 
+use App\Domain\Enum\RoleEnum;
 use App\Domain\Enum\SortTypeEnum;
 use Symfony\Component\Uid\Uuid;
 
@@ -16,6 +17,7 @@ readonly class GetAllUserDataDto
      * @param SortTypeEnum $sortType
      * @param int $offset
      * @param int|null $limit
+     * @param RoleEnum|null $forRole
      */
     public function __construct(
         private string|null $name = null,
@@ -26,6 +28,7 @@ readonly class GetAllUserDataDto
         private SortTypeEnum $sortType = SortTypeEnum::Asc,
         private int $offset = 0,
         private int|null $limit = 20,
+        private RoleEnum|null $forRole = null,
     ) {
     }
 
@@ -67,5 +70,10 @@ readonly class GetAllUserDataDto
     public function getLimit(): int|null
     {
         return $this->limit;
+    }
+
+    public function getForRole(): RoleEnum|null
+    {
+        return $this->forRole;
     }
 }

@@ -54,6 +54,7 @@ class UserDataRepository extends AbstractRepository implements UserDataRepositor
                         $dto->getGroupIds(),
                     )
                     : null,
+                'ud.for_role' => $dto->getForRole()?->value,
             ]);
         if ($dto->withGroup() !== null) {
             if ($dto->withGroup()) {

@@ -9,6 +9,7 @@ use App\Domain\Enum\ValidationErrorSlugEnum;
 use App\Domain\Exception\ValidationException;
 use App\Domain\Repository\UserDataRepositoryInterface;
 use App\Domain\Validation\ValidationError;
+use DateTimeImmutable;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Uid\Uuid;
 
@@ -74,6 +75,25 @@ class UserDataService
             ]);
         }
 
+        if ($dto->getForRole()?->isMain() === false) {
+            throw ValidationException::new([
+                new ValidationError(
+                    'for_role',
+                    ValidationErrorSlugEnum::WrongField->getSlug(),
+                    'Эта роль недоступна для поиска',
+                ),
+            ]);
+        }
+
         return $this->userDataRepository->findAll($dto);
+    }
+
+    public function update(UserData $userData): bool
+    {
+        $userData
+            ->setUpdatedAt(new DateTimeImmutable());
+        return $this
+            ->userDataRepository
+            ->update($userData);
     }
 }

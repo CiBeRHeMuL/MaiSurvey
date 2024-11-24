@@ -7,7 +7,7 @@ enum RoleEnum: string
     case Admin = 'admin';
     case Student = 'student';
     case Teacher = 'teacher';
-    case SurveyCreator = 'surveyCreator';
+    case SurveyCreator = 'survey_creator';
 
     /**
      * Доступы роли
@@ -32,7 +32,7 @@ enum RoleEnum: string
         };
     }
 
-    public function isMain(): true
+    public function isMain(): bool
     {
         return match ($this) {
             self::Admin,

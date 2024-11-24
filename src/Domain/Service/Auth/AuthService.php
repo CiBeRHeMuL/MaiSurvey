@@ -190,17 +190,25 @@ class AuthService
                     $user
                         ->setData($userData)
                         ->setStatus(UserStatusEnum::Active);
+                    $userData
+                        ->setUser($user)
+                        ->setUserId($user->getId());
                     if (
                         $this
                             ->userService
                             ->update($user)
                     ) {
-                        return $user;
-                    } else {
-                        throw ErrorException::new(
-                            'Не удалось сохранить пользователя, обратитесь в поддержку',
-                        );
+                        if (
+                            $this
+                                ->userDataService
+                                ->update($userData)
+                        ) {
+                            return $user;
+                        }
                     }
+                    throw ErrorException::new(
+                        'Не удалось сохранить пользователя, обратитесь в поддержку',
+                    );
                 }
             }
         } else {
