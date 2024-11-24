@@ -105,7 +105,7 @@ class AuthController extends BaseController
         LoggerInterface $logger,
     ): JsonResponse {
         $useCase->setLogger($logger);
-        $user = $useCase->execute($dto);
+        $user = $useCase->execute($this->getUser()->getUser(), $dto);
         return Response::success(
             new SuccessResponse(User::fromUser($user)),
         );

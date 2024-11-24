@@ -27,11 +27,12 @@ class SignUpStep2UseCase
         return $this;
     }
 
-    public function execute(SignUpStep2Dto $dto): User
+    public function execute(User $user, SignUpStep2Dto $dto): User
     {
         return $this
             ->authService
             ->signUpStep2(
+                $user,
                 new DomainSignUpStep2Dto(
                     new Uuid($dto->user_data_id),
                 ),
