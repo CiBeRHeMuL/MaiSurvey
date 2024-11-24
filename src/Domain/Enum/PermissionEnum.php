@@ -5,11 +5,11 @@ namespace App\Domain\Enum;
 enum PermissionEnum: string
 {
     // Survey
-    case SurveyView = 'ROLE_survey.view';
-    case SurveyComplete = 'ROLE_survey.complete';
-    case SurveyCreate = 'ROLE_survey.create';
-    case SurveyUpdate = 'ROLE_survey.update';
-    case SurveyDelete = 'ROLE_survey.delete';
-    case SurveyViewResult = 'ROLE_survey.view_result';
-    case SurveyViewAll = 'ROLE_survey.view_all';
+    case SurveyView = 'survey.view';
+    case SurveyComplete = 'survey.complete';
+    case SurveyCreate = 'survey.create';
+    case SurveyUpdate = 'survey.update';
+    case SurveyDelete = 'survey.delete';
+    case SurveyViewResult = 'survey.view_result';
+    case SurveyViewAll = 'survey.view_all';
 }

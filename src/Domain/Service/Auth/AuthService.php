@@ -187,7 +187,9 @@ class AuthService
                         ),
                     ]);
                 } else {
-                    $user->setData($userData);
+                    $user
+                        ->setData($userData)
+                        ->setStatus(UserStatusEnum::Active);
                     if (
                         $this
                             ->userService

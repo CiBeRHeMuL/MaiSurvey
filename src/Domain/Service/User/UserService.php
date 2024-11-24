@@ -117,6 +117,8 @@ class UserService
 
     public function update(User $user): bool
     {
+        $user
+            ->setUpdatedAt(new DateTimeImmutable());
         return $this->userRepository->update($user);
     }
 }

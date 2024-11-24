@@ -54,4 +54,26 @@ services:
   # --- start security
   App\Presentation\Web\Security\Voter\StatusVoter:
     tags: [ 'security.voter' ]
+  App\Presentation\Web\Security\Voter\PermissionVoter:
+    tags: [ 'security.voter' ]
   # --- end security
+
+  # --- start monolog
+
+  monolog.custom_handlers.telegram.error:
+    class: Monolog\Handler\TelegramBotHandler
+    arguments:
+      $apiKey: "%env(TELEGRAM_CONFIG_ERROR_BOT_KEY)%"
+      $channel: "%env(TELEGRAM_CONFIG_ERROR_CHAT_ID)%"
+      $disableWebPagePreview: true
+      $parseMode: MarkdownV2
+      $topic: "%env(TELEGRAM_CONFIG_ERROR_TOPIC)%"
+      $level: error
+    calls:
+      - setFormatter: [ '@monolog.custom_formatter.telegram' ]
+  monolog.custom_formatter.telegram:
+    class: App\Infrastructure\Service\Log\TelegramFormatter
+    arguments:
+      $includeStacktraces: true
+      $ignoreEmptyContextAndExtra: true
+  # --- end monolog
