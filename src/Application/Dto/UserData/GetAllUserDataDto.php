@@ -2,11 +2,11 @@
 
 namespace App\Application\Dto\UserData;
 
+use App\Application\Validator\Constraints as LAssert;
 use App\Domain\Enum\RoleEnum;
 use App\Domain\Enum\SortTypeEnum;
 use App\Domain\Service\UserData\UserDataService;
 use Symfony\Component\Validator\Constraints as Assert;
-use App\Application\Validator\Constraints as LAssert;
 
 readonly class GetAllUserDataDto
 {
@@ -56,6 +56,7 @@ readonly class GetAllUserDataDto
         public int|null $limit = 20,
         #[Assert\Type('string', message: 'Значение должно быть строкой')]
         #[LAssert\EnumChoice(enum: RoleEnum::class, message: 'Значение должно входить в список допустимых')]
+        /** Роль, для которой фильтруем значения */
         public string|null $for_role = null,
     ) {
     }

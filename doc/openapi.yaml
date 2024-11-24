@@ -356,6 +356,7 @@ paths:
           in: query
           required: false
           schema:
+            title: 'Роль, для которой фильтруем значения'
             type: string
             default: null
             enum:
@@ -526,6 +527,7 @@ components:
           minimum: 0
           nullable: true
         for_role:
+          title: 'Роль, для которой фильтруем значения'
           type: string
           default: null
           enum:
