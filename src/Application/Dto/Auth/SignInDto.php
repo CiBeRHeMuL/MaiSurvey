@@ -12,13 +12,13 @@ readonly class SignInDto
      * @param string $password пароль
      */
     public function __construct(
+        /** Почта */
         #[Assert\Type('string', message: 'Значение должно быть строкой')]
         #[Assert\Email(message: 'Неверный формат почты')]
-        /** Почта */
         public string $email,
+        /** Пароль */
         #[SensitiveParameter]
         #[Assert\Type('string', message: 'Значение должно быть строкой')]
-        /** Пароль */
         public string $password,
     ) {
     }

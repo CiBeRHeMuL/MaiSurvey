@@ -6,7 +6,7 @@ use App\Domain\DataProvider\DataProviderInterface;
 use App\Domain\DataProvider\DataSort;
 use App\Domain\DataProvider\LimitOffset;
 use App\Domain\DataProvider\SortColumn;
-use App\Domain\Dto\GetAllGroupsDto;
+use App\Domain\Dto\Group\GetAllGroupsDto;
 use App\Domain\Entity\Group;
 use App\Domain\Repository\GroupRepositoryInterface;
 use App\Infrastructure\Db\Expr\ILikeExpr;
@@ -39,5 +39,15 @@ class GroupRepository extends AbstractRepository implements GroupRepositoryInter
                 ),
             ]),
         );
+    }
+
+    public function findByName(string $name): Group|null
+    {
+        $q = Query::select()
+            ->select(['*'])
+            ->from($this->getClassTable(Group::class))
+            ->where(['name' => $name]);
+        return $this
+            ->findOneByQuery($q, Group::class);
     }
 }

@@ -89,7 +89,7 @@ class AuthController extends BaseController
         );
     }
 
-    /** Регистрация в приложении. Шаг 2 */
+    /** Регистрация в приложении. Шаг 2 (Персональные данные) */
     #[IsGranted(UserStatusEnum::Draft->value)]
     #[Route('/auth/sign-up/2', 'sign-up-2', methods: ['POST'])]
     #[OA\Tag('auth')]

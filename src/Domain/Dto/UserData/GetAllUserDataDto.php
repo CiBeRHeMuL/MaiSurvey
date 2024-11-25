@@ -1,30 +1,55 @@
 <?php
 
-namespace App\Domain\Dto;
+namespace App\Domain\Dto\UserData;
 
+use App\Domain\Enum\RoleEnum;
 use App\Domain\Enum\SortTypeEnum;
+use Symfony\Component\Uid\Uuid;
 
-readonly class GetAllGroupsDto
+readonly class GetAllUserDataDto
 {
     /**
      * @param string|null $name
+     * @param bool|null $withGroup
+     * @param bool|null $withUser
+     * @param Uuid[]|null $groupIds
      * @param string $sortBy
      * @param SortTypeEnum $sortType
      * @param int $offset
      * @param int|null $limit
+     * @param RoleEnum|null $forRole
      */
     public function __construct(
         private string|null $name = null,
+        private bool|null $withGroup = false,
+        private bool|null $withUser = null,
+        private array|null $groupIds = null,
         private string $sortBy = 'name',
         private SortTypeEnum $sortType = SortTypeEnum::Asc,
         private int $offset = 0,
         private int|null $limit = 20,
+        private RoleEnum|null $forRole = null,
     ) {
     }
 
     public function getName(): string|null
     {
         return $this->name;
+    }
+
+    public function withGroup(): bool|null
+    {
+        return $this->withGroup;
+    }
+
+    public function withUser(): bool|null
+    {
+        return $this->withUser;
+    }
+
+    public function getGroupIds(): array|null
+    {
+        return $this->groupIds;
     }
 
     public function getSortBy(): string
@@ -45,5 +70,10 @@ readonly class GetAllGroupsDto
     public function getLimit(): int|null
     {
         return $this->limit;
+    }
+
+    public function getForRole(): RoleEnum|null
+    {
+        return $this->forRole;
     }
 }

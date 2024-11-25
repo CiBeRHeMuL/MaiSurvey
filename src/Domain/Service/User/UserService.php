@@ -2,7 +2,7 @@
 
 namespace App\Domain\Service\User;
 
-use App\Domain\Dto\CreateUserDto;
+use App\Domain\Dto\User\CreateUserDto;
 use App\Domain\Entity\User;
 use App\Domain\Enum\ValidationErrorSlugEnum;
 use App\Domain\Exception\ErrorException;

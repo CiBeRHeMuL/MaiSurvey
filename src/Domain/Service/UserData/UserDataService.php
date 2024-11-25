@@ -3,15 +3,22 @@
 namespace App\Domain\Service\UserData;
 
 use App\Domain\DataProvider\DataProviderInterface;
-use App\Domain\Dto\GetAllUserDataDto;
+use App\Domain\Dto\UserData\CreateUserDataDto;
+use App\Domain\Dto\UserData\GetAllUserDataDto;
+use App\Domain\Dto\UserDataGroup\CreateUserDataGroupDto;
 use App\Domain\Entity\UserData;
+use App\Domain\Enum\RoleEnum;
 use App\Domain\Enum\ValidationErrorSlugEnum;
+use App\Domain\Exception\ErrorException;
 use App\Domain\Exception\ValidationException;
 use App\Domain\Repository\UserDataRepositoryInterface;
+use App\Domain\Service\Db\TransactionManagerInterface;
+use App\Domain\Service\UserDataGroup\UserDataGroupService;
 use App\Domain\Validation\ValidationError;
 use DateTimeImmutable;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Uid\Uuid;
+use Throwable;
 
 class UserDataService
 {
@@ -21,6 +28,8 @@ class UserDataService
 
     public function __construct(
         private UserDataRepositoryInterface $userDataRepository,
+        private TransactionManagerInterface $transactionManager,
+        private UserDataGroupService $userDataGroupService,
         LoggerInterface $logger,
     ) {
         $this->setLogger($logger);
@@ -29,6 +38,7 @@ class UserDataService
     public function setLogger(LoggerInterface $logger): UserDataService
     {
         $this->logger = $logger;
+        $this->userDataGroupService->setLogger($logger);
         return $this;
     }
 
@@ -95,5 +105,79 @@ class UserDataService
         return $this
             ->userDataRepository
             ->update($userData);
+    }
+
+    public function create(CreateUserDataDto $dto): UserData
+    {
+        if ($dto->getRole()->isMain() === false) {
+            throw ValidationException::new([
+                new ValidationError(
+                    'role',
+                    ValidationErrorSlugEnum::WrongField->getSlug(),
+                    'Нельзя создать данные для не основной роли',
+                ),
+            ]);
+        }
+
+        if ($dto->getRole() === RoleEnum::Student && $dto->getGroup() === null) {
+            throw ValidationException::new([
+                new ValidationError(
+                    'group',
+                    ValidationErrorSlugEnum::WrongField->getSlug(),
+                    'Для создания студента укажите группу',
+                ),
+            ]);
+        }
+        if ($dto->getRole() !== RoleEnum::Student && $dto->getGroup() !== null) {
+            throw ValidationException::new([
+                new ValidationError(
+                    'group',
+                    ValidationErrorSlugEnum::WrongField->getSlug(),
+                    'Нельзя привязать группу к не студенту',
+                ),
+            ]);
+        }
+        try {
+            $this->transactionManager->beginTransaction();
+
+            $userData = new UserData();
+            $userData
+                ->setFirstName($dto->getFirstName())
+                ->setLastName($dto->getLastName())
+                ->setPatronymic($dto->getPatronymic())
+                ->setForRole($dto->getRole())
+                ->setCreatedAt(new DateTimeImmutable())
+                ->setUpdatedAt(new DateTimeImmutable());
+
+            if ($this->userDataRepository->create($userData) === false) {
+                throw ErrorException::new(
+                    'Не удалось сохранить данные пользователя',
+                    400,
+                );
+            }
+
+            if ($dto->getGroup() !== null) {
+                $userDataGroup = $this
+                    ->userDataGroupService
+                    ->create(
+                        new CreateUserDataGroupDto(
+                            $userData,
+                            $dto->getGroup(),
+                        ),
+                    );
+                $userData
+                    ->setGroup($userDataGroup);
+            }
+
+            $this->transactionManager->commit();
+            return $userData;
+        } catch (ErrorException|ValidationException $e) {
+            $this->transactionManager->rollback();
+            throw $e;
+        } catch (Throwable $e) {
+            $this->logger->error($e);
+            $this->transactionManager->rollback();
+            throw $e;
+        }
     }
 }

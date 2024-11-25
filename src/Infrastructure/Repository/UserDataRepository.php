@@ -6,7 +6,7 @@ use App\Domain\DataProvider\DataProviderInterface;
 use App\Domain\DataProvider\DataSort;
 use App\Domain\DataProvider\LimitOffset;
 use App\Domain\DataProvider\SortColumn;
-use App\Domain\Dto\GetAllUserDataDto;
+use App\Domain\Dto\UserData\GetAllUserDataDto;
 use App\Domain\Entity\UserData;
 use App\Domain\Entity\UserDataGroup;
 use App\Domain\Repository\UserDataRepositoryInterface;

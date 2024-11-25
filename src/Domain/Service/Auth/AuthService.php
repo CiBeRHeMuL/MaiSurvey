@@ -6,7 +6,7 @@ use App\Domain\Dto\Auth\RefreshCredentialsDto;
 use App\Domain\Dto\Auth\SignInDto;
 use App\Domain\Dto\Auth\SignUpStep1Dto;
 use App\Domain\Dto\Auth\SignUpStep2Dto;
-use App\Domain\Dto\CreateUserDto;
+use App\Domain\Dto\User\CreateUserDto;
 use App\Domain\Entity\User;
 use App\Domain\Enum\UserStatusEnum;
 use App\Domain\Enum\ValidationErrorSlugEnum;

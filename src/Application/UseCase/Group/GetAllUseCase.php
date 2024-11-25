@@ -4,7 +4,7 @@ namespace App\Application\UseCase\Group;
 
 use App\Application\Dto\Group\GetAllGroupsDto;
 use App\Domain\DataProvider\DataProviderInterface;
-use App\Domain\Dto\GetAllGroupsDto as DomainGetAllGroupsDto;
+use App\Domain\Dto\Group\GetAllGroupsDto as DomainGetAllGroupsDto;
 use App\Domain\Enum\SortTypeEnum;
 use App\Domain\Service\Group\GroupService;
 use Psr\Log\LoggerInterface;

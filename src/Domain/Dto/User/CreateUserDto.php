@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domain\Dto;
+namespace App\Domain\Dto\User;
 
 use App\Domain\Enum\RoleEnum;
 use App\Domain\Enum\UserStatusEnum;

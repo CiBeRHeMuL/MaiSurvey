@@ -3,11 +3,15 @@
 namespace App\Domain\Service\Group;
 
 use App\Domain\DataProvider\DataProviderInterface;
-use App\Domain\Dto\GetAllGroupsDto;
+use App\Domain\Dto\Group\CreateGroupDto;
+use App\Domain\Dto\Group\GetAllGroupsDto;
+use App\Domain\Entity\Group;
 use App\Domain\Enum\ValidationErrorSlugEnum;
+use App\Domain\Exception\ErrorException;
 use App\Domain\Exception\ValidationException;
 use App\Domain\Repository\GroupRepositoryInterface;
 use App\Domain\Validation\ValidationError;
+use DateTimeImmutable;
 use Psr\Log\LoggerInterface;
 
 class GroupService
@@ -59,5 +63,41 @@ class GroupService
         }
 
         return $this->groupRepository->findAll($dto);
+    }
+
+    public function getByName(string $name): Group|null
+    {
+        return $this
+            ->groupRepository
+            ->findByName($name);
+    }
+
+    public function create(CreateGroupDto $dto): Group
+    {
+        $existing = $this
+            ->groupRepository
+            ->findByName($dto->getName());
+        if ($existing !== null) {
+            throw ValidationException::new([
+                new ValidationError(
+                    'name',
+                    ValidationErrorSlugEnum::AlreadyExists->getSlug(),
+                    'Группа уже существует',
+                ),
+            ]);
+        }
+
+        $group = new Group();
+        $group
+            ->setName($dto->getName())
+            ->setCreatedAt(new DateTimeImmutable())
+            ->setUpdatedAt(new DateTimeImmutable());
+        if ($this->groupRepository->create($group) === false) {
+            throw ErrorException::new(
+                'Не удалось сохранить группу',
+                400,
+            );
+        }
+        return $group;
     }
 }

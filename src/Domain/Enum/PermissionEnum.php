@@ -12,4 +12,7 @@ enum PermissionEnum: string
     case SurveyDelete = 'survey.delete';
     case SurveyViewResult = 'survey.view_result';
     case SurveyViewAll = 'survey.view_all';
+
+    // User
+    case UserCreate = 'user.create';
 }

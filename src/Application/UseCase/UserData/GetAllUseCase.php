@@ -4,7 +4,7 @@ namespace App\Application\UseCase\UserData;
 
 use App\Application\Dto\UserData\GetAllUserDataDto;
 use App\Domain\DataProvider\DataProviderInterface;
-use App\Domain\Dto\GetAllUserDataDto as DomainGetAllUserDataDto;
+use App\Domain\Dto\UserData\GetAllUserDataDto as DomainGetAllUserDataDto;
 use App\Domain\Enum\RoleEnum;
 use App\Domain\Enum\SortTypeEnum;
 use App\Domain\Service\UserData\UserDataService;

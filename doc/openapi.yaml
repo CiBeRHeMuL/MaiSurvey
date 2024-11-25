@@ -92,7 +92,7 @@ paths:
     post:
       tags:
         - auth
-      summary: 'Регистрация в приложении. Шаг 2'
+      summary: 'Регистрация в приложении. Шаг 2 (Персональные данные)'
       operationId: post_sign-up-2
       requestBody:
         required: true
@@ -233,6 +233,51 @@ paths:
                 allOf:
                   - { $ref: '#/components/schemas/SuccessWithPaginationResponse' }
                   - { properties: { data: { properties: { items: { type: array, items: { $ref: '#/components/schemas/Group' } } }, type: object } }, type: object }
+  /group:
+    post:
+      tags:
+        - groups
+      summary: 'Создать группу'
+      operationId: post_create-group
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateGroupDto'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/SuccessResponse' }
+                  - { properties: { data: { $ref: '#/components/schemas/Group' } }, type: object }
+        '422':
+          description: 'Unprocessable Entity'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResponse'
+        '400':
+          description: 'Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: 'Internal Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CriticalResponse'
   /health:
     get:
       tags:
@@ -268,6 +313,57 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: 'Internal Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CriticalResponse'
+  /user:
+    post:
+      tags:
+        - user
+      summary: 'Создание пользователя'
+      operationId: post_create-full-user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateFullUserDto'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/SuccessResponse' }
+                  - { properties: { data: { $ref: '#/components/schemas/User' } }, type: object }
+        '400':
+          description: 'Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 'Not Found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: 'Unprocessable Entity'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResponse'
         '500':
           description: 'Internal Server Error'
           content:
@@ -475,6 +571,56 @@ components:
           default: 20
           maximum: 100
           minimum: 0
+          nullable: true
+      type: object
+    CreateGroupDto:
+      required:
+        - name
+      properties:
+        name:
+          title: 'Имя группы'
+          type: string
+          maxLength: 255
+      type: object
+    CreateFullUserDto:
+      required:
+        - email
+        - password
+        - role
+        - first_name
+        - last_name
+      properties:
+        email:
+          title: Почта
+          type: string
+        password:
+          title: Пароль
+          type: string
+        role:
+          title: Роль
+          type: string
+          enum:
+            - admin
+            - student
+            - teacher
+            - survey_creator
+        first_name:
+          title: Имя
+          type: string
+          maxLength: 255
+        last_name:
+          title: Фамилия
+          type: string
+          maxLength: 255
+        patronymic:
+          title: Отчество
+          type: string
+          maxLength: 255
+          nullable: true
+        group:
+          title: Группа
+          type: string
+          maxLength: 255
           nullable: true
       type: object
     GetAllUserDataDto:
@@ -747,6 +893,7 @@ components:
         - survey.delete
         - survey.view_result
         - survey.view_all
+        - user.create
     PaginatedData:
       properties:
         items:
@@ -800,4 +947,6 @@ tags:
     description: 'Ручки для получения групп'
   - name: me
     description: 'Ручки для работы с "собой"'
+  - name: user
+    description: 'Ручки для работы с пользователями'
 

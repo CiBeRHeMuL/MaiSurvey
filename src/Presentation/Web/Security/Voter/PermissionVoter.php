@@ -36,7 +36,7 @@ class PermissionVoter implements CacheableVoterInterface
             $result = self::ACCESS_DENIED;
             $user = $token->getUser();
             if ($user instanceof SymfonyUser) {
-                if (in_array(PermissionEnum::from($attribute), $user->getRoles(), true)) {
+                if (in_array(PermissionEnum::from($attribute)->value, $user->getRoles(), true)) {
                     return self::ACCESS_GRANTED;
                 }
             }

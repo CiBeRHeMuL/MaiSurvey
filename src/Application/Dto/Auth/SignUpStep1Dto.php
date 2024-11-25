@@ -13,17 +13,17 @@ readonly class SignUpStep1Dto
      * @param string $repeat_password повторный пароль
      */
     public function __construct(
+        /** Почта */
         #[Assert\Type('string', message: 'Значение должно быть строкой')]
         #[Assert\Email(message: 'Неверный формат почты')]
-        /** Почта */
         public string $email,
-        #[SensitiveParameter]
-        #[Assert\Type('string', message: 'Значение должно быть строкой')]
         /** Пароль */
-        public string $password,
         #[SensitiveParameter]
         #[Assert\Type('string', message: 'Значение должно быть строкой')]
+        public string $password,
         /** Повторный пароль */
+        #[SensitiveParameter]
+        #[Assert\Type('string', message: 'Значение должно быть строкой')]
         public string $repeat_password,
     ) {
     }

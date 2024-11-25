@@ -35,6 +35,8 @@ services:
     class: App\Infrastructure\Service\Security\PasswordHasherService
   App\Domain\Service\Security\PasswordCheckerServiceInterface:
     class: App\Infrastructure\Service\Security\PasswordCheckerService
+  App\Domain\Service\Db\TransactionManagerInterface:
+    class: App\Infrastructure\Service\Db\TransactionManager
   # --- end services
 
   # --- start repositories
@@ -44,6 +46,8 @@ services:
     class: App\Infrastructure\Repository\UserDataRepository
   App\Domain\Repository\GroupRepositoryInterface:
     class: App\Infrastructure\Repository\GroupRepository
+  App\Domain\Repository\UserDataGroupRepositoryInterface:
+    class: App\Infrastructure\Repository\UserDataGroupRepository
   # --- end repositories
 
   # --- start serializer
