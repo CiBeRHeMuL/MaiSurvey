@@ -11,6 +11,8 @@ services:
       POSTGRES_USER: "${PG_USER}"
       POSTGRES_PASSWORD: "${PG_PASSWORD}"
       POSTGRES_DB: "${PG_DBNAME}"
+    networks:
+      - caddy
   mai-survey-php:
     build:
       context: ./
