@@ -5,6 +5,7 @@ namespace App\Domain\Dto\User;
 use App\Domain\Enum\RoleEnum;
 use App\Domain\ValueObject\Email;
 use SensitiveParameter;
+use Symfony\Component\Uid\Uuid;
 
 readonly class CreateFullUserDto
 {
@@ -16,7 +17,7 @@ readonly class CreateFullUserDto
         private string $firstName,
         private string $lastName,
         private string|null $patronymic,
-        private string|null $group,
+        private Uuid|null $groupId,
     ) {
     }
 
@@ -50,8 +51,8 @@ readonly class CreateFullUserDto
         return $this->patronymic;
     }
 
-    public function getGroup(): string|null
+    public function getGroupId(): Uuid|null
     {
-        return $this->group;
+        return $this->groupId;
     }
 }

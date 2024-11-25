@@ -23,6 +23,7 @@ class ValidationListener
                 $errors[] = $error->getMessage();
             }
             $io->horizontalTable($headers, [$errors]);
+            $event->stopPropagation();
         } elseif ($e instanceof ValidationFailedException) {
             $headers = [];
             $errors = [];
@@ -31,6 +32,7 @@ class ValidationListener
                 $errors[] = $violation->getMessage();
             }
             $io->horizontalTable($headers, [$errors]);
+            $event->stopPropagation();
         }
     }
 }

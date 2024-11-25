@@ -13,6 +13,7 @@ use App\Domain\Repository\GroupRepositoryInterface;
 use App\Domain\Validation\ValidationError;
 use DateTimeImmutable;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Uid\Uuid;
 
 class GroupService
 {
@@ -99,5 +100,12 @@ class GroupService
             );
         }
         return $group;
+    }
+
+    public function getById(Uuid $id): Group|null
+    {
+        return $this
+            ->groupRepository
+            ->findById($id);
     }
 }

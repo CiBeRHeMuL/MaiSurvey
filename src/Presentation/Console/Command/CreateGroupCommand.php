@@ -48,7 +48,7 @@ class CreateGroupCommand extends AbstractCommand
                 $input->getArgument('name'),
             ),
         );
-        $this->io->writeln('Группа успешно создана');
+        $this->io->writeln('<fg=green>Группа успешно создана</>');
         $this->io->horizontalTable(
             ['ID', 'имя'],
             [[$group->getId()->toRfc4122(), $group->getName()]],

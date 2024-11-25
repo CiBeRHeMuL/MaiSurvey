@@ -9,6 +9,7 @@ use App\Domain\Enum\RoleEnum;
 use App\Domain\Service\User\FullUserService;
 use App\Domain\ValueObject\Email;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Uid\Uuid;
 
 class CreateUserUseCase
 {
@@ -40,7 +41,7 @@ class CreateUserUseCase
                     $dto->first_name,
                     $dto->last_name,
                     $dto->patronymic,
-                    $dto->group,
+                    $dto->group_id !== null ? new Uuid($dto->group_id) : null,
                 ),
             );
     }

@@ -36,8 +36,8 @@ readonly class CreateFullUserDto
         public string|null $patronymic,
         /** Группа */
         #[Assert\Type('string', message: 'Значение должно быть строкой')]
-        #[Assert\Length(max: 255, maxMessage: 'Значение должно быть короче 255 символов')]
-        public string|null $group,
+        #[Assert\Uuid(message: 'Значение должно быть корректным uuid')]
+        public string|null $group_id,
     ) {
     }
 }

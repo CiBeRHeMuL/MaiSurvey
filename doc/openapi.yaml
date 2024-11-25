@@ -617,10 +617,9 @@ components:
           type: string
           maxLength: 255
           nullable: true
-        group:
+        group_id:
           title: Группа
           type: string
-          maxLength: 255
           nullable: true
       type: object
     GetAllUserDataDto:

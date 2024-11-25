@@ -57,14 +57,14 @@ class FullUserService
                 );
 
             $group = null;
-            if ($dto->getGroup() !== null) {
+            if ($dto->getGroupId() !== null) {
                 $group = $this
                     ->groupService
-                    ->getByName($dto->getGroup());
+                    ->getById($dto->getGroupId());
                 if ($group === null) {
                     throw ValidationException::new([
                         new ValidationError(
-                            'group',
+                            'group_id',
                             ValidationErrorSlugEnum::WrongField->getSlug(),
                             'Группа не найдена',
                         ),

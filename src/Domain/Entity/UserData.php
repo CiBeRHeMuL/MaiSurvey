@@ -149,4 +149,12 @@ class UserData
         $this->group = $group;
         return $this;
     }
+
+    public function getFullName(): string
+    {
+        return implode(
+            ' ',
+            array_filter([$this->getFirstName(), $this->getLastName(), $this->getPatronymic()]),
+        );
+    }
 }
