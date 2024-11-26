@@ -63,7 +63,6 @@ services:
   # --- end security
 
   # --- start monolog
-
   monolog.custom_handlers.telegram.error:
     class: Monolog\Handler\TelegramBotHandler
     arguments:
@@ -81,3 +80,11 @@ services:
       $includeStacktraces: true
       $ignoreEmptyContextAndExtra: true
   # --- end monolog
+
+when@dev:
+  services:
+    # --- start event listeners
+    App\Presentation\Web\Listener\ProfilerListener:
+      tags:
+        - {name: 'kernel.event_listener', event: Symfony\Component\EventDispatcher\Attribute\AsEventListener, priority: -1000}
+    # --- end event listeners

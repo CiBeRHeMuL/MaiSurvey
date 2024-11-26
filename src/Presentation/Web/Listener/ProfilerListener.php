@@ -10,12 +10,10 @@ use App\Presentation\Web\Response\Model\Common\Query;
 use App\Presentation\Web\Response\Response;
 use Doctrine\Bundle\DoctrineBundle\DataCollector\DoctrineDataCollector;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
-use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\Profiler\Profiler;
 use Symfony\Component\VarDumper\Cloner\Data;
 
-#[AsEventListener(event: ResponseEvent::class, priority: -1000)]
 class ProfilerListener
 {
     public function __construct(
