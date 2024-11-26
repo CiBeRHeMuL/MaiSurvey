@@ -154,7 +154,7 @@ class UserData
     {
         return implode(
             ' ',
-            array_filter([$this->getFirstName(), $this->getLastName(), $this->getPatronymic()]),
+            array_filter([$this->getLastName(), $this->getFirstName(), $this->getPatronymic()]),
         );
     }
 }
