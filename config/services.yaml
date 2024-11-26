@@ -86,5 +86,6 @@ when@dev:
     # --- start event listeners
     App\Presentation\Web\Listener\ProfilerListener:
       tags:
-        - {name: 'kernel.event_listener', event: Symfony\Component\EventDispatcher\Attribute\AsEventListener, priority: -1000}
+        - {name: 'kernel.event_listener', event: Symfony\Component\HttpKernel\Event\ResponseEvent, priority: -1000}
+      autowire: true
     # --- end event listeners
