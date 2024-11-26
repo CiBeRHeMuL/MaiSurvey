@@ -61,7 +61,7 @@ class UserDataService
      *
      * @param GetAllUserDataDto $dto
      *
-     * @return DataProviderInterface
+     * @return DataProviderInterface<UserData>
      */
     public function getAll(GetAllUserDataDto $dto): DataProviderInterface
     {

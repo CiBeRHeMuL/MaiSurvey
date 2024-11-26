@@ -46,7 +46,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CriticalResponse'
+                $ref: '#/components/schemas/ErrorResponse'
       security: [ ]
   /auth/sign-up/1:
     post:
@@ -86,7 +86,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CriticalResponse'
+                $ref: '#/components/schemas/ErrorResponse'
       security: [ ]
   /auth/sign-up/2:
     post:
@@ -132,7 +132,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CriticalResponse'
+                $ref: '#/components/schemas/ErrorResponse'
   /auth/refresh:
     put:
       tags:
@@ -206,7 +206,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CriticalResponse'
+                $ref: '#/components/schemas/ErrorResponse'
         '422':
           description: 'Unprocessable Entity'
           content:
@@ -277,7 +277,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CriticalResponse'
+                $ref: '#/components/schemas/ErrorResponse'
   /health:
     get:
       tags:
@@ -318,7 +318,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CriticalResponse'
+                $ref: '#/components/schemas/ErrorResponse'
   /user:
     post:
       tags:
@@ -369,7 +369,174 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CriticalResponse'
+                $ref: '#/components/schemas/ErrorResponse'
+  /users:
+    get:
+      tags:
+        - user
+      summary: 'Получить всех пользователей с пагинацией и сортировкой'
+      operationId: get_get-all-users
+      parameters:
+        - name: 'roles[]'
+          in: query
+          required: false
+          schema:
+            title: 'Роли для фильтрации'
+            type: array
+            items: { }
+            default: null
+            maxItems: 50
+            nullable: true
+        - name: name
+          in: query
+          required: false
+          schema:
+            title: 'Имя для фильтрации'
+            type: string
+            default: null
+            maxLength: 255
+            minLength: 1
+            nullable: true
+        - name: email
+          in: query
+          required: false
+          schema:
+            title: 'Почта для фильтрации'
+            type: string
+            default: null
+            maxLength: 255
+            minLength: 1
+            nullable: true
+        - name: deleted
+          in: query
+          required: false
+          schema:
+            title: 'Фильтр по метке удаления'
+            type: boolean
+            default: null
+            nullable: true
+        - name: status
+          in: query
+          required: false
+          schema:
+            title: 'Статус для фильтрации'
+            type: string
+            default: null
+            enum:
+              - draft
+              - active
+            nullable: true
+        - name: 'group_ids[]'
+          in: query
+          required: false
+          schema:
+            title: 'Группы для фильтрации'
+            type: array
+            items: { }
+            default: null
+            maxItems: 50
+            nullable: true
+        - name: with_group
+          in: query
+          required: false
+          schema:
+            title: 'Фильтровать только пользователей с группой'
+            type: boolean
+            default: null
+            nullable: true
+        - name: created_from
+          in: query
+          required: false
+          schema:
+            title: 'Создан после'
+            type: string
+            default: null
+            nullable: true
+        - name: created_to
+          in: query
+          required: false
+          schema:
+            title: 'Создан до'
+            type: string
+            default: null
+            nullable: true
+        - name: sort_by
+          in: query
+          required: false
+          schema:
+            title: 'Сортировка по'
+            type: string
+            default: name
+            enum:
+              - name
+              - created_at
+              - deleted
+              - email
+        - name: sort_type
+          in: query
+          required: false
+          schema:
+            title: 'Тип сортировки'
+            type: string
+            default: asc
+            enum:
+              - asc
+              - desc
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 100
+            maximum: 100
+            minimum: 0
+            nullable: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/SuccessWithPaginationResponse' }
+                  - { properties: { data: { properties: { items: { type: array, items: { $ref: '#/components/schemas/User' } } }, type: object } }, type: object }
+        '400':
+          description: 'Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 'Not Found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: 'Unprocessable Entity'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResponse'
+        '500':
+          description: 'Internal Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /user-data/all:
     get:
       tags:
@@ -467,7 +634,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CriticalResponse'
+                $ref: '#/components/schemas/ErrorResponse'
         '422':
           description: 'Unprocessable Entity'
           content:
@@ -622,6 +789,91 @@ components:
           type: string
           nullable: true
       type: object
+    GetAllDto:
+      properties:
+        roles:
+          title: 'Роли для фильтрации'
+          type: array
+          items: { }
+          default: null
+          maxItems: 50
+          nullable: true
+        name:
+          title: 'Имя для фильтрации'
+          type: string
+          default: null
+          maxLength: 255
+          minLength: 1
+          nullable: true
+        email:
+          title: 'Почта для фильтрации'
+          type: string
+          default: null
+          maxLength: 255
+          minLength: 1
+          nullable: true
+        deleted:
+          title: 'Фильтр по метке удаления'
+          type: boolean
+          default: null
+          nullable: true
+        status:
+          title: 'Статус для фильтрации'
+          type: string
+          default: null
+          enum:
+            - draft
+            - active
+          nullable: true
+        group_ids:
+          title: 'Группы для фильтрации'
+          type: array
+          items: { }
+          default: null
+          maxItems: 50
+          nullable: true
+        with_group:
+          title: 'Фильтровать только пользователей с группой'
+          type: boolean
+          default: null
+          nullable: true
+        created_from:
+          title: 'Создан после'
+          type: string
+          default: null
+          nullable: true
+        created_to:
+          title: 'Создан до'
+          type: string
+          default: null
+          nullable: true
+        sort_by:
+          title: 'Сортировка по'
+          type: string
+          default: name
+          enum:
+            - name
+            - created_at
+            - deleted
+            - email
+        sort_type:
+          title: 'Тип сортировки'
+          type: string
+          default: asc
+          enum:
+            - asc
+            - desc
+        offset:
+          type: integer
+          default: 0
+          minimum: 0
+        limit:
+          type: integer
+          default: 100
+          maximum: 100
+          minimum: 0
+          nullable: true
+      type: object
     GetAllUserDataDto:
       properties:
         name:
@@ -727,13 +979,6 @@ components:
             items:
               $ref: '#/components/schemas/Error'
       type: object
-    CriticalResponse:
-      required:
-        - exception
-      properties:
-        exception:
-          $ref: '#/components/schemas/ExceptionModel'
-      type: object
     User:
       required:
         - id
@@ -832,51 +1077,6 @@ components:
         message:
           type: string
       type: object
-    ExceptionModel:
-      required:
-        - exception_class
-        - code
-        - file
-        - line
-        - message
-        - trace
-      properties:
-        exception_class:
-          type: string
-        code:
-          type: integer
-        file:
-          type: string
-        line:
-          type: integer
-        message:
-          type: string
-        trace:
-          type: array
-          items:
-            properties:
-              function:
-                type: string
-              line:
-                type: integer
-              file:
-                type: string
-              class:
-                type: string
-                nullable: true
-              object:
-                type: object
-                nullable: true
-                additionalProperties: true
-              type:
-                type: string
-                nullable: true
-              args:
-                type: array
-                items:
-                  type: string
-            type: object
-      type: object
     UserStatusEnum:
       type: string
       enum:
@@ -893,6 +1093,7 @@ components:
         - survey.view_result
         - survey.view_all
         - user.create
+        - user.view
     PaginatedData:
       properties:
         items:

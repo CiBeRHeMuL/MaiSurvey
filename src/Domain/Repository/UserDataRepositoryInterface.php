@@ -17,7 +17,7 @@ interface UserDataRepositoryInterface extends RepositoryInterface
     /**
      * @param GetAllUserDataDto $dto
      *
-     * @return DataProviderInterface
+     * @return DataProviderInterface<UserData>
      */
     public function findAll(GetAllUserDataDto $dto): DataProviderInterface;
 }

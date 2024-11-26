@@ -2,6 +2,8 @@
 
 namespace App\Domain\Repository;
 
+use App\Domain\DataProvider\DataProviderInterface;
+use App\Domain\Dto\User\GetAllUsersDto;
 use App\Domain\Entity\User;
 use App\Domain\Repository\Common\RepositoryInterface;
 use App\Domain\ValueObject\Email;
@@ -12,4 +14,13 @@ interface UserRepositoryInterface extends RepositoryInterface
     public function findById(Uuid $uuid): User|null;
 
     public function findByEmail(Email $email): User|null;
+
+    /**
+     * Список пользователей с пагинацией и сортировкой.
+     *
+     * @param GetAllUsersDto $dto
+     *
+     * @return DataProviderInterface<User>
+     */
+    public function findAll(GetAllUsersDto $dto): DataProviderInterface;
 }

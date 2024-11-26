@@ -19,8 +19,8 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 class ErrorResponseListener
 {
     public function __construct(
-        #[Autowire('%kernel.environment%')]
-        private string $environment,
+        #[Autowire('%kernel.debug%')]
+        private bool $debug,
         private LoggerInterface $logger,
     ) {
     }
@@ -52,7 +52,7 @@ class ErrorResponseListener
             );
         } else {
             $this->logger->error($e);
-            if ($this->environment === 'dev') {
+            if ($this->debug) {
                 $event->setResponse(Response::critical(new CriticalResponse($e)));
             } else {
                 $event->setResponse(
@@ -68,5 +68,6 @@ class ErrorResponseListener
                 );
             }
         }
+        $event->stopPropagation();
     }
 }

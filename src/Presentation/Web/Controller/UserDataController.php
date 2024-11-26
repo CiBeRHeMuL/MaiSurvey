@@ -20,7 +20,7 @@ class UserDataController extends BaseController
     /** Получить список данных пользователей с фильтрацией и пагинацией. */
     #[Route('/user-data/all', name: 'get-all-user-data', methods: ['GET'])]
     #[OA\Tag('user-data')]
-    #[LOA\CriticalResponse]
+    #[LOA\ErrorResponse(500)]
     #[LOA\ValidationResponse]
     #[LOA\ErrorResponse(400)]
     #[LOA\ErrorResponse(401)]

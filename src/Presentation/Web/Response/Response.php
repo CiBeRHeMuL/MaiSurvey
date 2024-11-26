@@ -7,9 +7,11 @@ use App\Presentation\Web\Enum\HttpStatusCodeEnum;
 use App\Presentation\Web\Response\Model\Common\CriticalResponse;
 use App\Presentation\Web\Response\Model\Common\Error;
 use App\Presentation\Web\Response\Model\Common\ErrorResponse;
+use App\Presentation\Web\Response\Model\Common\ProfileResponse;
 use App\Presentation\Web\Response\Model\Common\SuccessResponse;
 use App\Presentation\Web\Response\Model\Common\SuccessWithPaginationResponse;
 use App\Presentation\Web\Response\Model\Common\ValidationResponse;
+use Exception;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 class Response
@@ -48,7 +50,7 @@ class Response
             new ErrorResponse(
                 new Error(
                     ErrorSlugEnum::NotFound->getSlug(),
-                    ErrorSlugEnum::NotFound->getMessage(),
+                    ErrorSlugEnum::NotFound->getSlug(),
                 ),
             ),
             HttpStatusCodeEnum::NotFound,
@@ -56,8 +58,15 @@ class Response
     }
 
     public static function critical(
-        CriticalResponse $response = new CriticalResponse(new \Exception('Unknown exception')),
+        CriticalResponse $response = new CriticalResponse(new Exception('Unknown exception')),
         HttpStatusCodeEnum $statusCode = HttpStatusCodeEnum::InternalServerError,
+    ): JsonResponse {
+        return self::response($response, $statusCode);
+    }
+
+    public static function profile(
+        ProfileResponse $response,
+        HttpStatusCodeEnum $statusCode = HttpStatusCodeEnum::Ok,
     ): JsonResponse {
         return self::response($response, $statusCode);
     }

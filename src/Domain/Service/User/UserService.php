@@ -2,7 +2,9 @@
 
 namespace App\Domain\Service\User;
 
+use App\Domain\DataProvider\DataProviderInterface;
 use App\Domain\Dto\User\CreateUserDto;
+use App\Domain\Dto\User\GetAllUsersDto;
 use App\Domain\Entity\User;
 use App\Domain\Enum\ValidationErrorSlugEnum;
 use App\Domain\Exception\ErrorException;
@@ -19,6 +21,8 @@ use Symfony\Component\Uid\Uuid;
 
 class UserService
 {
+    public const array GET_ALL_SORT = ['name', 'created_at', 'deleted', 'email'];
+
     private LoggerInterface $logger;
 
     public function __construct(
@@ -120,5 +124,53 @@ class UserService
         $user
             ->setUpdatedAt(new DateTimeImmutable());
         return $this->userRepository->update($user);
+    }
+
+    /**
+     * Получить список пользователей с пагинацией и сортировкой
+     *
+     * @param GetAllUsersDto $dto
+     *
+     * @return DataProviderInterface<User>
+     */
+    public function getAll(GetAllUsersDto $dto): DataProviderInterface
+    {
+        if ($dto->getName() !== null && mb_strlen($dto->getName()) < 3) {
+            throw ValidationException::new([
+                new ValidationError(
+                    'name',
+                    ValidationErrorSlugEnum::WrongField->getSlug(),
+                    'Имя должно быть не короче 3 символов',
+                ),
+            ]);
+        }
+
+        if (!in_array($dto->getSortBy(), self::GET_ALL_SORT, true)) {
+            throw ValidationException::new([
+                new ValidationError(
+                    'name',
+                    ValidationErrorSlugEnum::WrongField->getSlug(),
+                    sprintf('Сортировка доступна по полям: %s', implode(', ', self::GET_ALL_SORT)),
+                ),
+            ]);
+        }
+
+        if (
+            $dto->getCreatedFrom() !== null
+            && $dto->getCreatedTo() !== null
+            && $dto->getCreatedTo()->diff($dto->getCreatedFrom())->invert === 1
+        ) {
+            throw ValidationException::new([
+                new ValidationError(
+                    'created_from',
+                    ValidationErrorSlugEnum::WrongField->getSlug(),
+                    'Дата начала должна быть меньше даты окончания',
+                ),
+            ]);
+        }
+
+        return $this
+            ->userRepository
+            ->findAll($dto);
     }
 }

@@ -13,7 +13,7 @@ interface GroupRepositoryInterface extends RepositoryInterface
     /**
      * @param GetAllGroupsDto $dto
      *
-     * @return DataProviderInterface
+     * @return DataProviderInterface<Group>
      */
     public function findAll(GetAllGroupsDto $dto): DataProviderInterface;
 

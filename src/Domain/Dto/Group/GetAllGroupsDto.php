@@ -18,7 +18,7 @@ readonly class GetAllGroupsDto
         private string $sortBy = 'name',
         private SortTypeEnum $sortType = SortTypeEnum::Asc,
         private int $offset = 0,
-        private int|null $limit = 20,
+        private int|null $limit = 100,
     ) {
     }
 

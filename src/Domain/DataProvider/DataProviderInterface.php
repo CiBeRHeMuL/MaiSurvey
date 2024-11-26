@@ -9,6 +9,8 @@ use Iterator;
  * провайдером данных, включая получение общего количества элементов,
  * текущего количества элементов в выборке, самих элементов, а также
  * параметров ограничения выборки.
+ *
+ * @template-covariant T
  */
 interface DataProviderInterface
 {
@@ -29,7 +31,7 @@ interface DataProviderInterface
     /**
      * Получает Итератор данных для текущей выборки.
      *
-     * @return Iterator Итератор данных.
+     * @return Iterator<T> Итератор данных.
      */
     public function getItems(): Iterator;
 

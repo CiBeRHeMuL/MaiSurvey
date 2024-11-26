@@ -42,7 +42,7 @@ class AuthController extends BaseController
     #[LOA\SuccessResponse(SigningInUser::class)]
     #[LOA\ErrorResponse]
     #[LOA\ValidationResponse]
-    #[LOA\CriticalResponse]
+    #[LOA\ErrorResponse(500)]
     public function signIn(
         #[MapRequestPayload]
         SignInDto $dto,
@@ -69,7 +69,7 @@ class AuthController extends BaseController
     #[LOA\SuccessResponse(SigningInUser::class)]
     #[LOA\ErrorResponse]
     #[LOA\ValidationResponse]
-    #[LOA\CriticalResponse]
+    #[LOA\ErrorResponse(500)]
     public function signUpStep1(
         #[MapRequestPayload]
         SignUpStep1Dto $dto,
@@ -97,7 +97,7 @@ class AuthController extends BaseController
     #[LOA\ErrorResponse(400)]
     #[LOA\ErrorResponse(401)]
     #[LOA\ValidationResponse]
-    #[LOA\CriticalResponse]
+    #[LOA\ErrorResponse(500)]
     public function signUpStep2(
         #[MapRequestPayload]
         SignUpStep2Dto $dto,
@@ -119,7 +119,7 @@ class AuthController extends BaseController
     #[LOA\ErrorResponse(400)]
     #[LOA\ErrorResponse(401)]
     #[LOA\ValidationResponse]
-    #[LOA\CriticalResponse]
+    #[LOA\ErrorResponse(500)]
     public function refreshCredentials(
         #[MapRequestPayload]
         RefreshCredentialsDto $dto,

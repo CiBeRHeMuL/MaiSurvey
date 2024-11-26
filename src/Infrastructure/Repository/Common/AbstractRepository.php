@@ -10,15 +10,19 @@ use App\Domain\DataProvider\DataSortInterface;
 use App\Domain\DataProvider\LimitOffset;
 use App\Domain\DataProvider\SortColumnInterface;
 use App\Domain\Repository\Common\RepositoryInterface;
+use App\Infrastructure\DataProvider\LazyBatchedDataProvider;
+use ArrayIterator;
 use Doctrine\DBAL\Result;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NativeQuery;
 use Doctrine\ORM\Query\ResultSetMapping;
 use Exception;
 use Psr\Log\LoggerInterface;
+use Qstart\Db\QueryBuilder\DML\Expression\Expr;
 use Qstart\Db\QueryBuilder\DML\Query\QueryInterface;
 use Qstart\Db\QueryBuilder\DML\Query\SelectQuery;
 use Qstart\Db\QueryBuilder\Helper\DialectSQL;
+use Qstart\Db\QueryBuilder\Query;
 
 abstract class AbstractRepository implements RepositoryInterface
 {
@@ -110,11 +114,10 @@ abstract class AbstractRepository implements RepositoryInterface
         $items = [];
         $total = intval(
             $this->findOneByQuery(
-                (clone $query)
-                    ->select("count(*) AS count")
-                    ->limit(null)
-                    ->offset(null),
-            )['count'] ?: 0,
+                Query::select()
+                    ->select(['count' => new Expr('count(*)')])
+                    ->from(['t' => (clone $query)->limit(null)->offset(null)]),
+            )['count'] ?? 0,
         );
 
         if ($total > 0) {
@@ -124,9 +127,9 @@ abstract class AbstractRepository implements RepositoryInterface
                     ->orderBy(
                         array_merge(
                             ...array_map(
-                            fn(SortColumnInterface $column) => [$column->getColumn() => $column->getSort()],
-                            $sort->getSortColumns(),
-                        ),
+                                fn(SortColumnInterface $column) => [$column->getColumn() => $column->getSort()],
+                                $sort->getSortColumns(),
+                            ),
                         ),
                     );
             }
@@ -144,6 +147,61 @@ abstract class AbstractRepository implements RepositoryInterface
             limit: $limit,
             sort: $sort,
         );
+    }
+
+    public function findWithLazyBatchedProvider(
+        SelectQuery $query,
+        string|null $entityClassName = null,
+        array|null $relations = null,
+        DataLimitInterface|null $limit = null,
+        DataSortInterface|null $sort = null,
+        int $batchSize = 500,
+    ): DataProviderInterface {
+        $limit ??= new LimitOffset(null, 0);
+        $sort ??= new DataSort([]);
+
+        $total = intval(
+            $this->findOneByQuery(
+                Query::select()
+                    ->select(['count' => new Expr('count(*)')])
+                    ->from(['t' => (clone $query)->limit(null)->offset(null)]),
+            )['count'] ?? 0,
+        );
+
+        if ($total > 0) {
+            $fetcher = function (DataLimitInterface $limit) use (&$query, &$sort, &$entityClassName, &$relations) {
+                $clonedQuery = (clone $query)->limit($limit->getLimit())->offset($limit->getOffset());
+                if ($sort->getSortColumns()) {
+                    $clonedQuery
+                        ->orderBy(
+                            array_merge(
+                                ...array_map(
+                                    fn(SortColumnInterface $column) => [$column->getColumn() => $column->getSort()],
+                                    $sort->getSortColumns(),
+                                ),
+                            ),
+                        );
+                }
+
+                return new ArrayIterator(
+                    $this->findAllByQuery(
+                        $clonedQuery,
+                        $entityClassName,
+                        $relations,
+                    ),
+                );
+            };
+            return new LazyBatchedDataProvider(
+                $fetcher,
+                $batchSize,
+                max(0, min($total - $limit->getOffset(), $limit->getLimit())),
+                $total,
+                $limit,
+                $sort,
+            );
+        }
+
+        return new ArrayDataProvider([], 0, $limit, $sort);
     }
 
     public function executeQuery(QueryInterface $query): Result
@@ -201,7 +259,7 @@ abstract class AbstractRepository implements RepositoryInterface
         $relations = array_combine(
             $relations,
             array_map(
-                fn(string $r) => md5($r),
+                fn(string $r) => "rel_$r",
                 $relations,
             ),
         );

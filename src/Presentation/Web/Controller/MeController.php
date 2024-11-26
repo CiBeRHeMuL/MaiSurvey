@@ -19,7 +19,7 @@ class MeController extends BaseController
     #[OA\Tag('me')]
     #[LOA\SuccessResponse(User::class)]
     #[LOA\ErrorResponse]
-    #[LOA\CriticalResponse]
+    #[LOA\ErrorResponse(500)]
     public function me(): JsonResponse
     {
         return Response::success(

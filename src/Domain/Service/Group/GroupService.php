@@ -39,7 +39,7 @@ class GroupService
      *
      * @param GetAllGroupsDto $dto
      *
-     * @return DataProviderInterface
+     * @return DataProviderInterface<Group>
      */
     public function getAll(GetAllGroupsDto $dto): DataProviderInterface
     {

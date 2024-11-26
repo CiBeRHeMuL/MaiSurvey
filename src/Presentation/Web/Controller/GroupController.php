@@ -24,7 +24,7 @@ class GroupController extends BaseController
     /** Получить список групп с фильтрацией и пагинацией. */
     #[Route('/groups', name: 'get-all-groups', methods: ['GET'])]
     #[OA\Tag('groups')]
-    #[LOA\CriticalResponse]
+    #[LOA\ErrorResponse(500)]
     #[LOA\ValidationResponse]
     #[LOA\ErrorResponse(400)]
     #[LOA\ErrorResponse(401)]
@@ -54,7 +54,7 @@ class GroupController extends BaseController
     #[LOA\ValidationResponse]
     #[LOA\ErrorResponse(400)]
     #[LOA\ErrorResponse(401)]
-    #[LOA\CriticalResponse]
+    #[LOA\ErrorResponse(500)]
     public function create(
         #[MapRequestPayload]
         CreateGroupDto $dto,
