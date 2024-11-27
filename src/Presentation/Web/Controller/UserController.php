@@ -84,10 +84,10 @@ class UserController extends BaseController
     }
 
     /** Экспорт пользователей в файл */
-    #[Route('/users/export/{exportType<xlsx>}', 'users-export-to-file', methods: ['GET'])]
+    #[Route('/users/export/{exportType<xlsx|csv>}', 'users-export-to-file', methods: ['GET'])]
     #[IsGranted(PermissionEnum::UserExport->value, statusCode: 404)]
     #[OA\Tag('user')]
-    #[LOA\FileResponse('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')]
+    #[LOA\FileResponse(['xlsx', 'csv'])]
     #[LOA\ErrorResponse(404)]
     #[LOA\ValidationResponse]
     #[LOA\ErrorResponse(500)]

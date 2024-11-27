@@ -13,6 +13,7 @@ class FileDataExportFactory implements FileDataExportFactoryInterface
     {
         $dataExport = match ($id) {
             'xlsx' => new XlsxDataExport(),
+            'csv' => new CsvDataExport(),
             default => throw new RuntimeException('Неизвестный id'),
         };
         $dataExport->setLogger($this->getLogger());

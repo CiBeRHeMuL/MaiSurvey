@@ -549,7 +549,10 @@ paths:
           required: true
           schema:
             type: string
-            pattern: xlsx
+            pattern: xlsx|csv
+            enum:
+              - xlsx
+              - csv
         - name: 'roles[]'
           in: query
           required: false
@@ -676,6 +679,10 @@ paths:
           description: Ok
           content:
             application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+            text/csv:
               schema:
                 type: string
                 format: binary
