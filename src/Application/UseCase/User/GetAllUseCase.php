@@ -5,6 +5,7 @@ namespace App\Application\UseCase\User;
 use App\Application\Dto\User\GetAllDto;
 use App\Domain\DataProvider\DataProviderInterface;
 use App\Domain\Dto\User\GetAllUsersDto;
+use App\Domain\Entity\User;
 use App\Domain\Enum\RoleEnum;
 use App\Domain\Enum\SortTypeEnum;
 use App\Domain\Enum\UserStatusEnum;
@@ -31,6 +32,11 @@ class GetAllUseCase
         return $this;
     }
 
+    /**
+     * @param GetAllDto $dto
+     *
+     * @return DataProviderInterface<User>
+     */
     public function execute(GetAllDto $dto): DataProviderInterface
     {
         return $this

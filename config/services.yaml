@@ -37,6 +37,11 @@ services:
     class: App\Infrastructure\Service\Security\PasswordCheckerService
   App\Domain\Service\Db\TransactionManagerInterface:
     class: App\Infrastructure\Service\Db\TransactionManager
+
+  App\Presentation\Web\Service\DataExport\FileDataExportFactoryInterface:
+    class: App\Presentation\Web\Service\DataExport\FileDataExportFactory
+    calls:
+      - setLogger: ['@logger']
   # --- end services
 
   # --- start repositories

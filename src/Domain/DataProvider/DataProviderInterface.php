@@ -31,7 +31,7 @@ interface DataProviderInterface
     /**
      * Получает Итератор данных для текущей выборки.
      *
-     * @return Iterator<T> Итератор данных.
+     * @return Iterator<int, T> Итератор данных.
      */
     public function getItems(): Iterator;
 

@@ -537,6 +537,166 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+  '/users/export/{exportType}':
+    get:
+      tags:
+        - user
+      summary: 'Экспорт пользователей в файл'
+      operationId: get_users-export-to-file
+      parameters:
+        - name: exportType
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: xlsx
+        - name: 'roles[]'
+          in: query
+          required: false
+          schema:
+            title: 'Роли для фильтрации'
+            type: array
+            items: { }
+            default: null
+            maxItems: 50
+            nullable: true
+        - name: name
+          in: query
+          required: false
+          schema:
+            title: 'Имя для фильтрации'
+            type: string
+            default: null
+            maxLength: 255
+            minLength: 1
+            nullable: true
+        - name: email
+          in: query
+          required: false
+          schema:
+            title: 'Почта для фильтрации'
+            type: string
+            default: null
+            maxLength: 255
+            minLength: 1
+            nullable: true
+        - name: deleted
+          in: query
+          required: false
+          schema:
+            title: 'Фильтр по метке удаления'
+            type: boolean
+            default: null
+            nullable: true
+        - name: status
+          in: query
+          required: false
+          schema:
+            title: 'Статус для фильтрации'
+            type: string
+            default: null
+            enum:
+              - draft
+              - active
+            nullable: true
+        - name: 'group_ids[]'
+          in: query
+          required: false
+          schema:
+            title: 'Группы для фильтрации'
+            type: array
+            items: { }
+            default: null
+            maxItems: 50
+            nullable: true
+        - name: with_group
+          in: query
+          required: false
+          schema:
+            title: 'Фильтровать только пользователей с группой'
+            type: boolean
+            default: null
+            nullable: true
+        - name: created_from
+          in: query
+          required: false
+          schema:
+            title: 'Создан после'
+            type: string
+            default: null
+            nullable: true
+        - name: created_to
+          in: query
+          required: false
+          schema:
+            title: 'Создан до'
+            type: string
+            default: null
+            nullable: true
+        - name: sort_by
+          in: query
+          required: false
+          schema:
+            title: 'Сортировка по'
+            type: string
+            default: name
+            enum:
+              - name
+              - created_at
+              - deleted
+              - email
+        - name: sort_type
+          in: query
+          required: false
+          schema:
+            title: 'Тип сортировки'
+            type: string
+            default: asc
+            enum:
+              - asc
+              - desc
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 100
+            maximum: 100
+            minimum: 0
+            nullable: true
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: 'Not Found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: 'Unprocessable Entity'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResponse'
+        '500':
+          description: 'Internal Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /user-data/all:
     get:
       tags:
@@ -1094,6 +1254,7 @@ components:
         - survey.view_all
         - user.create
         - user.view
+        - user.export
     PaginatedData:
       properties:
         items:

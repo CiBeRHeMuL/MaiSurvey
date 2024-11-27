@@ -7,7 +7,7 @@ WORKDIR /app
 
 COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
 
-RUN install-php-extensions pgsql pdo_pgsql intl opcache soap bcmath pcntl zip xdebug-3.3.2 tidy sockets
+RUN install-php-extensions pgsql pdo_pgsql intl opcache soap bcmath pcntl zip xdebug-3.3.2 tidy sockets gd
 RUN  apt-get update \
   && apt-get install -y wget \
   && rm -rf /var/lib/apt/lists/*

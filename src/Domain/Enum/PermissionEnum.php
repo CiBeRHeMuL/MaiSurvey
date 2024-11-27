@@ -16,4 +16,5 @@ enum PermissionEnum: string
     // User
     case UserCreate = 'user.create';
     case UserView = 'user.view';
+    case UserExport = 'user.export';
 }
