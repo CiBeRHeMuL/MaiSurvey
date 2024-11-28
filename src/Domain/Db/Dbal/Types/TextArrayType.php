@@ -46,7 +46,7 @@ class TextArrayType extends Type
      */
     public function convertToPHPValue(mixed $value, AbstractPlatform $platform): array|null
     {
-        if ($value === null) {
+        if (is_array($value) || $value === null) {
             return null;
         }
         try {

@@ -32,7 +32,7 @@ class UserController extends BaseController
 {
     /** Создание пользователя */
     #[Route('/user', 'create-full-user', methods: ['POST'])]
-    #[IsGranted(PermissionEnum::UserCreate->value, statusCode: 404)]
+    #[IsGranted(PermissionEnum::UserCreate->value, statusCode: 404, exceptionCode: 404)]
     #[OA\Tag('user')]
     #[LOA\SuccessResponse(User::class)]
     #[LOA\ErrorResponse(400)]
@@ -57,7 +57,7 @@ class UserController extends BaseController
 
     /** Получить всех пользователей с пагинацией и сортировкой */
     #[Route('/users', 'get-all-users', methods: ['GET'])]
-    #[IsGranted(PermissionEnum::UserView->value, statusCode: 404)]
+    #[IsGranted(PermissionEnum::UserView->value, statusCode: 404, exceptionCode: 404)]
     #[OA\Tag('user')]
     #[LOA\SuccessPaginationResponse(User::class)]
     #[LOA\ErrorResponse(400)]
@@ -85,7 +85,7 @@ class UserController extends BaseController
 
     /** Экспорт пользователей в файл */
     #[Route('/users/export/{exportType<xlsx|csv>}', 'users-export-to-file', methods: ['GET'])]
-    #[IsGranted(PermissionEnum::UserExport->value, statusCode: 404)]
+    #[IsGranted(PermissionEnum::UserExport->value, statusCode: 404, exceptionCode: 404)]
     #[OA\Tag('user')]
     #[LOA\FileResponse(['xlsx', 'csv'])]
     #[LOA\ErrorResponse(404)]

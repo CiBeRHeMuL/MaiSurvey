@@ -27,4 +27,13 @@ interface RepositoryInterface
      * @return bool
      */
     public function delete(object $entity): bool;
+
+    /**
+     * Массовое создание сущностей
+     *
+     * @param object[] $entities
+     *
+     * @return int
+     */
+    public function createMulti(array $entities): int;
 }

@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-#[IsGranted('IS_AUTHENTICATED')]
+#[IsGranted('IS_AUTHENTICATED', statusCode: 404, exceptionCode: 404)]
 class MeController extends BaseController
 {
     /** Информация обо мне. */

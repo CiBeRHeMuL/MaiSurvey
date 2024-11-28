@@ -6,6 +6,7 @@ use App\Application\Dto\Group\CreateGroupDto;
 use App\Application\Dto\Group\GetAllGroupsDto;
 use App\Application\UseCase\Group\CreateUseCase;
 use App\Application\UseCase\Group\GetAllUseCase;
+use App\Domain\Enum\PermissionEnum;
 use App\Presentation\Web\OpenApi\Attribute as LOA;
 use App\Presentation\Web\Response\Model\Common\PaginatedData;
 use App\Presentation\Web\Response\Model\Common\SuccessResponse;
@@ -18,6 +19,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Attribute\MapQueryString;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 class GroupController extends BaseController
 {
@@ -49,6 +51,7 @@ class GroupController extends BaseController
 
     /** Создать группу */
     #[Route('/group', 'create-group', methods: ['POST'])]
+    #[IsGranted(PermissionEnum::GroupCreate->value, statusCode: 404, exceptionCode: 404)]
     #[OA\Tag('groups')]
     #[LOA\SuccessResponse(Group::class)]
     #[LOA\ValidationResponse]

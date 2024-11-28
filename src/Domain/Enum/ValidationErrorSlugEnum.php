@@ -4,7 +4,6 @@ namespace App\Domain\Enum;
 
 enum ValidationErrorSlugEnum: string
 {
-    case LandingNotFound = 'LANDING_NOT_FOUND';
     case AlreadyExists = 'ALREADY_EXISTS';
     case NotFound = 'NOT_FOUND';
     case WrongField = 'WRONG_FIELD';

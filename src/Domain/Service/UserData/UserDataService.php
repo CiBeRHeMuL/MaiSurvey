@@ -109,45 +109,11 @@ class UserDataService
 
     public function create(CreateUserDataDto $dto): UserData
     {
-        if ($dto->getRole()->isMain() === false) {
-            throw ValidationException::new([
-                new ValidationError(
-                    'role',
-                    ValidationErrorSlugEnum::WrongField->getSlug(),
-                    'Нельзя создать данные для не основной роли',
-                ),
-            ]);
-        }
-
-        if ($dto->getRole() === RoleEnum::Student && $dto->getGroup() === null) {
-            throw ValidationException::new([
-                new ValidationError(
-                    'group',
-                    ValidationErrorSlugEnum::WrongField->getSlug(),
-                    'Для создания студента укажите группу',
-                ),
-            ]);
-        }
-        if ($dto->getRole() !== RoleEnum::Student && $dto->getGroup() !== null) {
-            throw ValidationException::new([
-                new ValidationError(
-                    'group',
-                    ValidationErrorSlugEnum::WrongField->getSlug(),
-                    'Нельзя привязать группу к не студенту',
-                ),
-            ]);
-        }
+        $this->validateCreateDto($dto);
         try {
             $this->transactionManager->beginTransaction();
 
-            $userData = new UserData();
-            $userData
-                ->setFirstName($dto->getFirstName())
-                ->setLastName($dto->getLastName())
-                ->setPatronymic($dto->getPatronymic())
-                ->setForRole($dto->getRole())
-                ->setCreatedAt(new DateTimeImmutable())
-                ->setUpdatedAt(new DateTimeImmutable());
+            $userData = $this->entityFromDto($dto);
 
             if ($this->userDataRepository->create($userData) === false) {
                 throw ErrorException::new(
@@ -179,5 +145,103 @@ class UserDataService
             $this->transactionManager->rollback();
             throw $e;
         }
+    }
+
+    public function validateCreateDto(CreateUserDataDto $dto): void
+    {
+        if ($dto->getRole()->isMain() === false) {
+            throw ValidationException::new([
+                new ValidationError(
+                    'role',
+                    ValidationErrorSlugEnum::WrongField->getSlug(),
+                    'Нельзя создать данные для не основной роли',
+                ),
+            ]);
+        }
+
+        if ($dto->getRole() === RoleEnum::Student && $dto->getGroup() === null) {
+            throw ValidationException::new([
+                new ValidationError(
+                    'group',
+                    ValidationErrorSlugEnum::WrongField->getSlug(),
+                    'Для создания студента укажите группу',
+                ),
+            ]);
+        }
+        if ($dto->getRole() !== RoleEnum::Student && $dto->getGroup() !== null) {
+            throw ValidationException::new([
+                new ValidationError(
+                    'group',
+                    ValidationErrorSlugEnum::WrongField->getSlug(),
+                    'Нельзя привязать группу к не студенту',
+                ),
+            ]);
+        }
+    }
+
+    /**
+     * Массовое создание данных
+     *
+     * @param CreateUserDataDto[] $dtos
+     * @param bool $validate валидировать данные?
+     * @param bool $transaction выполнять в транзакции?
+     * @param bool $throwOnError
+     *
+     * @return int
+     * @throws Throwable
+     */
+    public function createMulti(array $dtos, bool $validate = true, bool $transaction = true, bool $throwOnError = false): int
+    {
+        if ($transaction) {
+            $this->transactionManager->beginTransaction();
+        }
+        try {
+            $groupDtos = [];
+            $entities = [];
+            foreach ($dtos as $dto) {
+                if ($validate) {
+                    $this->validateCreateDto($dto);
+                }
+
+                $entity = $this->entityFromDto($dto);
+                $entities[] = $entity;
+
+                if ($dto->getGroup() !== null) {
+                    $groupDtos[] = new CreateUserDataGroupDto($entity, $dto->getGroup());
+                }
+            }
+
+            $created = $this->userDataRepository->createMulti($entities);
+
+            $this->userDataGroupService->createMulti($groupDtos, false, true, $throwOnError);
+
+            if ($transaction) {
+                $this->transactionManager->commit();
+            }
+
+            return $created;
+        } catch (Throwable $e) {
+            $this->logger->error($e);
+            if ($transaction) {
+                $this->transactionManager->rollback();
+            }
+            if ($throwOnError) {
+                throw $e;
+            }
+            return 0;
+        }
+    }
+
+    private function entityFromDto(CreateUserDataDto $dto): UserData
+    {
+        $userData = new UserData();
+        $userData
+            ->setFirstName($dto->getFirstName())
+            ->setLastName($dto->getLastName())
+            ->setPatronymic($dto->getPatronymic())
+            ->setForRole($dto->getRole())
+            ->setCreatedAt(new DateTimeImmutable())
+            ->setUpdatedAt(new DateTimeImmutable());
+        return $userData;
     }
 }

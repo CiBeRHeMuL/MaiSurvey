@@ -11,6 +11,7 @@ use App\Domain\Entity\Group;
 use App\Domain\Repository\GroupRepositoryInterface;
 use App\Infrastructure\Db\Expr\ILikeExpr;
 use App\Infrastructure\Repository\Common\AbstractRepository;
+use Iterator;
 use Qstart\Db\QueryBuilder\DML\Expression\Expr;
 use Qstart\Db\QueryBuilder\Query;
 use Symfony\Component\Uid\Uuid;
@@ -60,5 +61,14 @@ class GroupRepository extends AbstractRepository implements GroupRepositoryInter
             ->where(['id' => $id->toRfc4122()]);
         return $this
             ->findOneByQuery($q, Group::class);
+    }
+
+    public function findByNames(array $groupNames): Iterator
+    {
+        $q = Query::select()
+            ->select(['*'])
+            ->from($this->getClassTable(Group::class))
+            ->where(['name' => $groupNames]);
+        yield from $this->findAllByQuery($q, Group::class);
     }
 }

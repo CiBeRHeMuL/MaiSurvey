@@ -12,6 +12,7 @@ use App\Domain\Exception\ValidationException;
 use App\Domain\Repository\GroupRepositoryInterface;
 use App\Domain\Validation\ValidationError;
 use DateTimeImmutable;
+use Iterator;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Uid\Uuid;
 
@@ -107,5 +108,19 @@ class GroupService
         return $this
             ->groupRepository
             ->findById($id);
+    }
+
+    /**
+     * Получить группы по списку названий
+     *
+     * @param string[] $groupNames
+     *
+     * @return Iterator<int, Group>
+     */
+    public function getByNames(array $groupNames): Iterator
+    {
+        return $this
+            ->groupRepository
+            ->findByNames($groupNames);
     }
 }

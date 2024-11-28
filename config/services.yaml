@@ -42,6 +42,8 @@ services:
     class: App\Presentation\Web\Service\DataExport\FileDataExportFactory
     calls:
       - setLogger: ['@logger']
+  App\Domain\Service\DataImport\DataImportInterface:
+    class: App\Infrastructure\Service\DataImport\XlsxDataImport
   # --- end services
 
   # --- start repositories
@@ -65,6 +67,9 @@ services:
     tags: [ 'security.voter' ]
   App\Presentation\Web\Security\Voter\PermissionVoter:
     tags: [ 'security.voter' ]
+  App\Domain\Service\Security\SecurityService:
+    arguments:
+      $infinityTokens: '%env(bool:INFINITE_TOKENS)%'
   # --- end security
 
   # --- start monolog

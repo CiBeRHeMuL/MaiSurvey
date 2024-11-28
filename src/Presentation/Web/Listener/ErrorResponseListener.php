@@ -29,17 +29,22 @@ class ErrorResponseListener
     {
         $e = $event->getThrowable();
         if ($e instanceof HttpException && $e->getStatusCode() !== 500) {
-            $code = HttpStatusCodeEnum::tryFrom($e->getStatusCode());
-            if ($code !== null) {
-                $event->setResponse(
-                    Response::error(
-                        new ErrorResponse(
-                            new Error(ErrorSlugEnum::{$code->name}->getSlug(), $e->getMessage()),
-                        ),
-                        $code,
-                    ),
-                );
+            $code = HttpStatusCodeEnum::tryFrom($e->getStatusCode()) ?? HttpStatusCodeEnum::InternalServerError;
+            $message = $e->getMessage();
+            if ($e->getCode() !== 0) {
+                $messageCode = HttpStatusCodeEnum::tryFrom($e->getCode());
+                if ($messageCode !== null) {
+                    $message = ErrorSlugEnum::{$code->name}->getSlug();
+                }
             }
+            $event->setResponse(
+                Response::error(
+                    new ErrorResponse(
+                        new Error(ErrorSlugEnum::{$code->name}->getSlug(), $message),
+                    ),
+                    $code,
+                ),
+            );
         } elseif ($e instanceof ErrorException) {
             $code = HttpStatusCodeEnum::tryFrom($e->getCode()) ?? HttpStatusCodeEnum::InternalServerError;
             $event->setResponse(

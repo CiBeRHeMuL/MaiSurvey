@@ -828,6 +828,54 @@ paths:
                 allOf:
                   - { $ref: '#/components/schemas/SuccessWithPaginationResponse' }
                   - { properties: { data: { properties: { items: { type: array, items: { $ref: '#/components/schemas/UserData' } } }, type: object } }, type: object }
+  /user-data/import:
+    post:
+      tags:
+        - user-data
+      summary: 'Импорт данных пользователей'
+      operationId: post_import-user-data
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ImportDto'
+                - properties: { file: { type: string, format: binary } }
+                  type: object
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/SuccessResponse' }
+                  - { properties: { data: { $ref: '#/components/schemas/CreatedUserData' } }, type: object }
+        '422':
+          description: 'Unprocessable Entity'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResponse'
+        '400':
+          description: 'Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: 'Internal Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 components:
   schemas:
     SignInDto:
@@ -1101,6 +1149,39 @@ components:
             - survey_creator
           nullable: true
       type: object
+    ImportDto:
+      required:
+        - for_role
+      properties:
+        for_role:
+          title: Роль
+          type: string
+          enum:
+            - admin
+            - student
+            - teacher
+            - survey_creator
+        headers_in_first_row:
+          title: 'Находятся ли в первой строке файла заголовки для столбцов'
+          type: boolean
+          default: true
+        last_name_col:
+          title: 'Столбец с фамилией'
+          type: string
+          default: A
+        first_name_col:
+          title: 'Столбец с именем'
+          type: string
+          default: B
+        patronymic_col:
+          title: 'Столбец с отчеством'
+          type: string
+          default: C
+        group_name_col:
+          title: 'Столбец с названием группы'
+          type: string
+          default: D
+      type: object
     SuccessResponse:
       properties:
         data:
@@ -1213,6 +1294,13 @@ components:
           oneOf:
             - $ref: '#/components/schemas/UserDataGroup'
       type: object
+    CreatedUserData:
+      required:
+        - created
+      properties:
+        created:
+          type: integer
+      type: object
     Meta:
       required:
         - mode
@@ -1262,6 +1350,8 @@ components:
         - user.create
         - user.view
         - user.export
+        - user_data.import
+        - group.create
     PaginatedData:
       properties:
         items:

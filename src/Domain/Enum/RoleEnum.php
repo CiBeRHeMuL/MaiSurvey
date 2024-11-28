@@ -41,4 +41,18 @@ enum RoleEnum: string
             default => false,
         };
     }
+
+    /**
+     * Можно ли импортировать данные для пользователей для роли
+     *
+     * @return bool
+     */
+    public function importEnable(): bool
+    {
+        return match ($this) {
+            self::Student,
+            self::Teacher => true,
+            default => false,
+        };
+    }
 }

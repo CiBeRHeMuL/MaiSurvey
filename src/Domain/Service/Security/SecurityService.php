@@ -8,6 +8,11 @@ use DateTimeImmutable;
 
 class SecurityService
 {
+    public function __construct(
+        private bool $infinityTokens,
+    ) {
+    }
+
     /**
      * Генерирует токен доступа.
      *
@@ -17,7 +22,12 @@ class SecurityService
     {
         return new GeneratedToken(
             HString::random(40),
-            (new DateTimeImmutable())->modify('+1 hour'),
+            (new DateTimeImmutable())
+                ->modify(
+                    $this->infinityTokens
+                        ? '+10 years'
+                        : '+1 hour',
+                ),
         );
     }
 
@@ -30,7 +40,12 @@ class SecurityService
     {
         return new GeneratedToken(
             HString::random(40),
-            (new DateTimeImmutable())->modify('+1 month'),
+            (new DateTimeImmutable())
+                ->modify(
+                    $this->infinityTokens
+                        ? '+10 years'
+                        : '+1 hour',
+                ),
         );
     }
 }

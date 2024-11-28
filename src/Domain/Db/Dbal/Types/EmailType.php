@@ -28,8 +28,8 @@ class EmailType extends StringType
 
     public function convertToPHPValue(mixed $value, AbstractPlatform $platform): Email|null
     {
-        if ($value === null) {
-            return null;
+        if ($value instanceof Email || $value === null) {
+            return $value;
         }
         try {
             return new Email($value);
