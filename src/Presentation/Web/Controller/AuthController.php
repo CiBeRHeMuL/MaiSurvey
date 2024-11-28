@@ -113,7 +113,7 @@ class AuthController extends BaseController
 
     /** Обновить токен доступа. */
     #[Route('/auth/refresh', 'refresh-credentials', methods: ['PUT'])]
-    #[OA\Post(security: [])]
+    #[OA\Put(security: [])]
     #[OA\Tag('auth')]
     #[LOA\SuccessResponse(UserCredentials::class)]
     #[LOA\ErrorResponse(400)]

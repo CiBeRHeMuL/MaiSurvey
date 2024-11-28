@@ -146,8 +146,39 @@ paths:
             schema:
               $ref: '#/components/schemas/RefreshCredentialsDto'
       responses:
-        default:
-          description: ''
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/SuccessResponse' }
+                  - { properties: { data: { $ref: '#/components/schemas/UserCredentials' } }, type: object }
+        '400':
+          description: 'Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: 'Unprocessable Entity'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResponse'
+        '500':
+          description: 'Internal Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security: [ ]
   /groups:
     get:
       tags:
@@ -1257,6 +1288,20 @@ components:
           items:
             $ref: '#/components/schemas/PermissionEnum'
       type: object
+    UserCredentials:
+      required:
+        - access_token
+        - refresh_token
+      properties:
+        access_token:
+          type: string
+          maxLength: 40
+          minLength: 40
+        refresh_token:
+          type: string
+          maxLength: 40
+          minLength: 40
+      type: object
     SuccessWithPaginationResponse:
       properties:
         data:
@@ -1307,20 +1352,6 @@ components:
       properties:
         mode:
           type: string
-      type: object
-    UserCredentials:
-      required:
-        - access_token
-        - refresh_token
-      properties:
-        access_token:
-          type: string
-          maxLength: 40
-          minLength: 40
-        refresh_token:
-          type: string
-          maxLength: 40
-          minLength: 40
       type: object
     Error:
       required:
