@@ -2,7 +2,7 @@ version: "3.9"
 services:
   mai-survey-postgresql:
     image: postgres:17
-    container_name: mai-survey-postgresql
+    container_name: mai-survey-postgresql-container
     hostname: mai-survey-postgresql
     restart: always
     ports:
@@ -11,6 +11,8 @@ services:
       POSTGRES_USER: "${PG_USER}"
       POSTGRES_PASSWORD: "${PG_PASSWORD}"
       POSTGRES_DB: "${PG_DBNAME}"
+    networks:
+      - caddy
   mai-survey-php:
     build:
       context: ./
