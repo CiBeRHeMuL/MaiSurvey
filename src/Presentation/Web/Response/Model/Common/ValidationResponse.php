@@ -31,7 +31,7 @@ readonly class ValidationResponse
     ): self {
         $errors = [];
         foreach ($violations as $violation) {
-            $errors[$violation->getPropertyPath()] = new Error(
+            $errors[$violation->getPropertyPath()][] = new Error(
                 ErrorSlugEnum::WrongField->getSlug(),
                 $violation->getParameters()['hint'] ?? $violation->getMessage(),
             );
