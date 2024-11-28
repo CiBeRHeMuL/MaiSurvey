@@ -55,6 +55,8 @@ services:
     class: App\Infrastructure\Repository\GroupRepository
   App\Domain\Repository\UserDataGroupRepositoryInterface:
     class: App\Infrastructure\Repository\UserDataGroupRepository
+  App\Domain\Repository\SubjectRepositoryInterface:
+    class: App\Infrastructure\Repository\SubjectRepository
   # --- end repositories
 
   # --- start serializer

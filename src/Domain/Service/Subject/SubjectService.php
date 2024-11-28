@@ -1,15 +1,15 @@
 <?php
 
-namespace App\Domain\Service\Group;
+namespace App\Domain\Service\Subject;
 
 use App\Domain\DataProvider\DataProviderInterface;
-use App\Domain\Dto\Group\CreateGroupDto;
-use App\Domain\Dto\Group\GetAllGroupsDto;
-use App\Domain\Entity\Group;
+use App\Domain\Dto\Subject\CreateSubjectDto;
+use App\Domain\Dto\Subject\GetAllSubjectsDto;
+use App\Domain\Entity\Subject;
 use App\Domain\Enum\ValidationErrorSlugEnum;
 use App\Domain\Exception\ErrorException;
 use App\Domain\Exception\ValidationException;
-use App\Domain\Repository\GroupRepositoryInterface;
+use App\Domain\Repository\SubjectRepositoryInterface;
 use App\Domain\Service\Db\TransactionManagerInterface;
 use App\Domain\Validation\ValidationError;
 use DateTimeImmutable;
@@ -18,34 +18,34 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\Uid\Uuid;
 use Throwable;
 
-class GroupService
+class SubjectService
 {
     public const array GET_ALL_SORT = ['name'];
 
     private LoggerInterface $logger;
 
     public function __construct(
-        private GroupRepositoryInterface $groupRepository,
+        private SubjectRepositoryInterface $subjectRepository,
         private TransactionManagerInterface $transactionManager,
         LoggerInterface $logger,
     ) {
         $this->setLogger($logger);
     }
 
-    public function setLogger(LoggerInterface $logger): GroupService
+    public function setLogger(LoggerInterface $logger): SubjectService
     {
         $this->logger = $logger;
         return $this;
     }
 
     /**
-     * Получить список групп с учетом фильтров и пагинации.
+     * Получить список предметов с учетом фильтров и пагинации.
      *
-     * @param GetAllGroupsDto $dto
+     * @param GetAllSubjectsDto $dto
      *
-     * @return DataProviderInterface<Group>
+     * @return DataProviderInterface<Subject>
      */
-    public function getAll(GetAllGroupsDto $dto): DataProviderInterface
+    public function getAll(GetAllSubjectsDto $dto): DataProviderInterface
     {
         if ($dto->getName() !== null && mb_strlen($dto->getName()) < 3) {
             throw ValidationException::new([
@@ -67,55 +67,55 @@ class GroupService
             ]);
         }
 
-        return $this->groupRepository->findAll($dto);
+        return $this->subjectRepository->findAll($dto);
     }
 
-    public function getByName(string $name): Group|null
+    public function getByName(string $name): Subject|null
     {
         return $this
-            ->groupRepository
+            ->subjectRepository
             ->findByName($name);
     }
 
-    public function create(CreateGroupDto $dto): Group
+    public function create(CreateSubjectDto $dto): Subject
     {
         $this->validateCreateDto($dto);
 
-        $group = $this->entityFromDto($dto);
-        if ($this->groupRepository->create($group) === false) {
+        $subject = $this->entityFromDto($dto);
+        if ($this->subjectRepository->create($subject) === false) {
             throw ErrorException::new(
-                'Не удалось сохранить группу',
+                'Не удалось сохранить предмет',
                 400,
             );
         }
-        return $group;
+        return $subject;
     }
 
-    public function getById(Uuid $id): Group|null
+    public function getById(Uuid $id): Subject|null
     {
         return $this
-            ->groupRepository
+            ->subjectRepository
             ->findById($id);
     }
 
     /**
-     * Получить группы по списку названий
+     * Получить предметы по списку названий
      *
-     * @param string[] $groupNames
+     * @param string[] $subjectNames
      *
-     * @return Iterator<int, Group>
+     * @return Iterator<int, Subject>
      */
-    public function getByNames(array $groupNames): Iterator
+    public function getByNames(array $subjectNames): Iterator
     {
         return $this
-            ->groupRepository
-            ->findByNames($groupNames);
+            ->subjectRepository
+            ->findByNames($subjectNames);
     }
 
     /**
-     * Массовое создание групп
+     * Массовое создание предметов
      *
-     * @param CreateGroupDto[] $dtos
+     * @param CreateSubjectDto[] $dtos
      * @param bool $validate валидировать данные?
      * @param bool $transaction выполнять в транзакции?
      * @param bool $throwOnError
@@ -140,7 +140,7 @@ class GroupService
                 $entities[] = $entity;
             }
 
-            $created = $this->groupRepository->createMulti($entities);
+            $created = $this->subjectRepository->createMulti($entities);
 
             if ($transaction) {
                 $this->transactionManager->commit();
@@ -159,7 +159,7 @@ class GroupService
         }
     }
 
-    public function validateCreateDto(CreateGroupDto $dto): void
+    public function validateCreateDto(CreateSubjectDto $dto): void
     {
         if ($dto->getName() === '') {
             throw ValidationException::new([
@@ -172,22 +172,22 @@ class GroupService
         }
 
         $existing = $this
-            ->groupRepository
+            ->subjectRepository
             ->findByName($dto->getName());
         if ($existing !== null) {
             throw ValidationException::new([
                 new ValidationError(
                     'name',
                     ValidationErrorSlugEnum::AlreadyExists->getSlug(),
-                    'Группа уже существует',
+                    'Предмет уже существует',
                 ),
             ]);
         }
     }
 
-    private function entityFromDto(CreateGroupDto $dto): Group
+    private function entityFromDto(CreateSubjectDto $dto): Subject
     {
-        $subject = new Group();
+        $subject = new Subject();
         $subject
             ->setName($dto->getName())
             ->setCreatedAt(new DateTimeImmutable())

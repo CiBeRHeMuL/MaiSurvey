@@ -10,13 +10,15 @@ nelmio_api_doc:
       - name: auth
         description: Ручки для авторизации и аутентификации
       - name: user-data
-        description: Ручки для получения данных пользователей
+        description: Ручки для работы с данными пользователей
       - name: groups
-        description: Ручки для получения групп
+        description: Ручки для работы с группами
       - name: me
         description: Ручки для работы с "собой"
-      - name: user
+      - name: users
         description: Ручки для работы с пользователями
+      - name: subjects
+        description: Ручки для работы с предметами
     servers:
       - url: https://mai-survey.net
       - url: http://mai-survey.loc

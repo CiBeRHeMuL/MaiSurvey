@@ -14,7 +14,6 @@ class UserDataGroup
     #[ORM\Id]
     #[ORM\Column(type: UuidType::NAME, nullable: false)]
     private Uuid|null $user_data_id = null;
-    #[ORM\Id]
     #[ORM\Column(type: UuidType::NAME, nullable: false)]
     private Uuid|null $group_id = null;
     #[ORM\Column(name: 'created_at', type: 'datetime_immutable', nullable: false, options: ['default' => 'CURRENT_TIMESTAMP'])]

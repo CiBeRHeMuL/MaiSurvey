@@ -15,7 +15,7 @@ use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
-#[AsEventListener(event: ExceptionEvent::class, priority: -1)]
+#[AsEventListener(event: ExceptionEvent::class, priority: 10)]
 class ErrorResponseListener
 {
     public function __construct(

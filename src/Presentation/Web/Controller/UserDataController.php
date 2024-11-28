@@ -8,7 +8,7 @@ use App\Application\UseCase\UserData\ImportUseCase;
 use App\Domain\Dto\UserData\ImportDto as DomainImportDto;
 use App\Domain\Enum\PermissionEnum;
 use App\Domain\Enum\RoleEnum;
-use App\Presentation\Web\Dto\UserData\ImportDto;
+use App\Presentation\Web\Dto\UserData\ImportUserDataDto;
 use App\Presentation\Web\Enum\ErrorSlugEnum;
 use App\Presentation\Web\OpenApi\Attribute as LOA;
 use App\Presentation\Web\Response\Model\Common\Error;
@@ -16,7 +16,7 @@ use App\Presentation\Web\Response\Model\Common\PaginatedData;
 use App\Presentation\Web\Response\Model\Common\SuccessResponse;
 use App\Presentation\Web\Response\Model\Common\SuccessWithPaginationResponse;
 use App\Presentation\Web\Response\Model\Common\ValidationResponse;
-use App\Presentation\Web\Response\Model\CreatedUserData;
+use App\Presentation\Web\Response\Model\CreatedUserDataInfo;
 use App\Presentation\Web\Response\Model\UserData;
 use App\Presentation\Web\Response\Response;
 use Nelmio\ApiDocBundle\Attribute\Model;
@@ -68,7 +68,7 @@ class UserDataController extends BaseController
             schema: new OA\Schema(
                 allOf: [
                     new OA\Schema(
-                        ref: new Model(type: ImportDto::class),
+                        ref: new Model(type: ImportUserDataDto::class),
                         type: 'object',
                     ),
                     new OA\Schema(
@@ -85,7 +85,7 @@ class UserDataController extends BaseController
             ),
         ),
     )]
-    #[LOA\SuccessResponse(CreatedUserData::class)]
+    #[LOA\SuccessResponse(CreatedUserDataInfo::class)]
     #[LOA\ValidationResponse]
     #[LOA\ErrorResponse(400)]
     #[LOA\ErrorResponse(401)]
@@ -94,7 +94,7 @@ class UserDataController extends BaseController
         ImportUseCase $useCase,
         LoggerInterface $logger,
         #[MapRequestPayload]
-        ImportDto $dto,
+        ImportUserDataDto $dto,
         #[MapUploadedFile]
         UploadedFile|array $file = [],
     ): JsonResponse {
@@ -125,7 +125,7 @@ class UserDataController extends BaseController
         );
         return Response::success(
             new SuccessResponse(
-                new CreatedUserData($created),
+                new CreatedUserDataInfo($created),
             ),
         );
     }

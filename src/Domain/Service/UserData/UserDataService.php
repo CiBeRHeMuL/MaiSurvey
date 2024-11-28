@@ -149,6 +149,34 @@ class UserDataService
 
     public function validateCreateDto(CreateUserDataDto $dto): void
     {
+        if ($dto->getFirstName() === '') {
+            throw ValidationException::new([
+                new ValidationError(
+                    'name',
+                    ValidationErrorSlugEnum::AlreadyExists->getSlug(),
+                    'Имя не должно быть пустым',
+                ),
+            ]);
+        }
+        if ($dto->getLastName() === '') {
+            throw ValidationException::new([
+                new ValidationError(
+                    'name',
+                    ValidationErrorSlugEnum::AlreadyExists->getSlug(),
+                    'Фамилия не должна быть пустой',
+                ),
+            ]);
+        }
+        if ($dto->getPatronymic() === '') {
+            throw ValidationException::new([
+                new ValidationError(
+                    'name',
+                    ValidationErrorSlugEnum::AlreadyExists->getSlug(),
+                    'Отчество не должно быть пустым',
+                ),
+            ]);
+        }
+
         if ($dto->getRole()->isMain() === false) {
             throw ValidationException::new([
                 new ValidationError(

@@ -23,4 +23,9 @@ enum PermissionEnum: string
 
     // Group
     case GroupCreate = 'group.create';
+    case GroupImport = 'group.import';
+
+    // Subject
+    case SubjectCreate = 'subject.create';
+    case SubjectImport = 'subject.import';
 }

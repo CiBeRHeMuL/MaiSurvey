@@ -1,55 +1,41 @@
 <?php
 
-namespace App\Domain\Service\UserData;
+namespace App\Domain\Service\Subject;
 
-use App\Domain\Dto\UserData\CreateUserDataDto;
-use App\Domain\Dto\UserData\ImportDto;
-use App\Domain\Entity\Group;
+use App\Domain\Dto\Subject\CreateSubjectDto;
+use App\Domain\Dto\Subject\ImportDto;
 use App\Domain\Enum\ValidationErrorSlugEnum;
 use App\Domain\Exception\ErrorException;
 use App\Domain\Exception\ValidationException;
-use App\Domain\Helper\HArray;
 use App\Domain\Service\DataImport\DataImportInterface;
 use App\Domain\Service\Db\TransactionManagerInterface;
-use App\Domain\Service\Group\GroupService;
 use App\Domain\Validation\ValidationError;
 use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 use Throwable;
 
-class UserDataImporter
+class SubjectsImporter
 {
     private LoggerInterface $logger;
 
     public function __construct(
-        private DataImportInterface $dataImport,
-        private UserDataService $userDataService,
-        private GroupService $groupService,
-        private TransactionManagerInterface $transactionManager,
         LoggerInterface $logger,
+        private TransactionManagerInterface $transactionManager,
+        private SubjectService $subjectService,
+        private DataImportInterface $dataImport,
     ) {
+        $this->setLogger($logger);
     }
 
-    public function setLogger(LoggerInterface $logger): UserDataImporter
+    public function setLogger(LoggerInterface $logger): SubjectsImporter
     {
         $this->logger = $logger;
-        $this->userDataService->setLogger($logger);
-        $this->groupService->setLogger($logger);
+        $this->subjectService->setLogger($logger);
         return $this;
     }
 
     public function import(ImportDto $dto): int
     {
-        if ($dto->getForRole()->importEnable() === false) {
-            throw ValidationException::new([
-                new ValidationError(
-                    'for_role',
-                    ValidationErrorSlugEnum::WrongField->getSlug(),
-                    'Импорт данных недоступен для этой роли',
-                ),
-            ]);
-        }
-
         try {
             $this->dataImport->openFile($dto->getFile());
         } catch (InvalidArgumentException $e) {
@@ -64,37 +50,15 @@ class UserDataImporter
         }
         $firstRow = $dto->isHeadersInFirstRow() ? 2 : 1;
 
-        // Сначала собираем id групп для
-        /** @var string[] $groupNames */
-        $groupNames = [];
-        foreach ($this->dataImport->getRows($firstRow, $this->dataImport->getHighestRow()) as $row) {
-            $groupName = $row[$dto->getGroupNameCol()] ?? null;
-            $groupName = trim($groupName);
-
-            $groupName && $groupNames[$groupName] = $groupName;
-        }
-
-        $groups = $this
-            ->groupService
-            ->getByNames(array_values($groupNames));
-        $groups = HArray::index(
-            $groups,
-            fn(Group $g) => $g->getName(),
-        );
-
         $validationErrorTemplate = 'Некорректное содержимое файла. Ошибка в строке %d: %s';
 
+        /** @var array<string, CreateSubjectDto> $createDtos */
         $createDtos = [];
-        // Обрабатываем строки на ошибки
+        // Мапа название -> номер строки. Для вывода ошибки
+        $nameToRow = [];
         foreach ($this->dataImport->getRows($firstRow, $this->dataImport->getHighestRow()) as $k => $row) {
-            $groupName = $row[$dto->getGroupNameCol()] ?? null;
-            $groupName = trim($groupName);
-
-            $firstName = $row[$dto->getFirstNameCol()] ?? '';
-            $lastName = $row[$dto->getLastNameCol()] ?? '';
-            $patronymic = $row[$dto->getPatronymicCol()] ?? null;
-
-            if ($groupName && !isset($groups[$groupName])) {
+            $name = $row[$dto->getNameCol()] ?? '';
+            if (isset($nameToRow[$name])) {
                 throw ValidationException::new([
                     new ValidationError(
                         'file',
@@ -103,23 +67,20 @@ class UserDataImporter
                             $validationErrorTemplate,
                             $k - 1 + $firstRow,
                             sprintf(
-                                'Группа "%s" не найдена',
-                                $groupName,
+                                'повторяющееся название предмета, такой предмет уже был указан в строке %d',
+                                $nameToRow[$name] - 1 + $firstRow,
                             ),
                         ),
                     ),
                 ]);
             }
 
-            $createDto = new CreateUserDataDto(
-                $dto->getForRole(),
-                $firstName,
-                $lastName,
-                $patronymic ?: null,
-                $groups[$groupName] ?? null,
+            $createDto = new CreateSubjectDto(
+                $name,
             );
+
             try {
-                $this->userDataService->validateCreateDto($createDto);
+                $this->subjectService->validateCreateDto($createDto);
             } catch (ValidationException $e) {
                 throw ValidationException::new(array_map(
                     fn(ValidationError $error) => new ValidationError(
@@ -131,6 +92,7 @@ class UserDataImporter
                 ));
             }
 
+            $nameToRow[$name] = $k;
             $createDtos[] = $createDto;
         }
 
@@ -141,11 +103,11 @@ class UserDataImporter
         $created = 0;
         foreach ($chunks as $dtos) {
             try {
-                $created += $this->userDataService->createMulti($dtos, false, false, true);
+                $created += $this->subjectService->createMulti($dtos, false, false, true);
             } catch (Throwable $e) {
                 $this->logger->error($e);
                 $this->transactionManager->rollback();
-                throw ErrorException::new('Не удалось сохранить данные, обратитесь в поддержку');
+                throw ErrorException::new('Не удалось сохранить предметы, обратитесь в поддержку');
             }
         }
         $this->transactionManager->commit();

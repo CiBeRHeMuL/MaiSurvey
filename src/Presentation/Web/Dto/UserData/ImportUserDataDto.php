@@ -6,7 +6,7 @@ use App\Application\Validator\Constraints as LAssert;
 use App\Domain\Enum\RoleEnum;
 use Symfony\Component\Validator\Constraints as Assert;
 
-readonly class ImportDto
+readonly class ImportUserDataDto
 {
     public function __construct(
         /** Роль */

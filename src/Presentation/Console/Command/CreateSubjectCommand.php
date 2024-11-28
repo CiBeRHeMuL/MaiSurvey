@@ -2,16 +2,16 @@
 
 namespace App\Presentation\Console\Command;
 
-use App\Application\Dto\Group\CreateGroupDto;
-use App\Application\UseCase\Group\CreateUseCase;
+use App\Application\Dto\Subject\CreateSubjectDto;
+use App\Application\UseCase\Subject\CreateUseCase;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-#[AsCommand('group:create')]
-class CreateGroupCommand extends AbstractCommand
+#[AsCommand('subject:create')]
+class CreateSubjectCommand extends AbstractCommand
 {
     private LoggerInterface $logger;
 
@@ -23,7 +23,7 @@ class CreateGroupCommand extends AbstractCommand
         parent::__construct();
     }
 
-    public function setLogger(LoggerInterface $logger): CreateGroupCommand
+    public function setLogger(LoggerInterface $logger): CreateSubjectCommand
     {
         $this->logger = $logger;
         $this->useCase->setLogger($logger);
@@ -33,22 +33,22 @@ class CreateGroupCommand extends AbstractCommand
     protected function configure(): void
     {
         $this
-            ->setDescription('Создание группы')
+            ->setDescription('Создание предмета')
             ->addArgument(
                 'name',
                 InputArgument::REQUIRED,
-                'Название группы',
+                'Название предмета',
             );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $group = $this->useCase->execute(
-            new CreateGroupDto(
+            new CreateSubjectDto(
                 $input->getArgument('name'),
             ),
         );
-        $this->io->writeln('<fg=green>Группа успешно создана</>');
+        $this->io->writeln('<fg=green>Предмет успешно создана</>');
         $this->io->horizontalTable(
             ['ID', 'Название'],
             [[$group->getId()->toRfc4122(), $group->getName()]],

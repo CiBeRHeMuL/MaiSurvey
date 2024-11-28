@@ -190,7 +190,7 @@ paths:
           in: query
           required: false
           schema:
-            title: 'Имя для фильтрации'
+            title: 'Название для фильтрации'
             type: string
             default: null
             maxLength: 255
@@ -309,6 +309,54 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+  /groups/import:
+    post:
+      tags:
+        - groups
+      summary: 'Импорт групп'
+      operationId: post_import-groups
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ImportGroupsDto'
+                - properties: { file: { type: string, format: binary } }
+                  type: object
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/SuccessResponse' }
+                  - { properties: { data: { $ref: '#/components/schemas/CreatedGroupsInfo' } }, type: object }
+        '422':
+          description: 'Unprocessable Entity'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResponse'
+        '400':
+          description: 'Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: 'Internal Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /health:
     get:
       tags:
@@ -340,6 +388,184 @@ paths:
                   - { properties: { data: { $ref: '#/components/schemas/User' } }, type: object }
         '400':
           description: 'Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: 'Internal Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /subjects:
+    get:
+      tags:
+        - subjects
+      summary: 'Получить список предметов с фильтрацией и пагинацией.'
+      operationId: get_get-all-subjects
+      parameters:
+        - name: name
+          in: query
+          required: false
+          schema:
+            title: 'Название для фильтрации'
+            type: string
+            default: null
+            maxLength: 255
+            minLength: 1
+            nullable: true
+        - name: sort_by
+          in: query
+          required: false
+          schema:
+            title: 'Сортировка по'
+            type: string
+            default: name
+            enum:
+              - name
+        - name: sort_type
+          in: query
+          required: false
+          schema:
+            title: 'Тип сортировки'
+            type: string
+            default: asc
+            enum:
+              - asc
+              - desc
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+            minimum: 0
+            nullable: true
+      responses:
+        '500':
+          description: 'Internal Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: 'Unprocessable Entity'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResponse'
+        '400':
+          description: 'Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/SuccessWithPaginationResponse' }
+                  - { properties: { data: { properties: { items: { type: array, items: { $ref: '#/components/schemas/Subject' } } }, type: object } }, type: object }
+  /subject:
+    post:
+      tags:
+        - subjects
+      summary: 'Создать предмет'
+      operationId: post_create-subject
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSubjectDto'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/SuccessResponse' }
+                  - { properties: { data: { $ref: '#/components/schemas/Subject' } }, type: object }
+        '422':
+          description: 'Unprocessable Entity'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResponse'
+        '400':
+          description: 'Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: 'Internal Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /subjects/import:
+    post:
+      tags:
+        - subjects
+      summary: 'Импорт предметов'
+      operationId: post_import-subjects
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ImportSubjectsDto'
+                - properties: { file: { type: string, format: binary } }
+                  type: object
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/SuccessResponse' }
+                  - { properties: { data: { $ref: '#/components/schemas/CreatedSubjectsInfo' } }, type: object }
+        '422':
+          description: 'Unprocessable Entity'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResponse'
+        '400':
+          description: 'Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
           content:
             application/json:
               schema:
@@ -871,7 +1097,7 @@ paths:
           multipart/form-data:
             schema:
               allOf:
-                - $ref: '#/components/schemas/ImportDto'
+                - $ref: '#/components/schemas/ImportUserDataDto'
                 - properties: { file: { type: string, format: binary } }
                   type: object
       responses:
@@ -882,7 +1108,7 @@ paths:
               schema:
                 allOf:
                   - { $ref: '#/components/schemas/SuccessResponse' }
-                  - { properties: { data: { $ref: '#/components/schemas/CreatedUserData' } }, type: object }
+                  - { properties: { data: { $ref: '#/components/schemas/CreatedUserDataInfo' } }, type: object }
         '422':
           description: 'Unprocessable Entity'
           content:
@@ -956,7 +1182,7 @@ components:
     GetAllGroupsDto:
       properties:
         name:
-          title: 'Имя для фильтрации'
+          title: 'Название для фильтрации'
           type: string
           default: null
           maxLength: 255
@@ -991,9 +1217,73 @@ components:
         - name
       properties:
         name:
-          title: 'Имя группы'
+          title: 'Название группы'
           type: string
           maxLength: 255
+      type: object
+    ImportGroupsDto:
+      properties:
+        headers_in_first_row:
+          title: 'Находятся ли в первой строке файла заголовки для столбцов'
+          type: boolean
+          default: true
+        name_col:
+          title: 'Столбец с названием'
+          type: string
+          default: A
+      type: object
+    GetAllSubjectsDto:
+      properties:
+        name:
+          title: 'Название для фильтрации'
+          type: string
+          default: null
+          maxLength: 255
+          minLength: 1
+          nullable: true
+        sort_by:
+          title: 'Сортировка по'
+          type: string
+          default: name
+          enum:
+            - name
+        sort_type:
+          title: 'Тип сортировки'
+          type: string
+          default: asc
+          enum:
+            - asc
+            - desc
+        offset:
+          type: integer
+          default: 0
+          minimum: 0
+        limit:
+          type: integer
+          default: 20
+          maximum: 100
+          minimum: 0
+          nullable: true
+      type: object
+    CreateSubjectDto:
+      required:
+        - name
+      properties:
+        name:
+          title: 'Название предмета'
+          type: string
+          maxLength: 255
+      type: object
+    ImportSubjectsDto:
+      properties:
+        headers_in_first_row:
+          title: 'Находятся ли в первой строке файла заголовки для столбцов'
+          type: boolean
+          default: true
+        name_col:
+          title: 'Столбец с названием'
+          type: string
+          default: A
       type: object
     CreateFullUserDto:
       required:
@@ -1180,7 +1470,7 @@ components:
             - survey_creator
           nullable: true
       type: object
-    ImportDto:
+    ImportUserDataDto:
       required:
         - for_role
       properties:
@@ -1319,6 +1609,30 @@ components:
         name:
           type: string
       type: object
+    CreatedGroupsInfo:
+      required:
+        - created
+      properties:
+        created:
+          type: integer
+      type: object
+    Subject:
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+      type: object
+    CreatedSubjectsInfo:
+      required:
+        - created
+      properties:
+        created:
+          type: integer
+      type: object
     UserData:
       required:
         - id
@@ -1339,7 +1653,7 @@ components:
           oneOf:
             - $ref: '#/components/schemas/UserDataGroup'
       type: object
-    CreatedUserData:
+    CreatedUserDataInfo:
       required:
         - created
       properties:
@@ -1383,6 +1697,9 @@ components:
         - user.export
         - user_data.import
         - group.create
+        - group.import
+        - subject.create
+        - subject.import
     PaginatedData:
       properties:
         items:
@@ -1431,11 +1748,12 @@ tags:
   - name: auth
     description: 'Ручки для авторизации и аутентификации'
   - name: user-data
-    description: 'Ручки для получения данных пользователей'
+    description: 'Ручки для работы с данными пользователей'
   - name: groups
-    description: 'Ручки для получения групп'
+    description: 'Ручки для работы с группами'
   - name: me
     description: 'Ручки для работы с "собой"'
+  - name: subjects
+    description: 'Ручки для работы с предметами'
   - name: user
-    description: 'Ручки для работы с пользователями'
 

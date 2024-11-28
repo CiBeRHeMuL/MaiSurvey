@@ -11,7 +11,7 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 use Symfony\Component\Validator\Exception\ValidationFailedException;
 
-#[AsEventListener(event: ExceptionEvent::class, priority: 10)]
+#[AsEventListener(event: ExceptionEvent::class, priority: 100)]
 class ValidationResponseListener
 {
     public function __invoke(ExceptionEvent $event): void
@@ -27,6 +27,7 @@ class ValidationResponseListener
                     ),
                 );
             }
+            $event->stopPropagation();
         } elseif ($e instanceof ValidationException) {
             $errors = $e->getErrors();
             $event->setResponse(
@@ -34,6 +35,7 @@ class ValidationResponseListener
                     ValidationResponse::fromValidationErrors($errors),
                 ),
             );
+            $event->stopPropagation();
         }
     }
 }

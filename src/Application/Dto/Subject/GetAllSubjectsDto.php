@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Application\Dto\Group;
+namespace App\Application\Dto\Subject;
 
 use App\Application\Validator\Constraints as LAssert;
 use App\Domain\Enum\SortTypeEnum;
-use App\Domain\Service\Group\GroupService;
+use App\Domain\Service\Subject\SubjectService;
 use Symfony\Component\Validator\Constraints as Assert;
 
-readonly class GetAllGroupsDto
+readonly class GetAllSubjectsDto
 {
     /**
      * @param string|null $name название для фильтрации
@@ -23,7 +23,7 @@ readonly class GetAllGroupsDto
         public string|null $name = null,
         /** Сортировка по */
         #[Assert\Type('string', message: 'Значение должно быть строкой')]
-        #[Assert\Choice(choices: GroupService::GET_ALL_SORT, message: 'Значение должно входить в список допустимых')]
+        #[Assert\Choice(choices: SubjectService::GET_ALL_SORT, message: 'Значение должно входить в список допустимых')]
         public string $sort_by = 'name',
         /** Тип сортировки */
         #[Assert\Type('string', message: 'Значение должно быть строкой')]

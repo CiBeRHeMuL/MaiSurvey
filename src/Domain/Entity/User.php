@@ -6,6 +6,8 @@ use App\Domain\Enum\RoleEnum;
 use App\Domain\Enum\UserStatusEnum;
 use App\Domain\ValueObject\Email;
 use DateTimeImmutable;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\IdGenerator\UuidGenerator;
 use Symfony\Bridge\Doctrine\Types\UuidType;
@@ -48,6 +50,18 @@ class User
 
     #[ORM\OneToOne(targetEntity: UserData::class, mappedBy: 'user', cascade: ['persist'])]
     private UserData|null $data = null;
+    /** @var Collection<UserSubject> $studyingSubjects */
+    #[ORM\OneToMany(targetEntity: UserSubject::class, mappedBy: 'user')]
+    private Collection $studyingSubjects;
+    /** @var Collection<UserSubject> $teachingSubjects */
+    #[ORM\OneToMany(targetEntity: UserSubject::class, mappedBy: 'teacher')]
+    private Collection $teachingSubjects;
+
+    public function __construct()
+    {
+        $this->studyingSubjects = new ArrayCollection();
+        $this->teachingSubjects = new ArrayCollection();
+    }
 
     public function getId(): Uuid|null
     {
@@ -229,5 +243,27 @@ class User
     public function isDraft(): bool
     {
         return $this->getStatus() === UserStatusEnum::Draft && $this->isDeleted() === false;
+    }
+
+    public function getStudyingSubjects(): Collection
+    {
+        return $this->studyingSubjects;
+    }
+
+    public function setStudyingSubjects(Collection $studyingSubjects): User
+    {
+        $this->studyingSubjects = $studyingSubjects;
+        return $this;
+    }
+
+    public function getTeachingSubjects(): Collection
+    {
+        return $this->teachingSubjects;
+    }
+
+    public function setTeachingSubjects(Collection $teachingSubjects): User
+    {
+        $this->teachingSubjects = $teachingSubjects;
+        return $this;
     }
 }
