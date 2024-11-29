@@ -30,6 +30,7 @@ class UserSubjectController extends BaseController
     #[LOA\ValidationResponse]
     #[LOA\ErrorResponse(400)]
     #[LOA\ErrorResponse(401)]
+    #[LOA\ErrorResponse(404)]
     #[LOA\SuccessPaginationResponse(UserSubject::class)]
     public function getAll(
         LoggerInterface $logger,
@@ -57,6 +58,7 @@ class UserSubjectController extends BaseController
     #[LOA\ValidationResponse]
     #[LOA\ErrorResponse(400)]
     #[LOA\ErrorResponse(401)]
+    #[LOA\ErrorResponse(404)]
     #[LOA\SuccessPaginationResponse(MyUserSubject::class)]
     public function getMy(
         LoggerInterface $logger,
