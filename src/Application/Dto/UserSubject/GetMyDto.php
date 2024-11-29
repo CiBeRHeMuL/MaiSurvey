@@ -10,13 +10,9 @@ use Symfony\Component\Validator\Constraints as Assert;
 readonly class GetMyDto
 {
     public function __construct(
-        /** Преподаватели для фильтрации */
-        #[Assert\All([
-            new Assert\Type('string', message: 'Значение должно быть строкой'),
-            new Assert\Uuid(message: 'Значение должно быть uuid'),
-        ])]
-        #[Assert\Count(max: 50, maxMessage: 'Поиск по более чем 50 значениям не поддерживается')]
-        public array|null $teacher_ids = null,
+        /** Актуален ли предмет на текущий момент */
+        #[Assert\Type('boolean', message: 'Значение должно быть булевым')]
+        public bool|null $actual = null,
         /** Предметы для фильтрации */
         #[Assert\All([
             new Assert\Type('string', message: 'Значение должно быть строкой'),

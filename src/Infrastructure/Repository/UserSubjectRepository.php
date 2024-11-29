@@ -7,9 +7,13 @@ use App\Domain\DataProvider\DataSort;
 use App\Domain\DataProvider\LimitOffset;
 use App\Domain\DataProvider\SortColumn;
 use App\Domain\Dto\UserSubject\GetAllUserSubjectsDto;
+use App\Domain\Dto\UserSubject\GetMyUserSubjectsDto;
 use App\Domain\Entity\Subject;
+use App\Domain\Entity\User;
 use App\Domain\Entity\UserSubject;
 use App\Domain\Repository\UserSubjectRepositoryInterface;
+use DateTimeImmutable;
+use Qstart\Db\QueryBuilder\DML\Expression\BetweenExpr;
 use Qstart\Db\QueryBuilder\DML\Expression\Expr;
 use Qstart\Db\QueryBuilder\Query;
 use Symfony\Component\Uid\Uuid;
@@ -59,6 +63,54 @@ class UserSubjectRepository extends Common\AbstractRepository implements UserSub
                 new Expr(
                     'us.actual_to >= :act',
                     ['act' => $dto->getIsActualTo()->format(DATE_RFC3339)],
+                ),
+            );
+        }
+        return $this
+            ->findWithLazyBatchedProvider(
+                $q,
+                UserSubject::class,
+                ['user', 'subject', 'teacher'],
+                new LimitOffset(
+                    $dto->getLimit(),
+                    $dto->getOffset(),
+                ),
+                new DataSort([
+                    new SortColumn(
+                        $dto->getSortBy(),
+                        $dto->getSortType()->getPhpSort(),
+                    ),
+                ]),
+            );
+    }
+
+    public function findMy(User $user, GetMyUserSubjectsDto $dto): DataProviderInterface
+    {
+        $q = Query::select()
+            ->select(['us.*', 'name' => 's.name'])
+            ->from(['us' => $this->getClassTable(UserSubject::class)])
+            ->innerJoin(
+                ['s' => $this->getClassTable(Subject::class)],
+                's.id = us.subject_id',
+            )
+            ->where([
+                'OR',
+                ['us.user_id' => $user->getId()->toRfc4122()],
+                ['us.teacher_id' => $user->getId()->toRfc4122()],
+            ]);
+        if ($dto->getSubjectIds() !== null) {
+            $userIds = array_unique($dto->getSubjectIds(), SORT_REGULAR);
+            $q->andWhere([
+                'us.subject_id' => array_map(fn(Uuid $id) => $id->toRfc4122(), $userIds),
+            ]);
+        }
+        if ($dto->isActual() !== null) {
+            $q->andWhere(
+                new BetweenExpr(
+                    (new DateTimeImmutable())->format(DATE_RFC3339),
+                    'us.actual_from',
+                    'us.actual_to',
+                    $dto->isActual(),
                 ),
             );
         }

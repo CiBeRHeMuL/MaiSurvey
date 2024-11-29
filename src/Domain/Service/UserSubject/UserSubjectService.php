@@ -4,6 +4,8 @@ namespace App\Domain\Service\UserSubject;
 
 use App\Domain\DataProvider\DataProviderInterface;
 use App\Domain\Dto\UserSubject\GetAllUserSubjectsDto;
+use App\Domain\Dto\UserSubject\GetMyUserSubjectsDto;
+use App\Domain\Entity\User;
 use App\Domain\Entity\UserSubject;
 use App\Domain\Enum\ValidationErrorSlugEnum;
 use App\Domain\Exception\ValidationException;
@@ -50,5 +52,28 @@ class UserSubjectService
         return $this
             ->userSubjectRepository
             ->findAll($dto);
+    }
+
+    /**
+     * @param User $user
+     * @param GetMyUserSubjectsDto $dto
+     *
+     * @return DataProviderInterface<UserSubject>
+     */
+    public function getMy(User $user, GetMyUserSubjectsDto $dto): DataProviderInterface
+    {
+        if (!in_array($dto->getSortBy(), self::GET_ALL_SORT, true)) {
+            throw ValidationException::new([
+                new ValidationError(
+                    'name',
+                    ValidationErrorSlugEnum::WrongField->getSlug(),
+                    sprintf('Сортировка доступна по полям: %s', implode(', ', self::GET_ALL_SORT)),
+                ),
+            ]);
+        }
+
+        return $this
+            ->userSubjectRepository
+            ->findMy($user, $dto);
     }
 }

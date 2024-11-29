@@ -1324,16 +1324,13 @@ paths:
       summary: 'Список моих предметов с пагинацией и фильтрацией'
       operationId: get_get-my-user-subjects
       parameters:
-        -
-          name: 'teacher_ids[]'
+        - name: actual
           in: query
           required: false
           schema:
-            title: 'Преподаватели для фильтрации'
-            type: array
-            items: {  }
+            title: 'Актуален ли предмет на текущий момент'
+            type: boolean
             default: null
-            maxItems: 50
             nullable: true
         -
           name: 'subject_ids[]'
@@ -1849,12 +1846,10 @@ components:
       type: object
     GetMyDto:
       properties:
-        teacher_ids:
-          title: 'Преподаватели для фильтрации'
-          type: array
-          items: {  }
+        actual:
+          title: 'Актуален ли предмет на текущий момент'
+          type: boolean
           default: null
-          maxItems: 50
           nullable: true
         subject_ids:
           title: 'Предметы для фильтрации'
