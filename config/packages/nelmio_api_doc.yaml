@@ -19,6 +19,8 @@ nelmio_api_doc:
         description: Ручки для работы с пользователями
       - name: subjects
         description: Ручки для работы с предметами
+      - name: user-subjects
+        description: Ручки для работы с предметами, привязанными к пользователям
     servers:
       - url: https://mai-survey.net
       - url: http://mai-survey.loc

@@ -4,8 +4,10 @@ info:
   description: 'MAI Survey Service'
   version: 1.0.0
 servers:
-  - url: 'https://mai-survey.net'
-  - url: 'http://mai-survey.loc'
+  -
+    url: 'https://mai-survey.net'
+  -
+    url: 'http://mai-survey.loc'
     description: 'Local development server'
 paths:
   /auth/sign-in:
@@ -47,7 +49,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-      security: [ ]
+      security: []
   /auth/sign-up/1:
     post:
       tags:
@@ -87,7 +89,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-      security: [ ]
+      security: []
   /auth/sign-up/2:
     post:
       tags:
@@ -178,7 +180,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-      security: [ ]
+      security: []
   /groups:
     get:
       tags:
@@ -186,7 +188,8 @@ paths:
       summary: 'Получить список групп с фильтрацией и пагинацией.'
       operationId: get_get-all-groups
       parameters:
-        - name: name
+        -
+          name: name
           in: query
           required: false
           schema:
@@ -196,7 +199,8 @@ paths:
             maxLength: 255
             minLength: 1
             nullable: true
-        - name: sort_by
+        -
+          name: sort_by
           in: query
           required: false
           schema:
@@ -205,7 +209,8 @@ paths:
             default: name
             enum:
               - name
-        - name: sort_type
+        -
+          name: sort_type
           in: query
           required: false
           schema:
@@ -215,14 +220,16 @@ paths:
             enum:
               - asc
               - desc
-        - name: offset
+        -
+          name: offset
           in: query
           required: false
           schema:
             type: integer
             default: 0
             minimum: 0
-        - name: limit
+        -
+          name: limit
           in: query
           required: false
           schema:
@@ -321,8 +328,10 @@ paths:
           multipart/form-data:
             schema:
               allOf:
-                - $ref: '#/components/schemas/ImportGroupsDto'
-                - properties: { file: { type: string, format: binary } }
+                -
+                  $ref: '#/components/schemas/ImportGroupsDto'
+                -
+                  properties: { file: { type: string, format: binary } }
                   type: object
       responses:
         '200':
@@ -370,7 +379,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SuccessResponse'
-      security: [ ]
+      security: []
   /me:
     get:
       tags:
@@ -405,7 +414,8 @@ paths:
       summary: 'Получить список предметов с фильтрацией и пагинацией.'
       operationId: get_get-all-subjects
       parameters:
-        - name: name
+        -
+          name: name
           in: query
           required: false
           schema:
@@ -415,7 +425,8 @@ paths:
             maxLength: 255
             minLength: 1
             nullable: true
-        - name: sort_by
+        -
+          name: sort_by
           in: query
           required: false
           schema:
@@ -424,7 +435,8 @@ paths:
             default: name
             enum:
               - name
-        - name: sort_type
+        -
+          name: sort_type
           in: query
           required: false
           schema:
@@ -434,14 +446,16 @@ paths:
             enum:
               - asc
               - desc
-        - name: offset
+        -
+          name: offset
           in: query
           required: false
           schema:
             type: integer
             default: 0
             minimum: 0
-        - name: limit
+        -
+          name: limit
           in: query
           required: false
           schema:
@@ -540,8 +554,10 @@ paths:
           multipart/form-data:
             schema:
               allOf:
-                - $ref: '#/components/schemas/ImportSubjectsDto'
-                - properties: { file: { type: string, format: binary } }
+                -
+                  $ref: '#/components/schemas/ImportSubjectsDto'
+                -
+                  properties: { file: { type: string, format: binary } }
                   type: object
       responses:
         '200':
@@ -634,17 +650,19 @@ paths:
       summary: 'Получить всех пользователей с пагинацией и сортировкой'
       operationId: get_get-all-users
       parameters:
-        - name: 'roles[]'
+        -
+          name: 'roles[]'
           in: query
           required: false
           schema:
             title: 'Роли для фильтрации'
             type: array
-            items: { }
+            items: {  }
             default: null
             maxItems: 50
             nullable: true
-        - name: name
+        -
+          name: name
           in: query
           required: false
           schema:
@@ -654,7 +672,8 @@ paths:
             maxLength: 255
             minLength: 1
             nullable: true
-        - name: email
+        -
+          name: email
           in: query
           required: false
           schema:
@@ -664,7 +683,8 @@ paths:
             maxLength: 255
             minLength: 1
             nullable: true
-        - name: deleted
+        -
+          name: deleted
           in: query
           required: false
           schema:
@@ -672,7 +692,8 @@ paths:
             type: boolean
             default: null
             nullable: true
-        - name: status
+        -
+          name: status
           in: query
           required: false
           schema:
@@ -683,17 +704,19 @@ paths:
               - draft
               - active
             nullable: true
-        - name: 'group_ids[]'
+        -
+          name: 'group_ids[]'
           in: query
           required: false
           schema:
             title: 'Группы для фильтрации'
             type: array
-            items: { }
+            items: {  }
             default: null
             maxItems: 50
             nullable: true
-        - name: with_group
+        -
+          name: with_group
           in: query
           required: false
           schema:
@@ -701,7 +724,8 @@ paths:
             type: boolean
             default: null
             nullable: true
-        - name: created_from
+        -
+          name: created_from
           in: query
           required: false
           schema:
@@ -709,7 +733,8 @@ paths:
             type: string
             default: null
             nullable: true
-        - name: created_to
+        -
+          name: created_to
           in: query
           required: false
           schema:
@@ -717,7 +742,8 @@ paths:
             type: string
             default: null
             nullable: true
-        - name: sort_by
+        -
+          name: sort_by
           in: query
           required: false
           schema:
@@ -729,7 +755,8 @@ paths:
               - created_at
               - deleted
               - email
-        - name: sort_type
+        -
+          name: sort_type
           in: query
           required: false
           schema:
@@ -739,14 +766,16 @@ paths:
             enum:
               - asc
               - desc
-        - name: offset
+        -
+          name: offset
           in: query
           required: false
           schema:
             type: integer
             default: 0
             minimum: 0
-        - name: limit
+        -
+          name: limit
           in: query
           required: false
           schema:
@@ -801,7 +830,8 @@ paths:
       summary: 'Экспорт пользователей в файл'
       operationId: get_users-export-to-file
       parameters:
-        - name: exportType
+        -
+          name: exportType
           in: path
           required: true
           schema:
@@ -810,17 +840,19 @@ paths:
             enum:
               - xlsx
               - csv
-        - name: 'roles[]'
+        -
+          name: 'roles[]'
           in: query
           required: false
           schema:
             title: 'Роли для фильтрации'
             type: array
-            items: { }
+            items: {  }
             default: null
             maxItems: 50
             nullable: true
-        - name: name
+        -
+          name: name
           in: query
           required: false
           schema:
@@ -830,7 +862,8 @@ paths:
             maxLength: 255
             minLength: 1
             nullable: true
-        - name: email
+        -
+          name: email
           in: query
           required: false
           schema:
@@ -840,7 +873,8 @@ paths:
             maxLength: 255
             minLength: 1
             nullable: true
-        - name: deleted
+        -
+          name: deleted
           in: query
           required: false
           schema:
@@ -848,7 +882,8 @@ paths:
             type: boolean
             default: null
             nullable: true
-        - name: status
+        -
+          name: status
           in: query
           required: false
           schema:
@@ -859,17 +894,19 @@ paths:
               - draft
               - active
             nullable: true
-        - name: 'group_ids[]'
+        -
+          name: 'group_ids[]'
           in: query
           required: false
           schema:
             title: 'Группы для фильтрации'
             type: array
-            items: { }
+            items: {  }
             default: null
             maxItems: 50
             nullable: true
-        - name: with_group
+        -
+          name: with_group
           in: query
           required: false
           schema:
@@ -877,7 +914,8 @@ paths:
             type: boolean
             default: null
             nullable: true
-        - name: created_from
+        -
+          name: created_from
           in: query
           required: false
           schema:
@@ -885,7 +923,8 @@ paths:
             type: string
             default: null
             nullable: true
-        - name: created_to
+        -
+          name: created_to
           in: query
           required: false
           schema:
@@ -893,7 +932,8 @@ paths:
             type: string
             default: null
             nullable: true
-        - name: sort_by
+        -
+          name: sort_by
           in: query
           required: false
           schema:
@@ -905,7 +945,8 @@ paths:
               - created_at
               - deleted
               - email
-        - name: sort_type
+        -
+          name: sort_type
           in: query
           required: false
           schema:
@@ -915,14 +956,16 @@ paths:
             enum:
               - asc
               - desc
-        - name: offset
+        -
+          name: offset
           in: query
           required: false
           schema:
             type: integer
             default: 0
             minimum: 0
-        - name: limit
+        -
+          name: limit
           in: query
           required: false
           schema:
@@ -968,7 +1011,8 @@ paths:
       summary: 'Получить список данных пользователей с фильтрацией и пагинацией.'
       operationId: get_get-all-user-data
       parameters:
-        - name: name
+        -
+          name: name
           in: query
           required: false
           schema:
@@ -978,14 +1022,16 @@ paths:
             maxLength: 255
             minLength: 1
             nullable: true
-        - name: with_group
+        -
+          name: with_group
           in: query
           required: false
           schema:
             title: 'Учитывать только данные с группой'
             type: boolean
             default: null
-        - name: with_user
+        -
+          name: with_user
           in: query
           required: false
           schema:
@@ -993,7 +1039,8 @@ paths:
             type: boolean
             default: null
             nullable: true
-        - name: 'group_ids[]'
+        -
+          name: 'group_ids[]'
           in: query
           required: false
           schema:
@@ -1004,7 +1051,8 @@ paths:
             default: null
             maxItems: 50
             nullable: true
-        - name: sort_by
+        -
+          name: sort_by
           in: query
           required: false
           schema:
@@ -1013,7 +1061,8 @@ paths:
             default: name
             enum:
               - name
-        - name: sort_type
+        -
+          name: sort_type
           in: query
           required: false
           schema:
@@ -1023,14 +1072,16 @@ paths:
             enum:
               - asc
               - desc
-        - name: offset
+        -
+          name: offset
           in: query
           required: false
           schema:
             type: integer
             default: 0
             minimum: 0
-        - name: limit
+        -
+          name: limit
           in: query
           required: false
           schema:
@@ -1039,7 +1090,8 @@ paths:
             maximum: 100
             minimum: 0
             nullable: true
-        - name: for_role
+        -
+          name: for_role
           in: query
           required: false
           schema:
@@ -1097,8 +1149,10 @@ paths:
           multipart/form-data:
             schema:
               allOf:
-                - $ref: '#/components/schemas/ImportUserDataDto'
-                - properties: { file: { type: string, format: binary } }
+                -
+                  $ref: '#/components/schemas/ImportUserDataDto'
+                -
+                  properties: { file: { type: string, format: binary } }
                   type: object
       responses:
         '200':
@@ -1133,6 +1187,239 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+  /user-subjects:
+    get:
+      tags:
+        - user-subjects
+      summary: 'Список предметов пользователей с пагинацией и фильтрацией'
+      operationId: get_get-all-user-subjects
+      parameters:
+        -
+          name: 'user_ids[]'
+          in: query
+          required: false
+          schema:
+            title: 'Пользователи для фильтрации'
+            type: array
+            items: {  }
+            default: null
+            maxItems: 50
+            nullable: true
+        -
+          name: 'teacher_ids[]'
+          in: query
+          required: false
+          schema:
+            title: 'Преподаватели для фильтрации'
+            type: array
+            items: {  }
+            default: null
+            maxItems: 50
+            nullable: true
+        -
+          name: 'subject_ids[]'
+          in: query
+          required: false
+          schema:
+            title: 'Предметы для фильтрации'
+            type: array
+            items: {  }
+            default: null
+            maxItems: 50
+            nullable: true
+        -
+          name: is_actual_from
+          in: query
+          required: false
+          schema:
+            title: 'Был актуален с'
+            type: string
+            nullable: true
+        -
+          name: is_actual_to
+          in: query
+          required: false
+          schema:
+            title: 'Был актуален до'
+            type: string
+            nullable: true
+        -
+          name: sort_by
+          in: query
+          required: false
+          schema:
+            title: 'Сортировка по'
+            type: string
+            default: name
+            enum:
+              - name
+              - actual_from
+              - actual_to
+        -
+          name: sort_type
+          in: query
+          required: false
+          schema:
+            title: 'Тип сортировки'
+            type: string
+            default: asc
+            enum:
+              - asc
+              - desc
+        -
+          name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+        -
+          name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 100
+            maximum: 100
+            minimum: 0
+            nullable: true
+      responses:
+        '500':
+          description: 'Internal Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: 'Unprocessable Entity'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResponse'
+        '400':
+          description: 'Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/SuccessWithPaginationResponse' }
+                  - { properties: { data: { properties: { items: { type: array, items: { $ref: '#/components/schemas/UserSubject' } } }, type: object } }, type: object }
+  /user-subjects/my:
+    get:
+      tags:
+        - user-subjects
+      summary: 'Список моих предметов с пагинацией и фильтрацией'
+      operationId: get_get-my-user-subjects
+      parameters:
+        -
+          name: 'teacher_ids[]'
+          in: query
+          required: false
+          schema:
+            title: 'Преподаватели для фильтрации'
+            type: array
+            items: {  }
+            default: null
+            maxItems: 50
+            nullable: true
+        -
+          name: 'subject_ids[]'
+          in: query
+          required: false
+          schema:
+            title: 'Предметы для фильтрации'
+            type: array
+            items: {  }
+            default: null
+            maxItems: 50
+            nullable: true
+        -
+          name: sort_by
+          in: query
+          required: false
+          schema:
+            title: 'Сортировка по'
+            type: string
+            default: name
+            enum:
+              - name
+              - actual_from
+              - actual_to
+        -
+          name: sort_type
+          in: query
+          required: false
+          schema:
+            title: 'Тип сортировки'
+            type: string
+            default: asc
+            enum:
+              - asc
+              - desc
+        -
+          name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+        -
+          name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 100
+            maximum: 100
+            minimum: 0
+            nullable: true
+      responses:
+        '500':
+          description: 'Internal Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: 'Unprocessable Entity'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResponse'
+        '400':
+          description: 'Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/SuccessWithPaginationResponse' }
+                  - { properties: { data: { properties: { items: { type: array, items: { $ref: '#/components/schemas/MyUserSubject' } } }, type: object } }, type: object }
 components:
   schemas:
     SignInDto:
@@ -1330,7 +1617,7 @@ components:
         roles:
           title: 'Роли для фильтрации'
           type: array
-          items: { }
+          items: {  }
           default: null
           maxItems: 50
           nullable: true
@@ -1364,7 +1651,7 @@ components:
         group_ids:
           title: 'Группы для фильтрации'
           type: array
-          items: { }
+          items: {  }
           default: null
           maxItems: 50
           nullable: true
@@ -1503,6 +1790,105 @@ components:
           type: string
           default: D
       type: object
+    GetAllDto2:
+      properties:
+        user_ids:
+          title: 'Пользователи для фильтрации'
+          type: array
+          items: {  }
+          default: null
+          maxItems: 50
+          nullable: true
+        teacher_ids:
+          title: 'Преподаватели для фильтрации'
+          type: array
+          items: {  }
+          default: null
+          maxItems: 50
+          nullable: true
+        subject_ids:
+          title: 'Предметы для фильтрации'
+          type: array
+          items: {  }
+          default: null
+          maxItems: 50
+          nullable: true
+        is_actual_from:
+          title: 'Был актуален с'
+          type: string
+          nullable: true
+        is_actual_to:
+          title: 'Был актуален до'
+          type: string
+          nullable: true
+        sort_by:
+          title: 'Сортировка по'
+          type: string
+          default: name
+          enum:
+            - name
+            - actual_from
+            - actual_to
+        sort_type:
+          title: 'Тип сортировки'
+          type: string
+          default: asc
+          enum:
+            - asc
+            - desc
+        offset:
+          type: integer
+          default: 0
+          minimum: 0
+        limit:
+          type: integer
+          default: 100
+          maximum: 100
+          minimum: 0
+          nullable: true
+      type: object
+    GetMyDto:
+      properties:
+        teacher_ids:
+          title: 'Преподаватели для фильтрации'
+          type: array
+          items: {  }
+          default: null
+          maxItems: 50
+          nullable: true
+        subject_ids:
+          title: 'Предметы для фильтрации'
+          type: array
+          items: {  }
+          default: null
+          maxItems: 50
+          nullable: true
+        sort_by:
+          title: 'Сортировка по'
+          type: string
+          default: name
+          enum:
+            - name
+            - actual_from
+            - actual_to
+        sort_type:
+          title: 'Тип сортировки'
+          type: string
+          default: asc
+          enum:
+            - asc
+            - desc
+        offset:
+          type: integer
+          default: 0
+          minimum: 0
+        limit:
+          type: integer
+          default: 100
+          maximum: 100
+          minimum: 0
+          nullable: true
+      type: object
     SuccessResponse:
       properties:
         data:
@@ -1510,13 +1896,19 @@ components:
           default: null
           nullable: true
           anyOf:
-            - type: boolean
-            - type: integer
-            - type: number
-            - type: string
-            - type: array
-              items: { }
-            - type: object
+            -
+              type: boolean
+            -
+              type: integer
+            -
+              type: number
+            -
+              type: string
+            -
+              type: array
+              items: {  }
+            -
+              type: object
               additionalProperties: true
         meta:
           $ref: '#/components/schemas/Meta'
@@ -1542,7 +1934,7 @@ components:
       properties:
         errors:
           type: object
-          default: [ ]
+          default: []
           additionalProperties:
             type: array
             items:
@@ -1564,7 +1956,8 @@ components:
         data:
           nullable: true
           oneOf:
-            - $ref: '#/components/schemas/UserData'
+            -
+              $ref: '#/components/schemas/UserData'
         status:
           $ref: '#/components/schemas/UserStatusEnum'
         deleted:
@@ -1651,7 +2044,8 @@ components:
         group:
           nullable: true
           oneOf:
-            - $ref: '#/components/schemas/UserDataGroup'
+            -
+              $ref: '#/components/schemas/UserDataGroup'
       type: object
     CreatedUserDataInfo:
       required:
@@ -1659,6 +2053,45 @@ components:
       properties:
         created:
           type: integer
+      type: object
+    UserSubject:
+      required:
+        - subject
+        - teacher
+        - user
+        - actual_from
+        - actual_to
+      properties:
+        subject:
+          $ref: '#/components/schemas/Subject'
+        teacher:
+          $ref: '#/components/schemas/LiteUser'
+        user:
+          $ref: '#/components/schemas/LiteUser'
+        actual_from:
+          type: string
+          format: date-time
+        actual_to:
+          type: string
+          format: date-time
+      type: object
+    MyUserSubject:
+      required:
+        - subject
+        - teacher
+        - actual_from
+        - actual_to
+      properties:
+        subject:
+          $ref: '#/components/schemas/Subject'
+        teacher:
+          $ref: '#/components/schemas/LiteUser'
+        actual_from:
+          type: string
+          format: date-time
+        actual_to:
+          type: string
+          format: date-time
       type: object
     Meta:
       required:
@@ -1700,12 +2133,14 @@ components:
         - group.import
         - subject.create
         - subject.import
+        - user_subject.view_all
+        - user_subject.view_my
     PaginatedData:
       properties:
         items:
           type: array
-          items: { }
-          default: [ ]
+          items: {  }
+          default: []
         offset:
           type: integer
           default: null
@@ -1735,25 +2170,52 @@ components:
           type: string
           format: uuid
       type: object
+    LiteUser:
+      required:
+        - id
+        - email
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+          format: email
+        data:
+          nullable: true
+          oneOf:
+            -
+              $ref: '#/components/schemas/UserData'
+      type: object
   securitySchemes:
     Bearer:
       type: http
       bearerFormat: JWT
       scheme: bearer
 security:
-  - Bearer: [ ]
+  -
+    Bearer: []
 tags:
-  - name: health
+  -
+    name: health
     description: 'Ручки для проверки работоспособности сервера'
-  - name: auth
+  -
+    name: auth
     description: 'Ручки для авторизации и аутентификации'
-  - name: user-data
+  -
+    name: user-data
     description: 'Ручки для работы с данными пользователей'
-  - name: groups
+  -
+    name: groups
     description: 'Ручки для работы с группами'
-  - name: me
+  -
+    name: me
     description: 'Ручки для работы с "собой"'
-  - name: subjects
+  -
+    name: subjects
     description: 'Ручки для работы с предметами'
-  - name: user
+  -
+    name: user-subjects
+    description: 'Ручки для работы с предметами, привязанными к пользователям'
+  -
+    name: user
 

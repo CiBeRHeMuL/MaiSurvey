@@ -245,6 +245,16 @@ class User
         return $this->getStatus() === UserStatusEnum::Draft && $this->isDeleted() === false;
     }
 
+    public function isStudent(): bool
+    {
+        return in_array(RoleEnum::Student, $this->getRoles(), true);
+    }
+
+    public function isTeacher(): bool
+    {
+        return in_array(RoleEnum::Teacher, $this->getRoles(), true);
+    }
+
     public function getStudyingSubjects(): Collection
     {
         return $this->studyingSubjects;

@@ -16,13 +16,32 @@ enum RoleEnum: string
     public function getPermissions(): array
     {
         return match ($this) {
-            self::Admin => PermissionEnum::cases(),
+            self::Admin => [
+                PermissionEnum::SurveyView,
+                PermissionEnum::SurveyCreate,
+                PermissionEnum::SurveyUpdate,
+                PermissionEnum::SurveyDelete,
+                PermissionEnum::SurveyViewResult,
+                PermissionEnum::SurveyViewAll,
+                PermissionEnum::UserCreate,
+                PermissionEnum::UserView,
+                PermissionEnum::UserExport,
+                PermissionEnum::UserDataImport,
+                PermissionEnum::GroupCreate,
+                PermissionEnum::GroupImport,
+                PermissionEnum::SubjectCreate,
+                PermissionEnum::SubjectImport,
+                PermissionEnum::UserSubjectViewAll,
+            ],
             self::Student => [
                 PermissionEnum::SurveyComplete,
                 PermissionEnum::SurveyView,
                 PermissionEnum::SurveyViewResult,
+                PermissionEnum::UserSubjectViewMy,
             ],
-            self::Teacher => [],
+            self::Teacher => [
+                PermissionEnum::UserSubjectViewMy,
+            ],
             self::SurveyCreator => [
                 PermissionEnum::SurveyCreate,
                 PermissionEnum::SurveyUpdate,

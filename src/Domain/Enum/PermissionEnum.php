@@ -28,4 +28,8 @@ enum PermissionEnum: string
     // Subject
     case SubjectCreate = 'subject.create';
     case SubjectImport = 'subject.import';
+
+    // User Subject
+    case UserSubjectViewAll = 'user_subject.view_all';
+    case UserSubjectViewMy = 'user_subject.view_my';
 }
