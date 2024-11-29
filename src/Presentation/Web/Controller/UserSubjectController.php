@@ -24,7 +24,7 @@ class UserSubjectController extends BaseController
 {
     /** Список предметов пользователей с пагинацией и фильтрацией */
     #[Route('/user-subjects', 'get-all-user-subjects', methods: ['GET'])]
-    #[IsGranted(PermissionEnum::UserSubjectViewAll->value, statusCode: 404)]
+    #[IsGranted(PermissionEnum::UserSubjectViewAll->value, statusCode: 404, exceptionCode: 404)]
     #[OA\Tag('user-subjects')]
     #[LOA\ErrorResponse(500)]
     #[LOA\ValidationResponse]
