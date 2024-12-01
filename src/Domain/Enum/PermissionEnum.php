@@ -20,6 +20,7 @@ enum PermissionEnum: string
 
     // User Data
     case UserDataImport = 'user_data.import';
+    case UserDataViewAll = 'user_data.view_all';
 
     // Group
     case GroupCreate = 'group.create';

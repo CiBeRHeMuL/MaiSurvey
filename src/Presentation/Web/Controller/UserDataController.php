@@ -3,7 +3,9 @@
 namespace App\Presentation\Web\Controller;
 
 use App\Application\Dto\UserData\GetAllUserDataDto;
+use App\Application\Dto\UserData\GetAvailableUserDataDto;
 use App\Application\UseCase\UserData\GetAllUseCase;
+use App\Application\UseCase\UserData\GetAvailableUseCase;
 use App\Application\UseCase\UserData\ImportUseCase;
 use App\Domain\Dto\UserData\ImportDto as DomainImportDto;
 use App\Domain\Enum\PermissionEnum;
@@ -32,8 +34,9 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 class UserDataController extends BaseController
 {
-    /** Получить список данных пользователей с фильтрацией и пагинацией. */
+    /** Получить полный список данных пользователей с фильтрацией и пагинацией. */
     #[Route('/user-data/all', name: 'get-all-user-data', methods: ['GET'])]
+    #[IsGranted(PermissionEnum::UserDataViewAll->value, statusCode: 404, exceptionCode: 404)]
     #[OA\Tag('user-data')]
     #[LOA\ErrorResponse(500)]
     #[LOA\ValidationResponse]
@@ -45,6 +48,32 @@ class UserDataController extends BaseController
         LoggerInterface $logger,
         #[MapQueryString(validationFailedStatusCode: 422)]
         GetAllUserDataDto $dto = new GetAllUserDataDto(),
+    ): JsonResponse {
+        $useCase->setLogger($logger);
+        $dataProvider = $useCase->execute($dto);
+        return Response::successWithPagination(
+            new SuccessWithPaginationResponse(
+                PaginatedData::fromDataProvider(
+                    $dataProvider,
+                    UserData::fromData(...),
+                ),
+            ),
+        );
+    }
+
+    /** Получить доступный для привязки список данных пользователей с фильтрацией и пагинацией. */
+    #[Route('/user-data/available', name: 'get-available-user-data', methods: ['GET'])]
+    #[OA\Tag('user-data')]
+    #[LOA\ErrorResponse(500)]
+    #[LOA\ValidationResponse]
+    #[LOA\ErrorResponse(400)]
+    #[LOA\ErrorResponse(401)]
+    #[LOA\SuccessPaginationResponse(UserData::class)]
+    public function getAvailable(
+        GetAvailableUseCase $useCase,
+        LoggerInterface $logger,
+        #[MapQueryString(validationFailedStatusCode: 422)]
+        GetAvailableUserDataDto $dto = new GetAvailableUserDataDto(),
     ): JsonResponse {
         $useCase->setLogger($logger);
         $dataProvider = $useCase->execute($dto);
