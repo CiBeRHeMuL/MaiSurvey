@@ -1008,7 +1008,7 @@ paths:
     get:
       tags:
         - user-data
-      summary: 'Получить список данных пользователей с фильтрацией и пагинацией.'
+      summary: 'Получить полный список данных пользователей с фильтрацией и пагинацией.'
       operationId: get_get-all-user-data
       parameters:
         -
@@ -1082,6 +1082,122 @@ paths:
             minimum: 0
         -
           name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+            minimum: 0
+            nullable: true
+        - name: for_role
+          in: query
+          required: false
+          schema:
+            title: 'Роль, для которой фильтруем значения'
+            type: string
+            default: null
+            enum:
+              - admin
+              - student
+              - teacher
+              - survey_creator
+            nullable: true
+      responses:
+        '500':
+          description: 'Internal Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: 'Unprocessable Entity'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResponse'
+        '400':
+          description: 'Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/SuccessWithPaginationResponse' }
+                  - { properties: { data: { properties: { items: { type: array, items: { $ref: '#/components/schemas/UserData' } } }, type: object } }, type: object }
+  /user-data/available:
+    get:
+      tags:
+        - user-data
+      summary: 'Получить доступный для привязки список данных пользователей с фильтрацией и пагинацией.'
+      operationId: get_get-available-user-data
+      parameters:
+        - name: name
+          in: query
+          required: false
+          schema:
+            title: 'Имя для фильтрации'
+            type: string
+            default: null
+            maxLength: 255
+            minLength: 1
+            nullable: true
+        - name: with_group
+          in: query
+          required: false
+          schema:
+            title: 'Учитывать только данные с группой'
+            type: boolean
+            default: null
+        - name: 'group_ids[]'
+          in: query
+          required: false
+          schema:
+            title: 'Группы для фильтрации'
+            type: array
+            items:
+              type: string
+            default: null
+            maxItems: 50
+            nullable: true
+        - name: sort_by
+          in: query
+          required: false
+          schema:
+            title: 'Сортировка по'
+            type: string
+            default: name
+            enum:
+              - name
+        - name: sort_type
+          in: query
+          required: false
+          schema:
+            title: 'Тип сортировки'
+            type: string
+            default: asc
+            enum:
+              - asc
+              - desc
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+        - name: limit
           in: query
           required: false
           schema:
@@ -1766,6 +1882,61 @@ components:
             - survey_creator
           nullable: true
       type: object
+    GetAvailableUserDataDto:
+      properties:
+        name:
+          title: 'Имя для фильтрации'
+          type: string
+          default: null
+          maxLength: 255
+          minLength: 1
+          nullable: true
+        with_group:
+          title: 'Учитывать только данные с группой'
+          type: boolean
+          default: null
+        group_ids:
+          title: 'Группы для фильтрации'
+          type: array
+          items:
+            type: string
+          default: null
+          maxItems: 50
+          nullable: true
+        sort_by:
+          title: 'Сортировка по'
+          type: string
+          default: name
+          enum:
+            - name
+        sort_type:
+          title: 'Тип сортировки'
+          type: string
+          default: asc
+          enum:
+            - asc
+            - desc
+        offset:
+          type: integer
+          default: 0
+          minimum: 0
+        limit:
+          type: integer
+          default: 20
+          maximum: 100
+          minimum: 0
+          nullable: true
+        for_role:
+          title: 'Роль, для которой фильтруем значения'
+          type: string
+          default: null
+          enum:
+            - admin
+            - student
+            - teacher
+            - survey_creator
+          nullable: true
+      type: object
     ImportUserDataDto:
       required:
         - for_role
@@ -2136,6 +2307,7 @@ components:
         - user.view
         - user.export
         - user_data.import
+        - user_data.view_all
         - group.create
         - group.import
         - subject.create
