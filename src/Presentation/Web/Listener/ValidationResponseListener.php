@@ -3,6 +3,9 @@
 namespace App\Presentation\Web\Listener;
 
 use App\Domain\Exception\ValidationException;
+use App\Presentation\Web\Enum\ErrorSlugEnum;
+use App\Presentation\Web\Response\Model\Common\Error;
+use App\Presentation\Web\Response\Model\Common\ErrorResponse;
 use App\Presentation\Web\Response\Model\Common\ValidationResponse;
 use App\Presentation\Web\Response\Response;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
@@ -26,8 +29,20 @@ class ValidationResponseListener
                         ValidationResponse::fromViolationList($violations),
                     ),
                 );
+                $event->stopPropagation();
+            } elseif ($ve === null) {
+                $event->setResponse(
+                    Response::error(
+                        new ErrorResponse(
+                            new Error(
+                                ErrorSlugEnum::BadRequest->getSlug(),
+                                'Пропущены обязательный поля',
+                            ),
+                        ),
+                    ),
+                );
+                $event->stopPropagation();
             }
-            $event->stopPropagation();
         } elseif ($e instanceof ValidationException) {
             $errors = $e->getErrors();
             $event->setResponse(

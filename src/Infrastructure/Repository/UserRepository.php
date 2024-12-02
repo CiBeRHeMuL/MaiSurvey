@@ -32,10 +32,15 @@ class UserRepository extends AbstractRepository implements UserRepositoryInterfa
 
     public function findByEmail(Email $email): User|null
     {
-        return $this
-            ->getEntityManager()
-            ->getRepository(User::class)
-            ->findOneBy(['email' => $email]);
+        $q = Query::select()
+            ->from($this->getClassTable(User::class))
+            ->where(
+                new Expr(
+                    'lower(email) = :email',
+                    ['email' => strtolower($email->getEmail())],
+                ),
+            );
+        return $this->findOneByQuery($q, User::class);
     }
 
     public function findAll(GetAllUsersDto $dto): DataProviderInterface
