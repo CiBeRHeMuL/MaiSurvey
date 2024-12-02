@@ -1090,7 +1090,8 @@ paths:
             maximum: 100
             minimum: 0
             nullable: true
-        - name: for_role
+        -
+          name: for_role
           in: query
           required: false
           schema:
@@ -1143,7 +1144,8 @@ paths:
       summary: 'Получить доступный для привязки список данных пользователей с фильтрацией и пагинацией.'
       operationId: get_get-available-user-data
       parameters:
-        - name: name
+        -
+          name: name
           in: query
           required: false
           schema:
@@ -1153,14 +1155,16 @@ paths:
             maxLength: 255
             minLength: 1
             nullable: true
-        - name: with_group
+        -
+          name: with_group
           in: query
           required: false
           schema:
             title: 'Учитывать только данные с группой'
             type: boolean
             default: null
-        - name: 'group_ids[]'
+        -
+          name: 'group_ids[]'
           in: query
           required: false
           schema:
@@ -1171,7 +1175,8 @@ paths:
             default: null
             maxItems: 50
             nullable: true
-        - name: sort_by
+        -
+          name: sort_by
           in: query
           required: false
           schema:
@@ -1180,7 +1185,8 @@ paths:
             default: name
             enum:
               - name
-        - name: sort_type
+        -
+          name: sort_type
           in: query
           required: false
           schema:
@@ -1190,14 +1196,16 @@ paths:
             enum:
               - asc
               - desc
-        - name: offset
+        -
+          name: offset
           in: query
           required: false
           schema:
             type: integer
             default: 0
             minimum: 0
-        - name: limit
+        -
+          name: limit
           in: query
           required: false
           schema:
@@ -1446,7 +1454,8 @@ paths:
       summary: 'Список моих предметов с пагинацией и фильтрацией'
       operationId: get_get-my-user-subjects
       parameters:
-        - name: actual
+        -
+          name: actual
           in: query
           required: false
           schema:
@@ -2223,7 +2232,7 @@ components:
           nullable: true
           oneOf:
             -
-              $ref: '#/components/schemas/UserDataGroup'
+              $ref: '#/components/schemas/Group'
       type: object
     CreatedUserDataInfo:
       required:
@@ -2340,14 +2349,6 @@ components:
           type: string
           default: null
           nullable: true
-      type: object
-    UserDataGroup:
-      required:
-        - id
-      properties:
-        id:
-          type: string
-          format: uuid
       type: object
     LiteUser:
       required:

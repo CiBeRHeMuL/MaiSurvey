@@ -81,7 +81,7 @@ class UserDataRepository extends AbstractRepository implements UserDataRepositor
         return $this->findWithProvider(
             $q,
             UserData::class,
-            ['group'],
+            ['group', 'group.group'],
             limit: new LimitOffset(
                 $dto->getLimit(),
                 $dto->getOffset(),

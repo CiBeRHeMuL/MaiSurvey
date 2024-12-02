@@ -11,7 +11,7 @@ readonly class UserData
         public string $first_name,
         public string $last_name,
         public string|null $patronymic,
-        public UserDataGroup|null $group,
+        public Group|null $group,
     ) {
     }
 
@@ -23,7 +23,7 @@ readonly class UserData
             $data->getLastName(),
             $data->getPatronymic(),
             $data->getGroup() !== null
-                ? UserDataGroup::fromUserDataGroup($data->getGroup())
+                ? Group::fromGroup($data->getGroup()->getGroup())
                 : null,
         );
     }
