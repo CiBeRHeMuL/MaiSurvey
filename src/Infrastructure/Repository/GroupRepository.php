@@ -13,6 +13,7 @@ use App\Infrastructure\Db\Expr\ILikeExpr;
 use App\Infrastructure\Repository\Common\AbstractRepository;
 use Iterator;
 use Qstart\Db\QueryBuilder\DML\Expression\Expr;
+use Qstart\Db\QueryBuilder\DML\Expression\InExpr;
 use Qstart\Db\QueryBuilder\Query;
 use Symfony\Component\Uid\Uuid;
 
@@ -48,7 +49,12 @@ class GroupRepository extends AbstractRepository implements GroupRepositoryInter
         $q = Query::select()
             ->select(['*'])
             ->from($this->getClassTable(Group::class))
-            ->where(['name' => $name]);
+            ->where(
+                new Expr(
+                    'lower(name) = :name',
+                    ['name' => strtolower($name)],
+                ),
+            );
         return $this
             ->findOneByQuery($q, Group::class);
     }
@@ -68,7 +74,12 @@ class GroupRepository extends AbstractRepository implements GroupRepositoryInter
         $q = Query::select()
             ->select(['*'])
             ->from($this->getClassTable(Group::class))
-            ->where(['name' => $groupNames]);
+            ->where(
+                new InExpr(
+                    'lower(name)',
+                    array_map(strtolower(...), $groupNames),
+                )
+            );
         yield from $this->findAllByQuery($q, Group::class);
     }
 }

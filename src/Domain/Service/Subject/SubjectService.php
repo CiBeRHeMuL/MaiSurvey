@@ -159,7 +159,7 @@ class SubjectService
         }
     }
 
-    public function validateCreateDto(CreateSubjectDto $dto): void
+    public function validateCreateDto(CreateSubjectDto $dto, bool $checkExisting = true): void
     {
         if ($dto->getName() === '') {
             throw ValidationException::new([
@@ -171,17 +171,19 @@ class SubjectService
             ]);
         }
 
-        $existing = $this
-            ->subjectRepository
-            ->findByName($dto->getName());
-        if ($existing !== null) {
-            throw ValidationException::new([
-                new ValidationError(
-                    'name',
-                    ValidationErrorSlugEnum::AlreadyExists->getSlug(),
-                    'Предмет уже существует',
-                ),
-            ]);
+        if ($checkExisting) {
+            $existing = $this
+                ->subjectRepository
+                ->findByName($dto->getName());
+            if ($existing !== null) {
+                throw ValidationException::new([
+                    new ValidationError(
+                        'name',
+                        ValidationErrorSlugEnum::AlreadyExists->getSlug(),
+                        'Предмет уже существует',
+                    ),
+                ]);
+            }
         }
     }
 

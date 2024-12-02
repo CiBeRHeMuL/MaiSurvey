@@ -4,9 +4,11 @@ namespace App\Domain\Service\Subject;
 
 use App\Domain\Dto\Subject\CreateSubjectDto;
 use App\Domain\Dto\Subject\ImportDto;
+use App\Domain\Entity\Subject;
 use App\Domain\Enum\ValidationErrorSlugEnum;
 use App\Domain\Exception\ErrorException;
 use App\Domain\Exception\ValidationException;
+use App\Domain\Helper\HArray;
 use App\Domain\Service\DataImport\DataImportInterface;
 use App\Domain\Service\Db\TransactionManagerInterface;
 use App\Domain\Validation\ValidationError;
@@ -56,6 +58,7 @@ class SubjectsImporter
         $createDtos = [];
         // Мапа название -> номер строки. Для вывода ошибки
         $nameToRow = [];
+        $names = [];
         foreach ($this->dataImport->getRows($firstRow, $this->dataImport->getHighestRow()) as $k => $row) {
             $name = $row[$dto->getNameCol()] ?? '';
             if (isset($nameToRow[$name])) {
@@ -74,13 +77,38 @@ class SubjectsImporter
                     ),
                 ]);
             }
+            $names[$k] = $name;
+        }
+
+        $existingSubjects = $this
+            ->subjectService
+            ->getByNames($names);
+        $existingSubjects = HArray::index(
+            $existingSubjects,
+            fn(Subject $s) => $s->getName(),
+        );
+
+        foreach ($names as $k => $name) {
+            if (isset($existingSubjects[$name])) {
+                throw ValidationException::new([
+                    new ValidationError(
+                        'file',
+                        ValidationErrorSlugEnum::WrongFile->getSlug(),
+                        sprintf(
+                            $validationErrorTemplate,
+                            $k - 1 + $firstRow,
+                            'такой предмет уже существует',
+                        ),
+                    ),
+                ]);
+            }
 
             $createDto = new CreateSubjectDto(
                 $name,
             );
 
             try {
-                $this->subjectService->validateCreateDto($createDto);
+                $this->subjectService->validateCreateDto($createDto, false);
             } catch (ValidationException $e) {
                 throw ValidationException::new(array_map(
                     fn(ValidationError $error) => new ValidationError(

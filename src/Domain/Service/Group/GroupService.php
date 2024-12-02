@@ -159,7 +159,7 @@ class GroupService
         }
     }
 
-    public function validateCreateDto(CreateGroupDto $dto): void
+    public function validateCreateDto(CreateGroupDto $dto, bool $checkExisting = true): void
     {
         if ($dto->getName() === '') {
             throw ValidationException::new([
@@ -171,17 +171,19 @@ class GroupService
             ]);
         }
 
-        $existing = $this
-            ->groupRepository
-            ->findByName($dto->getName());
-        if ($existing !== null) {
-            throw ValidationException::new([
-                new ValidationError(
-                    'name',
-                    ValidationErrorSlugEnum::AlreadyExists->getSlug(),
-                    'Группа уже существует',
-                ),
-            ]);
+        if ($checkExisting) {
+            $existing = $this
+                ->groupRepository
+                ->findByName($dto->getName());
+            if ($existing !== null) {
+                throw ValidationException::new([
+                    new ValidationError(
+                        'name',
+                        ValidationErrorSlugEnum::AlreadyExists->getSlug(),
+                        'Группа уже существует',
+                    ),
+                ]);
+            }
         }
     }
 

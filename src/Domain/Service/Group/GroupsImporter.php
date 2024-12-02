@@ -4,9 +4,11 @@ namespace App\Domain\Service\Group;
 
 use App\Domain\Dto\Group\CreateGroupDto;
 use App\Domain\Dto\Group\ImportDto;
+use App\Domain\Entity\Group;
 use App\Domain\Enum\ValidationErrorSlugEnum;
 use App\Domain\Exception\ErrorException;
 use App\Domain\Exception\ValidationException;
+use App\Domain\Helper\HArray;
 use App\Domain\Service\DataImport\DataImportInterface;
 use App\Domain\Service\Db\TransactionManagerInterface;
 use App\Domain\Validation\ValidationError;
@@ -56,6 +58,8 @@ class GroupsImporter
         $createDtos = [];
         // Мапа название -> номер строки. Для вывода ошибки
         $nameToRow = [];
+        // Названия групп
+        $names = [];
         foreach ($this->dataImport->getRows($firstRow, $this->dataImport->getHighestRow()) as $k => $row) {
             $name = $row[$dto->getNameCol()] ?? '';
             if (isset($nameToRow[$name])) {
@@ -74,13 +78,38 @@ class GroupsImporter
                     ),
                 ]);
             }
+            $names[$k] = $name;
+        }
+
+        $existingGroups = $this
+            ->groupService
+            ->getByNames($names);
+        $existingGroups = HArray::index(
+            $existingGroups,
+            fn(Group $g) => $g->getName(),
+        );
+
+        foreach ($names as $k => $name) {
+            if (isset($existingGroups[$name])) {
+                throw ValidationException::new([
+                    new ValidationError(
+                        'file',
+                        ValidationErrorSlugEnum::WrongFile->getSlug(),
+                        sprintf(
+                            $validationErrorTemplate,
+                            $k - 1 + $firstRow,
+                            'такая группа уже существует',
+                        ),
+                    ),
+                ]);
+            }
 
             $createDto = new CreateGroupDto(
                 $name,
             );
 
             try {
-                $this->groupService->validateCreateDto($createDto);
+                $this->groupService->validateCreateDto($createDto, false);
             } catch (ValidationException $e) {
                 throw ValidationException::new(array_map(
                     fn(ValidationError $error) => new ValidationError(
