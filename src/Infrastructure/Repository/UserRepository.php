@@ -113,7 +113,7 @@ class UserRepository extends AbstractRepository implements UserRepositoryInterfa
             ->findWithLazyBatchedProvider(
                 $q,
                 User::class,
-                ['data'],
+                ['data', 'data.group', 'data.group.group'],
                 new LimitOffset(
                     $dto->getLimit(),
                     $dto->getOffset(),

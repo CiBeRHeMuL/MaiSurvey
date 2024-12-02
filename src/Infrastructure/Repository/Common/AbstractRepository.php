@@ -216,11 +216,10 @@ abstract class AbstractRepository implements RepositoryInterface
     {
         $query->limit(1);
         if ($entityClassName) {
-            $entities = $this->getEmNativeQuery($entityClassName, $query)->getOneOrNullResult();
-            if ($entities && $relations) {
-                return $this->populateRelations($entities, $relations);
+            if ($relations) {
+                return $this->findWithRelations($query, $entityClassName, $relations);
             }
-            return $entities;
+            return $this->getEmNativeQuery($entityClassName, $query)->getOneOrNullResult();
         } else {
             return $this->executeQuery($query)->fetchAssociative();
         }
@@ -229,11 +228,10 @@ abstract class AbstractRepository implements RepositoryInterface
     public function findAllByQuery(SelectQuery $query, string|null $entityClassName = null, array|null $relations = null): array
     {
         if ($entityClassName) {
-            $entities = $this->getEmNativeQuery($entityClassName, $query)->getResult();
-            if ($entities && $relations) {
-                return $this->populateRelations($entities, $relations);
+            if ($relations) {
+                return $this->findWithRelations($query, $entityClassName, $relations);
             }
-            return $entities;
+            return $this->getEmNativeQuery($entityClassName, $query)->getResult();
         }
 
         return $this->executeQuery($query)->fetchAllAssociative();
@@ -352,39 +350,38 @@ abstract class AbstractRepository implements RepositoryInterface
     }
 
     /**
-     * Подставляем релейшены в сущности.
+     * Поиск с учетом релейшенов
      *
      * @template T of object
-     * @param T[] $entities
+     * @param SelectQuery $query
+     * @param string $class
      * @param string[] $relations
      *
      * @return T[]
      */
-    protected function populateRelations(array $entities, array $relations): array
+    protected function findWithRelations(SelectQuery $query, string $class, array $relations): array
     {
-        if (empty($entities) || empty($relations)) {
-            return $entities;
-        }
+        $metadata = $this->getEntityManager()->getClassMetadata($class);
 
-        $entityClass = $entities[0]::class;
-        $metadata = $this->getEntityManager()->getClassMetadata($entityClass);
+        $idColumns = $metadata->getIdentifierColumnNames();
 
-        // Получаем идентификаторы всех сущностей (поддержка нескольких primary key)
-        $entityIds = [];
-        foreach ($entities as $entity) {
-            $identifier = $metadata->getIdentifierValues($entity);
-            $entityIds[] = $identifier;
-        }
+        $idQuery = Query::select()
+            ->from(['s' => $query])
+            ->select($idColumns);
+
+        // Получаем id сущностей из запроса (ВАЖНО, названия полей в id это названия колонок, а не свойств сущности)
+        $ids = $this->findAllByQuery($idQuery);
 
         // Формируем DQL-запрос для подгрузки ассоциаций с учетом сложных ключей
-        $qb = $this->getEntityManager()->createQueryBuilder()->select('e')->from("$entityClass", 'e');
+        $qb = $this->getEntityManager()->createQueryBuilder()->select('e')->from("$class", 'e');
 
         // Добавляем условия для каждого идентификатора
         $orX = $qb->expr()->orX();
         $i = 0;
-        foreach ($entityIds as $id) {
+        foreach ($ids as $id) {
             $andX = $qb->expr()->andX();
-            foreach ($id as $field => $value) {
+            foreach ($id as $column => $value) {
+                $field = $metadata->getFieldName($column);
                 $paramName = "prqb_$i";
                 $i++;
                 $andX->add($qb->expr()->eq("e.{$field}", ":{$paramName}"));
@@ -394,40 +391,82 @@ abstract class AbstractRepository implements RepositoryInterface
         }
         $qb->where($orX);
 
-        $relations = array_combine(
-            $relations,
-            array_map(
-                fn(string $r) => "rel_$r",
-                $relations,
-            ),
-        );
+        // Добавляем забытые и удаляем ненужные релейшены
+        $relations = $this->normalizeRelations($relations);
+
+        // Делаем хеши для каждого релейшена
+        $relationsHashes = $this->hashRelations($relations);
 
         // Добавляем необходимые JOIN FETCH для ассоциаций
-        foreach ($relations as $association => $hash) {
-            $qb
-                ->leftJoin("e.{$association}", $hash)
-                ->addSelect($hash);
-        }
-
-        // Выполняем запрос и получаем сущности с подгруженными ассоциациями
-        $results = $qb->getQuery()->getResult();
-
-        // Заполняем исходный массив
-
-        foreach ($results as $result) {
-            $identifier = $metadata->getIdentifierValues($result);
-            foreach ($entities as &$entity) {
-                $enIdentifier = $metadata->getIdentifierValues($entity);
-                if (serialize($enIdentifier) == serialize($identifier)) {
-                    foreach ($relations as $association => $hash) {
-                        $metadata->setFieldValue($entity, $association, $metadata->getFieldValue($result, $association));
-                    }
-                    break;
-                }
+        foreach ($relations as $relation) {
+            // Если релейшен вложенный, то нужна особая обработка
+            if (str_contains($relation, '.')) {
+                preg_match('/(.*?)\.([^.]*)$/ui', $relation, $matches);
+                $parentRel = $matches[1];
+                $rel = $matches[2];
+                $parentHash = $relationsHashes[$parentRel];
+                $relHash = $relationsHashes[$relation];
+                $qb
+                    ->leftJoin("$parentHash.$rel", $relHash)
+                    ->addSelect($relHash);
+            } else {
+                $hash = $relationsHashes[$relation];
+                $qb
+                    ->leftJoin("e.$relation", $hash)
+                    ->addSelect($hash);
             }
         }
 
-        return $entities;
+        // Выполняем запрос и получаем сущности с подгруженными ассоциациями
+        return $qb->getQuery()->getResult();
+    }
+
+    /**
+     * Нормализуем релейшены. Удаляем лишние и добавляем забытые
+     *
+     * @param string[] $relations
+     *
+     * @return string[]
+     */
+    private function normalizeRelations(array $relations): array
+    {
+        $result = [];
+        foreach ($relations as $relation) {
+            $nested = explode('.', $relation);
+            $nestLevel = [];
+            foreach ($nested as $nestRel) {
+                $nestLevel[] = $nestRel;
+                $rel = implode('.', $nestLevel);
+                $result[$rel] = $rel;
+            }
+        }
+        return $result;
+    }
+
+    /**
+     * Хешируем релейшены для дальнейшей работы с ними
+     *
+     * @param string[] $relations
+     *
+     * @return array<string, string>
+     */
+    private function hashRelations(array $relations): array
+    {
+        $sameCounts = [];
+        $relationsHashes = [];
+        foreach ($relations as $relation) {
+            $hash = 'rel_' . str_replace('.', '_', $relation);
+            // Если получился хеш, который уже есть, то дописываем цифру в конец релейшена
+            // Это работает, потому что мы заранее убрали неуникальные значения из списка релейшенов
+            $realHash = $hash;
+            while (array_key_exists($hash, $sameCounts)) {
+                $hash = $realHash . ($sameCounts[$hash]++);
+            }
+            $realHash = $hash;
+            $sameCounts[$realHash] = ($sameCounts[$realHash] ?? 0) + 1;
+            $relationsHashes[$relation] = $realHash;
+        }
+        return $relationsHashes;
     }
 
     protected function getEntityManager(): EntityManagerInterface

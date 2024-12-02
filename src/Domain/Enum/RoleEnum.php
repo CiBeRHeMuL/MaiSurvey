@@ -27,6 +27,7 @@ enum RoleEnum: string
                 PermissionEnum::UserView,
                 PermissionEnum::UserExport,
                 PermissionEnum::UserDataImport,
+                PermissionEnum::UserDataViewAll,
                 PermissionEnum::GroupCreate,
                 PermissionEnum::GroupImport,
                 PermissionEnum::SubjectCreate,

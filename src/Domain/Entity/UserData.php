@@ -36,7 +36,7 @@ class UserData
     #[ORM\OneToOne(targetEntity: User::class, inversedBy: 'data')]
     #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
     private User|null $user = null;
-    #[ORM\OneToOne(targetEntity: UserDataGroup::class, mappedBy: 'userData', cascade: ['persist'])]
+    #[ORM\OneToOne(targetEntity: UserDataGroup::class, mappedBy: 'userData')]
     #[ORM\InverseJoinColumn(name: 'id', referencedColumnName: 'user_data_id')]
     private UserDataGroup|null $group = null;
 
