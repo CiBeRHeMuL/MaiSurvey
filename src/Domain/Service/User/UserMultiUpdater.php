@@ -18,6 +18,7 @@ use App\Domain\Service\UserData\UserDataService;
 use App\Domain\Service\UserDataGroup\UserDataGroupService;
 use App\Domain\Validation\ValidationError;
 use App\Domain\ValueObject\Email;
+use DateTimeImmutable;
 use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 use Throwable;
@@ -224,13 +225,15 @@ class UserMultiUpdater
             $userData
                 ->setFirstName($dto->getFirstName())
                 ->setLastName($dto->getLastName())
-                ->setPatronymic($dto->getPatronymic());
+                ->setPatronymic($dto->getPatronymic())
+                ->setUpdatedAt(new DateTimeImmutable());
             $userDataToUpdate[] = $userData;
 
             if ($userDataGroup) {
                 $userDataGroup
                     ->setGroupId($group->getId())
-                    ->setGroup($group);
+                    ->setGroup($group)
+                    ->setUpdatedAt(new DateTimeImmutable());
                 $userDataGroupsToUpdate[] = $userDataGroup;
             }
         }
