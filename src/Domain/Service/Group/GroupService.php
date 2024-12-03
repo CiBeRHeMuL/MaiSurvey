@@ -13,7 +13,6 @@ use App\Domain\Repository\GroupRepositoryInterface;
 use App\Domain\Service\Db\TransactionManagerInterface;
 use App\Domain\Validation\ValidationError;
 use DateTimeImmutable;
-use Iterator;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Uid\Uuid;
 use Throwable;
@@ -103,10 +102,13 @@ class GroupService
      *
      * @param string[] $groupNames
      *
-     * @return Iterator<int, Group>
+     * @return Group[]
      */
-    public function getByNames(array $groupNames): Iterator
+    public function getByNames(array $groupNames): array
     {
+        if (!$groupNames) {
+            return [];
+        }
         return $this
             ->groupRepository
             ->findByNames($groupNames);

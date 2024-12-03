@@ -173,4 +173,21 @@ class UserService
             ->userRepository
             ->findAll($dto);
     }
+
+    /**
+     * Поиск по почтам
+     *
+     * @param Email[] $emails
+     *
+     * @return User[]
+     */
+    public function getAllByEmails(array $emails): array
+    {
+        if (!$emails) {
+            return [];
+        }
+        return $this
+            ->userRepository
+            ->findAllByEmails($emails);
+    }
 }

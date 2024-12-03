@@ -6,7 +6,10 @@ use App\Application\Dto\User\CreateFullUserDto;
 use App\Application\Dto\User\GetAllDto;
 use App\Application\UseCase\User\CreateUserUseCase;
 use App\Application\UseCase\User\GetAllUseCase;
+use App\Application\UseCase\User\MultiUpdateUseCase;
+use App\Domain\Dto\User\MultiUpdateDto;
 use App\Domain\Enum\PermissionEnum;
+use App\Presentation\Web\Dto\User\UpdateUsersDto;
 use App\Presentation\Web\Enum\ErrorSlugEnum;
 use App\Presentation\Web\OpenApi\Attribute as LOA;
 use App\Presentation\Web\Response\Model\Common\Error;
@@ -14,6 +17,8 @@ use App\Presentation\Web\Response\Model\Common\ErrorResponse;
 use App\Presentation\Web\Response\Model\Common\PaginatedData;
 use App\Presentation\Web\Response\Model\Common\SuccessResponse;
 use App\Presentation\Web\Response\Model\Common\SuccessWithPaginationResponse;
+use App\Presentation\Web\Response\Model\Common\ValidationResponse;
+use App\Presentation\Web\Response\Model\UpdatedUsersInfo;
 use App\Presentation\Web\Response\Model\User;
 use App\Presentation\Web\Response\Response;
 use App\Presentation\Web\Service\DataExport\FileDataExportFactoryInterface;
@@ -21,9 +26,11 @@ use OpenApi\Attributes as OA;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Attribute\MapQueryString;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
+use Symfony\Component\HttpKernel\Attribute\MapUploadedFile;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Throwable;
@@ -120,12 +127,14 @@ class UserController extends BaseController
         }
 
         $rows = [
-            ['Почта', 'ФИО', 'Группа'],
+            ['Почта', 'Фамилия', 'Имя', 'Отчество', 'Группа'],
         ];
         foreach ($dataProvider->getItems() as $user) {
             $rows[] = [
                 $user->getEmail()->getEmail(),
-                $user->getData()?->getFullName(),
+                $user->getData()?->getLastName(),
+                $user->getData()?->getFirstName(),
+                $user->getData()?->getPatronymic(),
                 $user->getData()?->getGroup()?->getGroup()->getName(),
             ];
         }
@@ -142,6 +151,53 @@ class UserController extends BaseController
                     ErrorSlugEnum::InternalServerError->getSlug(),
                     'Не удалось отправить файл',
                 ),
+            ),
+        );
+    }
+
+    /** Массовое обновление пользователей */
+    #[Route('/users/update', 'users-update-all', methods: ['POST'])]
+    #[IsGranted(PermissionEnum::UserUpdateAll->value, statusCode: 404, exceptionCode: 404)]
+    #[OA\Tag('user')]
+    #[LOA\ErrorResponse(404)]
+    #[LOA\ValidationResponse]
+    #[LOA\ErrorResponse(500)]
+    #[LOA\SuccessResponse(UpdatedUsersInfo::class)]
+    public function updateMulti(
+        LoggerInterface $logger,
+        MultiUpdateUseCase $useCase,
+        #[MapRequestPayload]
+        UpdateUsersDto $dto = new UpdateUsersDto(),
+        #[MapUploadedFile]
+        UploadedFile|array $file = [],
+    ): JsonResponse {
+        if (is_array($file)) {
+            return Response::validation(
+                new ValidationResponse([
+                    'file' => [
+                        new Error(
+                            ErrorSlugEnum::WrongField->getSlug(),
+                            'Не удалось прочитать файл',
+                        ),
+                    ],
+                ]),
+            );
+        }
+        $useCase->setLogger($logger);
+        $updated = $useCase->execute(
+            new MultiUpdateDto(
+                $file->getPathname(),
+                $dto->headers_in_first_row,
+                $dto->email_col,
+                $dto->last_name_col,
+                $dto->first_name_col,
+                $dto->patronymic_col,
+                $dto->group_name_col,
+            ),
+        );
+        return Response::success(
+            new SuccessResponse(
+                new UpdatedUsersInfo($updated),
             ),
         );
     }

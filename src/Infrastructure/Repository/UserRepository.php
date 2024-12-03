@@ -17,6 +17,7 @@ use App\Infrastructure\Db\Expr\FullNameExpr;
 use App\Infrastructure\Db\Expr\ILikeExpr;
 use App\Infrastructure\Repository\Common\AbstractRepository;
 use Qstart\Db\QueryBuilder\DML\Expression\Expr;
+use Qstart\Db\QueryBuilder\DML\Expression\InExpr;
 use Qstart\Db\QueryBuilder\Query;
 use Symfony\Component\Uid\Uuid;
 
@@ -124,6 +125,28 @@ class UserRepository extends AbstractRepository implements UserRepositoryInterfa
                         $dto->getSortType()->getPhpSort(),
                     ),
                 ]),
+            );
+    }
+
+    public function findAllByEmails(array $emails): array
+    {
+        $q = Query::select()
+            ->select(['*'])
+            ->from($this->getClassTable(User::class))
+            ->where(
+                new InExpr(
+                    'email',
+                    array_map(
+                        fn(Email $e) => strtolower($e->getEmail()),
+                        $emails,
+                    ),
+                ),
+            );
+        return $this
+            ->findAllByQuery(
+                $q,
+                User::class,
+                ['data', 'data.group', 'data.group.group'],
             );
     }
 }

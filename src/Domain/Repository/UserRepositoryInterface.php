@@ -23,4 +23,13 @@ interface UserRepositoryInterface extends RepositoryInterface
      * @return DataProviderInterface<User>
      */
     public function findAll(GetAllUsersDto $dto): DataProviderInterface;
+
+    /**
+     * Поиск по почтам
+     *
+     * @param Email[] $emails
+     *
+     * @return User[]
+     */
+    public function findAllByEmails(array $emails): array;
 }

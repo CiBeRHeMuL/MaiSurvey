@@ -77,6 +77,7 @@ class SubjectsImporter
                     ),
                 ]);
             }
+            $nameToRow[$name] = $k;
             $names[$k] = $name;
         }
 
@@ -120,7 +121,6 @@ class SubjectsImporter
                 ));
             }
 
-            $nameToRow[$name] = $k;
             $createDtos[] = $createDto;
         }
 

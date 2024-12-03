@@ -8,6 +8,7 @@ enum HttpStatusCodeEnum: int
     case Continue = 100;
     case SwitchingProtocols = 101;
     case Processing = 102;
+    case EarlyHints = 103;
 
     // Successful
     case Ok = 200;
@@ -113,6 +114,7 @@ enum HttpStatusCodeEnum: int
             self::Continue => 'Continue',
             self::SwitchingProtocols => 'Switching Protocols',
             self::Processing => 'Processing',
+            self::EarlyHints => 'Early Hints',
 
             // Successful
             self::Ok => 'Ok',

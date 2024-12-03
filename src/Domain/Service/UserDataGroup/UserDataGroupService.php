@@ -92,6 +92,45 @@ class UserDataGroupService
         }
     }
 
+    /**
+     * Массовое обновление
+     *
+     * @param UserDataGroup[] $groups
+     * @param bool $transaction
+     * @param bool $throwOnError
+     *
+     * @return int
+     * @throws Throwable
+     */
+    public function updateMulti(array $groups, bool $transaction = true, bool $throwOnError = false): int
+    {
+        if (!$groups) {
+            return 0;
+        }
+        if ($transaction) {
+            $this->transactionManager->beginTransaction();
+        }
+        try {
+            $updated = $this
+                ->userDataGroupRepository
+                ->updateMulti($groups);
+            if ($transaction) {
+                $this->transactionManager->commit();
+            }
+            return $updated;
+        } catch (Throwable $e) {
+            $this->logger->error($e);
+            if ($transaction) {
+                $this->transactionManager->rollback();
+            }
+            if ($throwOnError) {
+                throw $e;
+            } else {
+                return 0;
+            }
+        }
+    }
+
     private function entityFromDto(CreateUserDataGroupDto $dto): UserDataGroup
     {
         $group = new UserDataGroup();

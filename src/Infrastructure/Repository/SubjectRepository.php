@@ -51,7 +51,7 @@ class SubjectRepository extends AbstractRepository implements SubjectRepositoryI
             ->where(
                 new Expr(
                     'lower(name) = :name',
-                    ['name' => strtolower($name)],
+                    ['name' => mb_strtolower($name)],
                 ),
             );
         return $this->findOneByQuery($q, Subject::class);
@@ -74,7 +74,7 @@ class SubjectRepository extends AbstractRepository implements SubjectRepositoryI
             ->where(
                 new InExpr(
                     'lower(name)',
-                    array_map(strtolower(...), $groupNames),
+                    array_map(mb_strtolower(...), $groupNames),
                 )
             );
         yield from $this->findAllByQuery($q, Subject::class);

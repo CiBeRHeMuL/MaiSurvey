@@ -9,12 +9,12 @@ class HArray
     /**
      * Index array by key or callable
      * @template T
-     * @template Key
+     * @template Key of string|int
      *
-     * @param iterable<T>|array<Key, T>|T[] $array
-     * @param string|int|callable $key if callable, then must have signature: callable(array-element-type): string|int
+     * @param iterable<T> $array
+     * @param string|int|(callable(T): Key) $key if callable, then must have signature: callable(array-element-type): string|int
      *
-     * @return array<Key, T>|T[]
+     * @return array<Key, T>
      */
     public static function index(iterable $array, string|int|callable $key): array
     {
@@ -256,6 +256,43 @@ class HArray
             } else {
                 $currentResultEl[] = $projection($el);
             }
+        }
+        return $result;
+    }
+
+    /**
+     * Индексация с проекцией
+     *
+     * @template T
+     * @template Key
+     * @template Proj
+     *
+     * @param iterable<T> $array
+     * @param string|int|(callable(T): Key) $key
+     * @param (callable(T): Proj)|null $projection проекция
+     *
+     * @return ($projection is null ? array<Key, T> : array<Key, Proj>)
+     */
+    public static function indexExtended(
+        iterable $array,
+        string|int|callable $key,
+        callable|null $projection = null,
+    ): array {
+        if ($array instanceof Traversable) {
+            $array = iterator_to_array($array);
+        }
+
+        $key = is_callable($key)
+            ? $key
+            : fn($el) => $el[$key] ?? null;
+
+        $projection = is_callable($projection)
+            ? $projection
+            : fn($el) => $el;
+
+        $result = [];
+        foreach ($array as $i => $el) {
+            $result[$key($el)] = $projection($el);
         }
         return $result;
     }

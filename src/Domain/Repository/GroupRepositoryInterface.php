@@ -6,7 +6,6 @@ use App\Domain\DataProvider\DataProviderInterface;
 use App\Domain\Dto\Group\GetAllGroupsDto;
 use App\Domain\Entity\Group;
 use App\Domain\Repository\Common\RepositoryInterface;
-use Iterator;
 use Symfony\Component\Uid\Uuid;
 
 interface GroupRepositoryInterface extends RepositoryInterface
@@ -41,7 +40,7 @@ interface GroupRepositoryInterface extends RepositoryInterface
      *
      * @param string[] $groupNames
      *
-     * @return Iterator<int, Group>
+     * @return Group[]
      */
-    public function findByNames(array $groupNames): Iterator;
+    public function findByNames(array $groupNames): array;
 }

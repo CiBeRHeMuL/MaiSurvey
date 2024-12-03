@@ -76,7 +76,7 @@ abstract class AbstractRepository implements RepositoryInterface
         }
     }
 
-    public function createMulti(array $entities): int
+    public function createMulti(array $entities, array $replaceTables = []): int
     {
         if (empty($entities)) {
             return 0;
@@ -84,7 +84,6 @@ abstract class AbstractRepository implements RepositoryInterface
 
         $em = $this->entityManager;
         $conn = $this->entityManager->getConnection();
-        $platform = $conn->getDatabasePlatform();
 
         // Строки для вставки
         /** @var array<string, array<int, array>> $inserts */
@@ -101,6 +100,10 @@ abstract class AbstractRepository implements RepositoryInterface
         foreach ($entities as $k => &$entity) {
             $metadata = $em->getClassMetadata($entity::class);
             $tableName = $metadata->getTableName();
+            // Если есть таблица для замены, то используем ее
+            if (isset($replaceTables[$tableName])) {
+                $tableName = $replaceTables[$tableName];
+            }
 
             $rowData = [];
             $idGen = $metadata->idGenerator;
@@ -138,7 +141,6 @@ abstract class AbstractRepository implements RepositoryInterface
             $entityFieldCounts[$tableName] = $fieldsCount;
             $inserts[$tableName][$k] = $rowData;
         }
-
 
         // Выполнение SQL-запроса
         $conn->beginTransaction();
@@ -210,6 +212,102 @@ abstract class AbstractRepository implements RepositoryInterface
         }
 
         return $cnt;
+    }
+
+    public function updateMulti(array $entities): int
+    {
+        if ($entities === []) {
+            return 0;
+        }
+
+        $em = $this->getEntityManager();
+        $conn = $em->getConnection();
+
+        $conn->beginTransaction();
+
+        try {
+            // Находим все таблицы, в которых будет делаться обновление
+            // Сразу создаем временные таблицы
+            // Также запоминаем метаданные сущностей для таблиц
+            $tables = [];
+            $metadataForTables = [];
+            foreach ($entities as $entity) {
+                $metadata = $em->getClassMetadata($entity::class);
+                $table = $metadata->getTableName();
+                if (!isset($tables[$table])) {
+                    $tables[$table] = $this->createTemporaryTable($table);
+                    $metadataForTables[$table] = $metadata;
+                }
+            }
+
+            $this->createMulti($entities, $tables);
+
+            // Выполняем обновление
+            $updatesCount = 0;
+            foreach ($tables as $table => $tempTable) {
+                $metadata = $metadataForTables[$table];
+
+                $idColumns = $metadata->getIdentifierColumnNames();
+                $notIdColumns = array_diff($metadata->getColumnNames(), $idColumns);
+
+                // Создаем массив колонок, которые надо установить
+                $sets = [];
+                foreach ($notIdColumns as $column) {
+                    $sets[] = "$column = o.$column";
+                }
+                $sets = implode(', ', $sets);
+
+                // Условие для джойна таблиц
+                $where = [];
+                foreach ($idColumns as $column) {
+                    $where[] = "$table.$column = o.$column";
+                }
+                $where = implode(' AND ', $where);
+
+                // Обновляем данные
+                $updateSql = <<<SQL
+                UPDATE $table SET
+                $sets FROM $tempTable o
+                WHERE $where
+                SQL;
+
+                $result = $conn->executeQuery($updateSql);
+                $updatesCount += $result->rowCount();
+
+                $this->dropTemporaryTable($tempTable);
+            }
+
+            $conn->commit();
+
+            return $updatesCount;
+        } catch (Throwable $e) {
+            $conn->rollBack();
+            throw $e;
+        }
+    }
+
+    /**
+     * Создание временной таблицы
+     *
+     * @param string $originalTable
+     *
+     * @return string
+     * @throws \Doctrine\DBAL\Exception
+     */
+    private function createTemporaryTable(string $originalTable): string
+    {
+        $originalTable = trim($originalTable, '"');
+        $tempName = "temp_{$originalTable}_" . time();
+        $sql = "CREATE TABLE \"$tempName\" AS SELECT * FROM \"$originalTable\" WHERE FALSE;";
+        $this->getEntityManager()->getConnection()->executeQuery($sql);
+        return $tempName;
+    }
+
+    private function dropTemporaryTable(string $tempTable): void
+    {
+        $this->getEntityManager()->getConnection()->executeQuery(
+            "DROP TABLE $tempTable",
+        );
     }
 
     public function findOneByQuery(SelectQuery $query, string|null $entityClassName = null, array|null $relations = null)

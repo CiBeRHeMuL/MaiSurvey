@@ -5,6 +5,7 @@ namespace App\Domain\Service\UserData;
 use App\Domain\DataProvider\DataProviderInterface;
 use App\Domain\Dto\UserData\CreateUserDataDto;
 use App\Domain\Dto\UserData\GetAllUserDataDto;
+use App\Domain\Dto\UserData\UpdateUserDataDto;
 use App\Domain\Dto\UserDataGroup\CreateUserDataGroupDto;
 use App\Domain\Entity\UserData;
 use App\Domain\Enum\RoleEnum;
@@ -152,27 +153,51 @@ class UserDataService
         if ($dto->getFirstName() === '') {
             throw ValidationException::new([
                 new ValidationError(
-                    'name',
+                    'first_name',
                     ValidationErrorSlugEnum::AlreadyExists->getSlug(),
                     'Имя не должно быть пустым',
+                ),
+            ]);
+        } elseif (mb_strlen($dto->getFirstName()) > 255) {
+            throw ValidationException::new([
+                new ValidationError(
+                    'first_name',
+                    ValidationErrorSlugEnum::AlreadyExists->getSlug(),
+                    'Имя должно быть короче 255 символов',
                 ),
             ]);
         }
         if ($dto->getLastName() === '') {
             throw ValidationException::new([
                 new ValidationError(
-                    'name',
+                    'last_name',
                     ValidationErrorSlugEnum::AlreadyExists->getSlug(),
                     'Фамилия не должна быть пустой',
+                ),
+            ]);
+        } elseif (mb_strlen($dto->getLastName()) > 255) {
+            throw ValidationException::new([
+                new ValidationError(
+                    'last_name',
+                    ValidationErrorSlugEnum::AlreadyExists->getSlug(),
+                    'Фамилия должна быть короче 255 символов',
                 ),
             ]);
         }
         if ($dto->getPatronymic() === '') {
             throw ValidationException::new([
                 new ValidationError(
-                    'name',
+                    'patronymic',
                     ValidationErrorSlugEnum::AlreadyExists->getSlug(),
                     'Отчество не должно быть пустым',
+                ),
+            ]);
+        } elseif ($dto->getPatronymic() !== null && mb_strlen($dto->getPatronymic()) > 255) {
+            throw ValidationException::new([
+                new ValidationError(
+                    'patronymic',
+                    ValidationErrorSlugEnum::AlreadyExists->getSlug(),
+                    'Отчество должно быть короче 255 символов',
                 ),
             ]);
         }
@@ -257,6 +282,119 @@ class UserDataService
                 throw $e;
             }
             return 0;
+        }
+    }
+
+    public function validateUpdateDto(UserData $userData, UpdateUserDataDto $dto): void
+    {
+        if ($dto->getFirstName() === '') {
+            throw ValidationException::new([
+                new ValidationError(
+                    'first_name',
+                    ValidationErrorSlugEnum::AlreadyExists->getSlug(),
+                    'Имя не должно быть пустым',
+                ),
+            ]);
+        } elseif (mb_strlen($dto->getFirstName()) > 255) {
+            throw ValidationException::new([
+                new ValidationError(
+                    'first_name',
+                    ValidationErrorSlugEnum::AlreadyExists->getSlug(),
+                    'Имя должно быть короче 255 символов',
+                ),
+            ]);
+        }
+        if ($dto->getLastName() === '') {
+            throw ValidationException::new([
+                new ValidationError(
+                    'last_name',
+                    ValidationErrorSlugEnum::AlreadyExists->getSlug(),
+                    'Фамилия не должна быть пустой',
+                ),
+            ]);
+        } elseif (mb_strlen($dto->getLastName()) > 255) {
+            throw ValidationException::new([
+                new ValidationError(
+                    'last_name',
+                    ValidationErrorSlugEnum::AlreadyExists->getSlug(),
+                    'Фамилия должна быть короче 255 символов',
+                ),
+            ]);
+        }
+        if ($dto->getPatronymic() === '') {
+            throw ValidationException::new([
+                new ValidationError(
+                    'patronymic',
+                    ValidationErrorSlugEnum::AlreadyExists->getSlug(),
+                    'Отчество не должно быть пустым',
+                ),
+            ]);
+        } elseif ($dto->getPatronymic() !== null && mb_strlen($dto->getPatronymic()) > 255) {
+            throw ValidationException::new([
+                new ValidationError(
+                    'patronymic',
+                    ValidationErrorSlugEnum::AlreadyExists->getSlug(),
+                    'Отчество должно быть короче 255 символов',
+                ),
+            ]);
+        }
+
+        if ($userData->getForRole() === RoleEnum::Student && $dto->getGroup() === null) {
+            throw ValidationException::new([
+                new ValidationError(
+                    'group',
+                    ValidationErrorSlugEnum::WrongField->getSlug(),
+                    'Нельзя отвязать студента от группы',
+                ),
+            ]);
+        }
+        if ($userData->getForRole() !== RoleEnum::Student && $dto->getGroup() !== null) {
+            throw ValidationException::new([
+                new ValidationError(
+                    'group',
+                    ValidationErrorSlugEnum::WrongField->getSlug(),
+                    'Нельзя привязать группу к не студенту',
+                ),
+            ]);
+        }
+    }
+
+    /**
+     * Массовое обновление
+     *
+     * @param UserData[] $datas
+     * @param bool $transaction
+     * @param bool $throwOnError
+     *
+     * @return int
+     * @throws Throwable
+     */
+    public function updateMulti(array $datas, bool $transaction = true, bool $throwOnError = false): int
+    {
+        if (!$datas) {
+            return 0;
+        }
+        if ($transaction) {
+            $this->transactionManager->beginTransaction();
+        }
+        try {
+            $updated = $this
+                ->userDataRepository
+                ->updateMulti($datas);
+            if ($transaction) {
+                $this->transactionManager->commit();
+            }
+            return $updated;
+        } catch (Throwable $e) {
+            $this->logger->error($e);
+            if ($transaction) {
+                $this->transactionManager->rollback();
+            }
+            if ($throwOnError) {
+                throw $e;
+            } else {
+                return 0;
+            }
         }
     }
 

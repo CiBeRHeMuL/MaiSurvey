@@ -78,6 +78,7 @@ class GroupsImporter
                     ),
                 ]);
             }
+            $nameToRow[$name] = $k;
             $names[$k] = $name;
         }
 
@@ -121,7 +122,6 @@ class GroupsImporter
                 ));
             }
 
-            $nameToRow[$name] = $k;
             $createDtos[] = $createDto;
         }
 

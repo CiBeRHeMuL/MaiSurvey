@@ -11,7 +11,6 @@ use App\Domain\Entity\Group;
 use App\Domain\Repository\GroupRepositoryInterface;
 use App\Infrastructure\Db\Expr\ILikeExpr;
 use App\Infrastructure\Repository\Common\AbstractRepository;
-use Iterator;
 use Qstart\Db\QueryBuilder\DML\Expression\Expr;
 use Qstart\Db\QueryBuilder\DML\Expression\InExpr;
 use Qstart\Db\QueryBuilder\Query;
@@ -52,7 +51,7 @@ class GroupRepository extends AbstractRepository implements GroupRepositoryInter
             ->where(
                 new Expr(
                     'lower(name) = :name',
-                    ['name' => strtolower($name)],
+                    ['name' => mb_strtolower($name)],
                 ),
             );
         return $this
@@ -69,7 +68,7 @@ class GroupRepository extends AbstractRepository implements GroupRepositoryInter
             ->findOneByQuery($q, Group::class);
     }
 
-    public function findByNames(array $groupNames): Iterator
+    public function findByNames(array $groupNames): array
     {
         $q = Query::select()
             ->select(['*'])
@@ -77,9 +76,9 @@ class GroupRepository extends AbstractRepository implements GroupRepositoryInter
             ->where(
                 new InExpr(
                     'lower(name)',
-                    array_map(strtolower(...), $groupNames),
+                    array_map(mb_strtolower(...), $groupNames),
                 )
             );
-        yield from $this->findAllByQuery($q, Group::class);
+        return $this->findAllByQuery($q, Group::class);
     }
 }
