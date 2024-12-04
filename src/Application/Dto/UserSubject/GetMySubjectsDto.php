@@ -7,7 +7,7 @@ use App\Domain\Enum\SortTypeEnum;
 use App\Domain\Service\UserSubject\UserSubjectService;
 use Symfony\Component\Validator\Constraints as Assert;
 
-readonly class GetMyDto
+readonly class GetMySubjectsDto
 {
     public function __construct(
         /** Актуален ли предмет на текущий момент */

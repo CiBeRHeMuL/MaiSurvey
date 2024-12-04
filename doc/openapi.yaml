@@ -407,6 +407,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+  /roles:
+    get:
+      tags:
+        - roles
+      operationId: get_get-all-roles
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/SuccessWithPaginationResponse' }
+                  - { properties: { data: { properties: { items: { type: array, items: { $ref: '#/components/schemas/Role' } } }, type: object } }, type: object }
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 'Not Found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /subjects:
     get:
       tags:
@@ -1004,6 +1030,45 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+  /users/update:
+    post:
+      tags:
+        - user
+      summary: 'Массовое обновление пользователей'
+      operationId: post_users-update-all
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUsersDto'
+      responses:
+        '404':
+          description: 'Not Found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: 'Unprocessable Entity'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResponse'
+        '500':
+          description: 'Internal Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/SuccessResponse' }
+                  - { properties: { data: { $ref: '#/components/schemas/UpdatedUsersInfo' } }, type: object }
   /user-data/all:
     get:
       tags:
@@ -1746,7 +1811,7 @@ components:
           type: string
           nullable: true
       type: object
-    GetAllDto:
+    GetAllUsersDto:
       properties:
         roles:
           title: 'Роли для фильтрации'
@@ -1830,6 +1895,33 @@ components:
           maximum: 100
           minimum: 0
           nullable: true
+      type: object
+    UpdateUsersDto:
+      properties:
+        headers_in_first_row:
+          title: 'Находятся ли в первой строке файла заголовки для столбцов'
+          type: boolean
+          default: true
+        email_col:
+          title: 'Столбец с почтой'
+          type: string
+          default: A
+        last_name_col:
+          title: 'Столбец с фамилией'
+          type: string
+          default: B
+        first_name_col:
+          title: 'Столбец с именем'
+          type: string
+          default: C
+        patronymic_col:
+          title: 'Столбец с отчеством'
+          type: string
+          default: D
+        group_name_col:
+          title: 'Столбец с названием группы'
+          type: string
+          default: E
       type: object
     GetAllUserDataDto:
       properties:
@@ -1979,7 +2071,7 @@ components:
           type: string
           default: D
       type: object
-    GetAllDto2:
+    GetAllSubjectsDto2:
       properties:
         user_ids:
           title: 'Пользователи для фильтрации'
@@ -2036,7 +2128,7 @@ components:
           minimum: 0
           nullable: true
       type: object
-    GetMyDto:
+    GetMySubjectsDto:
       properties:
         actual:
           title: 'Актуален ли предмет на текущий момент'
@@ -2196,6 +2288,19 @@ components:
         created:
           type: integer
       type: object
+    Role:
+      required:
+        - slug
+        - name
+        - import_enabled
+      properties:
+        slug:
+          $ref: '#/components/schemas/RoleEnum'
+        name:
+          type: string
+        import_enabled:
+          type: boolean
+      type: object
     Subject:
       required:
         - id
@@ -2211,6 +2316,13 @@ components:
         - created
       properties:
         created:
+          type: integer
+      type: object
+    UpdatedUsersInfo:
+      required:
+        - updated
+      properties:
+        updated:
           type: integer
       type: object
     UserData:
@@ -2306,6 +2418,7 @@ components:
       type: string
       enum:
         - survey.view
+        - survey.view_my
         - survey.complete
         - survey.create
         - survey.update
@@ -2315,6 +2428,7 @@ components:
         - user.create
         - user.view
         - user.export
+        - user.update_all
         - user_data.import
         - user_data.view_all
         - group.create
@@ -2323,6 +2437,8 @@ components:
         - subject.import
         - user_subject.view_all
         - user_subject.view_my
+        - user_subject.import
+        - role.view_all
     PaginatedData:
       properties:
         items:
@@ -2350,6 +2466,13 @@ components:
           default: null
           nullable: true
       type: object
+    RoleEnum:
+      type: string
+      enum:
+        - admin
+        - student
+        - teacher
+        - survey_creator
     LiteUser:
       required:
         - id
@@ -2396,6 +2519,8 @@ tags:
   -
     name: user-subjects
     description: 'Ручки для работы с предметами, привязанными к пользователям'
+  - name: roles
+    description: 'Ручки для получения ролей'
   -
     name: user
 

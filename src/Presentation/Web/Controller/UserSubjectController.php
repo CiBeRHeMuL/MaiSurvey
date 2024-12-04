@@ -2,8 +2,8 @@
 
 namespace App\Presentation\Web\Controller;
 
-use App\Application\Dto\UserSubject\GetAllDto;
-use App\Application\Dto\UserSubject\GetMyDto;
+use App\Application\Dto\UserSubject\GetAllSubjectsDto;
+use App\Application\Dto\UserSubject\GetMySubjectsDto;
 use App\Application\UseCase\UserSubject\GetAllUseCase;
 use App\Application\UseCase\UserSubject\GetMyUseCase;
 use App\Domain\Enum\PermissionEnum;
@@ -36,7 +36,7 @@ class UserSubjectController extends BaseController
         LoggerInterface $logger,
         GetAllUseCase $useCase,
         #[MapQueryString]
-        GetAllDto $dto = new GetAllDto(),
+        GetAllSubjectsDto $dto = new GetAllSubjectsDto(),
     ): JsonResponse {
         $useCase->setLogger($logger);
         $provider = $useCase->execute($dto);
@@ -64,7 +64,7 @@ class UserSubjectController extends BaseController
         LoggerInterface $logger,
         GetMyUseCase $useCase,
         #[MapQueryString]
-        GetMyDto $dto = new GetMyDto(),
+        GetMySubjectsDto $dto = new GetMySubjectsDto(),
     ): JsonResponse {
         $useCase->setLogger($logger);
         $provider = $useCase->execute($this->getUser()->getUser(), $dto);

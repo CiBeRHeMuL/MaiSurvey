@@ -3,7 +3,7 @@
 namespace App\Presentation\Web\Controller;
 
 use App\Application\Dto\User\CreateFullUserDto;
-use App\Application\Dto\User\GetAllDto;
+use App\Application\Dto\User\GetAllUsersDto;
 use App\Application\UseCase\User\CreateUserUseCase;
 use App\Application\UseCase\User\GetAllUseCase;
 use App\Application\UseCase\User\MultiUpdateUseCase;
@@ -76,7 +76,7 @@ class UserController extends BaseController
         LoggerInterface $logger,
         GetAllUseCase $useCase,
         #[MapQueryString(validationFailedStatusCode: 422)]
-        GetAllDto $dto = new GetAllDto(),
+        GetAllUsersDto $dto = new GetAllUsersDto(),
     ): JsonResponse {
         $useCase->setLogger($logger);
         $dataProvider = $useCase->execute($dto);
@@ -106,7 +106,7 @@ class UserController extends BaseController
         #[Autowire('%kernel.project_dir%')]
         string $projectDir,
         #[MapQueryString(validationFailedStatusCode: 422)]
-        GetAllDto $dto = new GetAllDto(),
+        GetAllUsersDto $dto = new GetAllUsersDto(),
     ): BinaryFileResponse|JsonResponse {
         try {
             $dataExportFactory->setLogger($logger);

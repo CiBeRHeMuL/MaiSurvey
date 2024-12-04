@@ -7,7 +7,7 @@ use App\Domain\Enum\SortTypeEnum;
 use App\Domain\Service\UserSubject\UserSubjectService;
 use Symfony\Component\Validator\Constraints as Assert;
 
-readonly class GetAllDto
+readonly class GetAllSubjectsDto
 {
     public function __construct(
         /** Пользователи для фильтрации */

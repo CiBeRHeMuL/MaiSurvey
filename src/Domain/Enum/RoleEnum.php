@@ -9,6 +9,16 @@ enum RoleEnum: string
     case Teacher = 'teacher';
     case SurveyCreator = 'survey_creator';
 
+    public function getName(): string
+    {
+        return match ($this) {
+            self::Admin => 'Администратор',
+            self::Student => 'Студент',
+            self::Teacher => 'Преподаватель',
+            self::SurveyCreator => 'Создатель опросов',
+        };
+    }
+
     /**
      * Доступы роли
      * @return PermissionEnum[]
@@ -34,15 +44,18 @@ enum RoleEnum: string
                 PermissionEnum::SubjectCreate,
                 PermissionEnum::SubjectImport,
                 PermissionEnum::UserSubjectViewAll,
+                PermissionEnum::RoleViewAll,
             ],
             self::Student => [
                 PermissionEnum::SurveyComplete,
                 PermissionEnum::SurveyView,
                 PermissionEnum::SurveyViewResult,
                 PermissionEnum::UserSubjectViewMy,
+                PermissionEnum::SurveyViewMy,
             ],
             self::Teacher => [
                 PermissionEnum::UserSubjectViewMy,
+                PermissionEnum::SurveyViewMy,
             ],
             self::SurveyCreator => [
                 PermissionEnum::SurveyCreate,
@@ -68,7 +81,7 @@ enum RoleEnum: string
      *
      * @return bool
      */
-    public function importEnable(): bool
+    public function importEnabled(): bool
     {
         return match ($this) {
             self::Student,

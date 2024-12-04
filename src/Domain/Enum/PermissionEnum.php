@@ -6,6 +6,7 @@ enum PermissionEnum: string
 {
     // Survey
     case SurveyView = 'survey.view';
+    case SurveyViewMy = 'survey.view_my';
     case SurveyComplete = 'survey.complete';
     case SurveyCreate = 'survey.create';
     case SurveyUpdate = 'survey.update';
@@ -35,4 +36,7 @@ enum PermissionEnum: string
     case UserSubjectViewAll = 'user_subject.view_all';
     case UserSubjectViewMy = 'user_subject.view_my';
     case UserSubjectImport = 'user_subject.import';
+
+    // Role
+    case RoleViewAll = 'role.view_all';
 }

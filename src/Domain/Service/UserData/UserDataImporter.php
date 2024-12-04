@@ -40,7 +40,7 @@ class UserDataImporter
 
     public function import(ImportDto $dto): int
     {
-        if ($dto->getForRole()->importEnable() === false) {
+        if ($dto->getForRole()->importEnabled() === false) {
             throw ValidationException::new([
                 new ValidationError(
                     'for_role',

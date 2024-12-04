@@ -2,7 +2,7 @@
 
 namespace App\Application\UseCase\UserSubject;
 
-use App\Application\Dto\UserSubject\GetAllDto;
+use App\Application\Dto\UserSubject\GetAllSubjectsDto;
 use App\Domain\DataProvider\DataProviderInterface;
 use App\Domain\Dto\UserSubject\GetAllUserSubjectsDto;
 use App\Domain\Entity\UserSubject;
@@ -31,11 +31,11 @@ class GetAllUseCase
     }
 
     /**
-     * @param GetAllDto $dto
+     * @param GetAllSubjectsDto $dto
      *
      * @return DataProviderInterface<UserSubject>
      */
-    public function execute(GetAllDto $dto): DataProviderInterface
+    public function execute(GetAllSubjectsDto $dto): DataProviderInterface
     {
         return $this
             ->userSubjectService

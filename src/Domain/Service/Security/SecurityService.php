@@ -9,8 +9,11 @@ use DateTimeImmutable;
 class SecurityService
 {
     public function __construct(
-        private bool $infinityTokens,
+        private int|null $accessTokenExpiresIn = null,
+        private int|null $refreshTokenExpiresIn = null,
     ) {
+        $this->accessTokenExpiresIn ??= 3600;
+        $this->refreshTokenExpiresIn ??= 3600;
     }
 
     /**
@@ -23,11 +26,7 @@ class SecurityService
         return new GeneratedToken(
             HString::random(40),
             (new DateTimeImmutable())
-                ->modify(
-                    $this->infinityTokens
-                        ? '+10 years'
-                        : '+1 hour',
-                ),
+                ->modify("+$this->accessTokenExpiresIn seconds"),
         );
     }
 
@@ -41,11 +40,7 @@ class SecurityService
         return new GeneratedToken(
             HString::random(40),
             (new DateTimeImmutable())
-                ->modify(
-                    $this->infinityTokens
-                        ? '+10 years'
-                        : '+1 hour',
-                ),
+                ->modify("+$this->refreshTokenExpiresIn seconds"),
         );
     }
 }

@@ -2,9 +2,9 @@
 
 namespace App\Application\UseCase\User;
 
-use App\Application\Dto\User\GetAllDto;
+use App\Application\Dto\User\GetAllUsersDto;
 use App\Domain\DataProvider\DataProviderInterface;
-use App\Domain\Dto\User\GetAllUsersDto;
+use App\Domain\Dto\User\GetAllUsersDto as DomainGetAllUsersDto;
 use App\Domain\Entity\User;
 use App\Domain\Enum\RoleEnum;
 use App\Domain\Enum\SortTypeEnum;
@@ -33,16 +33,16 @@ class GetAllUseCase
     }
 
     /**
-     * @param GetAllDto $dto
+     * @param GetAllUsersDto $dto
      *
      * @return DataProviderInterface<User>
      */
-    public function execute(GetAllDto $dto): DataProviderInterface
+    public function execute(GetAllUsersDto $dto): DataProviderInterface
     {
         return $this
             ->userService
             ->getAll(
-                new GetAllUsersDto(
+                new DomainGetAllUsersDto(
                     $dto->roles !== null ? array_map(RoleEnum::from(...), $dto->roles) : null,
                     $dto->name,
                     $dto->email,

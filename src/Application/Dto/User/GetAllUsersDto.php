@@ -9,7 +9,7 @@ use App\Domain\Enum\UserStatusEnum;
 use App\Domain\Service\User\UserService;
 use Symfony\Component\Validator\Constraints as Assert;
 
-readonly class GetAllDto
+readonly class GetAllUsersDto
 {
     public function __construct(
         /** Роли для фильтрации */
