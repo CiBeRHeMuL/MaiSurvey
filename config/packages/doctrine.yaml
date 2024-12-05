@@ -11,6 +11,8 @@ doctrine:
     types:
       text[]: App\Domain\Db\Dbal\Types\TextArrayType
       email: App\Domain\Db\Dbal\Types\EmailType
+      item_data: App\Domain\Db\Dbal\Types\ItemDataType
+      answer_data: App\Domain\Db\Dbal\Types\AnswerDataType
   orm:
     auto_generate_proxy_classes: true
     enable_lazy_ghost_objects: true

@@ -4,8 +4,52 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b68818be80e3d9e0efbe5d7fa15af682",
+    "content-hash": "eda89d15028ddf9b402832e9d509ab40",
     "packages": [
+        {
+            "name": "andrew-gos/class-builder",
+            "version": "1.2.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/CiBeRHeMuL/ClassBuilder.git",
+                "reference": "5c1a8a3b1ba0511d78249fa6832a082f203203ca"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/CiBeRHeMuL/ClassBuilder/zipball/5c1a8a3b1ba0511d78249fa6832a082f203203ca",
+                "reference": "5c1a8a3b1ba0511d78249fa6832a082f203203ca",
+                "shasum": ""
+            },
+            "require": {
+                "ext-ctype": "*",
+                "php": ">=8.2"
+            },
+            "require-dev": {
+                "phpunit/phpunit": ">=11.2"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "AndrewGos\\ClassBuilder\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Andrey Gostev",
+                    "email": "Gostev71@outlook.com"
+                }
+            ],
+            "description": "Advanced library for building objects from arrays or other types",
+            "support": {
+                "issues": "https://github.com/CiBeRHeMuL/ClassBuilder/issues",
+                "source": "https://github.com/CiBeRHeMuL/ClassBuilder/tree/1.2.2"
+            },
+            "time": "2024-09-26T12:11:38+00:00"
+        },
         {
             "name": "doctrine/cache",
             "version": "2.2.0",
@@ -8939,5 +8983,5 @@
         "ext-iconv": "*"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.6.0"
+    "plugin-api-version": "2.2.0"
 }

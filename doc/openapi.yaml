@@ -618,6 +618,98 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+  /surveys/my:
+    get:
+      operationId: get_survey-get-my
+      parameters:
+        -
+          name: 'subject_ids[]'
+          in: query
+          required: false
+          schema:
+            title: 'Предметы для фильтрации'
+            type: array
+            items: {  }
+            default: null
+            maxItems: 50
+            nullable: true
+        -
+          name: completed
+          in: query
+          required: false
+          schema:
+            title: 'Завершен ли опрос'
+            type: boolean
+            default: null
+            nullable: true
+        -
+          name: sort_by
+          in: query
+          required: false
+          schema:
+            title: 'Сортировка по'
+            type: string
+            default: created_at
+            enum:
+              - name
+              - completed
+              - created_at
+        -
+          name: sort_type
+          in: query
+          required: false
+          schema:
+            title: 'Тип сортировки'
+            type: string
+            default: asc
+            enum:
+              - asc
+              - desc
+        -
+          name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+        -
+          name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 100
+            maximum: 100
+            minimum: 0
+            nullable: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/SuccessWithPaginationResponse' }
+                  - { properties: { data: { properties: { items: { type: array, items: { $ref: '#/components/schemas/MySurvey' } } }, type: object } }, type: object }
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 'Not Found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: 'Unprocessable Entity'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResponse'
   /user:
     post:
       tags:
@@ -1771,6 +1863,46 @@ components:
           type: string
           default: A
       type: object
+    GetMySurveysDto:
+      properties:
+        subject_ids:
+          title: 'Предметы для фильтрации'
+          type: array
+          items: {  }
+          default: null
+          maxItems: 50
+          nullable: true
+        completed:
+          title: 'Завершен ли опрос'
+          type: boolean
+          default: null
+          nullable: true
+        sort_by:
+          title: 'Сортировка по'
+          type: string
+          default: created_at
+          enum:
+            - name
+            - completed
+            - created_at
+        sort_type:
+          title: 'Тип сортировки'
+          type: string
+          default: asc
+          enum:
+            - asc
+            - desc
+        offset:
+          type: integer
+          default: 0
+          minimum: 0
+        limit:
+          type: integer
+          default: 100
+          maximum: 100
+          minimum: 0
+          nullable: true
+      type: object
     CreateFullUserDto:
       required:
         - email
@@ -2318,6 +2450,20 @@ components:
         created:
           type: integer
       type: object
+    MySurvey:
+      required:
+        - survey
+        - completed
+      properties:
+        survey:
+          $ref: '#/components/schemas/Survey'
+        completed:
+          type: boolean
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+      type: object
     UpdatedUsersInfo:
       required:
         - updated
@@ -2473,6 +2619,21 @@ components:
         - student
         - teacher
         - survey_creator
+    Survey:
+      required:
+        - id
+        - subject
+      properties:
+        id:
+          type: string
+        subject:
+          $ref: '#/components/schemas/Subject'
+        teacher:
+          nullable: true
+          oneOf:
+            -
+              $ref: '#/components/schemas/LiteUser'
+      type: object
     LiteUser:
       required:
         - id
@@ -2519,7 +2680,8 @@ tags:
   -
     name: user-subjects
     description: 'Ручки для работы с предметами, привязанными к пользователям'
-  - name: roles
+  -
+    name: roles
     description: 'Ручки для получения ролей'
   -
     name: user

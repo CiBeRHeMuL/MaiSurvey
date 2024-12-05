@@ -55,7 +55,6 @@ enum RoleEnum: string
             ],
             self::Teacher => [
                 PermissionEnum::UserSubjectViewMy,
-                PermissionEnum::SurveyViewMy,
             ],
             self::SurveyCreator => [
                 PermissionEnum::SurveyCreate,
