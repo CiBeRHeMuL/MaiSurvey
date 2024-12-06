@@ -2,6 +2,7 @@
 
 namespace App\Domain\Entity;
 
+use App\Domain\Dto\SurveyItem\ItemDataInterface;
 use App\Domain\Enum\SurveyItemTypeEnum;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
@@ -27,6 +28,8 @@ class SurveyItem
     private string $text;
     #[ORM\Column(type: 'integer', nullable: false)]
     private int $position;
+    #[ORM\Column(type: 'item_data', nullable: false, options: ['jsonb' => true])]
+    private ItemDataInterface $data;
     #[ORM\Column(name: 'created_at', type: 'datetime_immutable', nullable: false, options: ['default' => 'CURRENT_TIMESTAMP'])]
     private DateTimeImmutable $createdAt;
 
@@ -97,6 +100,17 @@ class SurveyItem
     public function setPosition(int $position): SurveyItem
     {
         $this->position = $position;
+        return $this;
+    }
+
+    public function getData(): ItemDataInterface
+    {
+        return $this->data;
+    }
+
+    public function setData(ItemDataInterface $data): SurveyItem
+    {
+        $this->data = $data;
         return $this;
     }
 

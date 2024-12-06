@@ -3,7 +3,9 @@
 namespace App\Domain\Service\Survey;
 
 use App\Domain\DataProvider\DataProviderInterface;
+use App\Domain\Dto\Survey\GetMySurveyByIdDto;
 use App\Domain\Dto\Survey\GetMySurveysDto;
+use App\Domain\Entity\MySurvey;
 use App\Domain\Entity\User;
 use App\Domain\Enum\ValidationErrorSlugEnum;
 use App\Domain\Exception\ValidationException;
@@ -45,5 +47,12 @@ class SurveyService
         return $this
             ->surveyRepository
             ->findMy($user, $dto);
+    }
+
+    public function getMyById(User $user, GetMySurveyByIdDto $dto): MySurvey|null
+    {
+        return $this
+            ->surveyRepository
+            ->findMyById($user, $dto);
     }
 }

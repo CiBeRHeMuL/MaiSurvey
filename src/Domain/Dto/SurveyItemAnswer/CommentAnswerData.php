@@ -4,11 +4,10 @@ namespace App\Domain\Dto\SurveyItemAnswer;
 
 use AndrewGos\ClassBuilder\Attribute as MA;
 use AndrewGos\ClassBuilder\Checker\FieldIsChecker;
-use App\Domain\Dto\SurveyItem\ItemDataInterface;
 use App\Domain\Enum\SurveyItemTypeEnum;
 
 #[MA\BuildIf(new FieldIsChecker('type', SurveyItemTypeEnum::Comment->value))]
-readonly class CommentAnswerData implements ItemDataInterface
+readonly class CommentAnswerData implements AnswerDataInterface
 {
     /**
      * @param SurveyItemTypeEnum $type

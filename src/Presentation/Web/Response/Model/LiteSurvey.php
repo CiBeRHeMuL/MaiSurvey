@@ -5,19 +5,12 @@ namespace App\Presentation\Web\Response\Model;
 use App\Domain\Entity\MySurvey as DomainMySurvey;
 use App\Domain\Entity\Survey as DomainSurvey;
 
-readonly class Survey
+readonly class LiteSurvey
 {
-    /**
-     * @param string $id
-     * @param Subject $subject
-     * @param LiteUser|null $teacher
-     * @param SurveyItem[] $items
-     */
     public function __construct(
         public string $id,
         public Subject $subject,
         public LiteUser|null $teacher,
-        public array $items,
     ) {
     }
 
@@ -29,10 +22,6 @@ readonly class Survey
             $survey->getTeacher() !== null
                 ? LiteUser::fromUser($survey->getTeacher())
                 : null,
-            array_map(
-                SurveyItem::fromItem(...),
-                $survey->getItems()->toArray(),
-            ),
         );
     }
 
@@ -44,10 +33,6 @@ readonly class Survey
             $survey->getSurvey()->getTeacher() !== null
                 ? LiteUser::fromUser($survey->getSurvey()->getTeacher())
                 : null,
-            array_map(
-                SurveyItem::fromItem(...),
-                $survey->getSurvey()->getItems()->toArray(),
-            ),
         );
     }
 }

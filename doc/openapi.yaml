@@ -620,7 +620,9 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
   /surveys/my:
     get:
-      operationId: get_survey-get-my
+      tags:
+        - surveys
+      operationId: get_survey-get-all-my
       parameters:
         -
           name: 'subject_ids[]'
@@ -691,7 +693,56 @@ paths:
               schema:
                 allOf:
                   - { $ref: '#/components/schemas/SuccessWithPaginationResponse' }
-                  - { properties: { data: { properties: { items: { type: array, items: { $ref: '#/components/schemas/MySurvey' } } }, type: object } }, type: object }
+                  - { properties: { data: { properties: { items: { type: array, items: { $ref: '#/components/schemas/LiteMySurvey' } } }, type: object } }, type: object }
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 'Not Found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: 'Unprocessable Entity'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResponse'
+  '/surveys/my/{id}':
+    get:
+      tags:
+        - surveys
+      operationId: get_survey-get-my-by-id
+      parameters:
+        -
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '[0-9a-f]{8}-[0-9a-f]{4}-[13-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}'
+        -
+          name: completed
+          in: query
+          required: false
+          schema:
+            title: 'Завершен ли опрос'
+            type: boolean
+            default: null
+            nullable: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/SuccessResponse' }
+                  - { properties: { data: { $ref: '#/components/schemas/MySurvey' } }, type: object }
         '401':
           description: Unauthorized
           content:
@@ -713,7 +764,7 @@ paths:
   /user:
     post:
       tags:
-        - user
+        - users
       summary: 'Создание пользователя'
       operationId: post_create-full-user
       requestBody:
@@ -764,7 +815,7 @@ paths:
   /users:
     get:
       tags:
-        - user
+        - users
       summary: 'Получить всех пользователей с пагинацией и сортировкой'
       operationId: get_get-all-users
       parameters:
@@ -944,7 +995,7 @@ paths:
   '/users/export/{exportType}':
     get:
       tags:
-        - user
+        - users
       summary: 'Экспорт пользователей в файл'
       operationId: get_users-export-to-file
       parameters:
@@ -1125,7 +1176,7 @@ paths:
   /users/update:
     post:
       tags:
-        - user
+        - users
       summary: 'Массовое обновление пользователей'
       operationId: post_users-update-all
       requestBody:
@@ -1903,6 +1954,14 @@ components:
           minimum: 0
           nullable: true
       type: object
+    GetMySurveyByIdDto:
+      properties:
+        completed:
+          title: 'Завершен ли опрос'
+          type: boolean
+          default: null
+          nullable: true
+      type: object
     CreateFullUserDto:
       required:
         - email
@@ -2450,6 +2509,20 @@ components:
         created:
           type: integer
       type: object
+    LiteMySurvey:
+      required:
+        - survey
+        - completed
+      properties:
+        survey:
+          $ref: '#/components/schemas/LiteSurvey'
+        completed:
+          type: boolean
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+      type: object
     MySurvey:
       required:
         - survey
@@ -2619,7 +2692,7 @@ components:
         - student
         - teacher
         - survey_creator
-    Survey:
+    LiteSurvey:
       required:
         - id
         - subject
@@ -2633,6 +2706,26 @@ components:
           oneOf:
             -
               $ref: '#/components/schemas/LiteUser'
+      type: object
+    Survey:
+      required:
+        - id
+        - subject
+        - items
+      properties:
+        id:
+          type: string
+        subject:
+          $ref: '#/components/schemas/Subject'
+        teacher:
+          nullable: true
+          oneOf:
+            -
+              $ref: '#/components/schemas/LiteUser'
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/SurveyItem'
       type: object
     LiteUser:
       required:
@@ -2649,6 +2742,81 @@ components:
           oneOf:
             -
               $ref: '#/components/schemas/UserData'
+      type: object
+    SurveyItem:
+      required:
+        - id
+        - survey_id
+        - answer_required
+        - type
+        - text
+        - position
+        - data
+      properties:
+        id:
+          type: string
+        survey_id:
+          type: string
+        answer_required:
+          type: boolean
+        type:
+          type: string
+        text:
+          type: string
+        position:
+          type: integer
+        data:
+          oneOf:
+            -
+              $ref: '#/components/schemas/ChoiceItemData'
+            -
+              $ref: '#/components/schemas/MultiChoiceItemData'
+            -
+              $ref: '#/components/schemas/CommentItemData'
+      type: object
+    ChoiceItemData:
+      required:
+        - type
+        - choices
+      properties:
+        type:
+          type: string
+        choices:
+          type: array
+          items:
+            $ref: '#/components/schemas/Choice'
+      type: object
+    MultiChoiceItemData:
+      required:
+        - type
+        - choices
+      properties:
+        type:
+          type: string
+        choices:
+          type: array
+          items:
+            $ref: '#/components/schemas/Choice'
+      type: object
+    CommentItemData:
+      required:
+        - type
+      properties:
+        type:
+          type: string
+        placeholder:
+          type: string
+          nullable: true
+      type: object
+    Choice:
+      required:
+        - text
+        - value
+      properties:
+        text:
+          type: string
+        value:
+          type: string
       type: object
   securitySchemes:
     Bearer:
@@ -2675,6 +2843,9 @@ tags:
     name: me
     description: 'Ручки для работы с "собой"'
   -
+    name: users
+    description: 'Ручки для работы с пользователями'
+  -
     name: subjects
     description: 'Ручки для работы с предметами'
   -
@@ -2684,5 +2855,6 @@ tags:
     name: roles
     description: 'Ручки для получения ролей'
   -
-    name: user
+    name: surveys
+    description: 'Ручки для работы с опросами'
 

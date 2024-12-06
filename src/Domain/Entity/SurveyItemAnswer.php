@@ -19,8 +19,8 @@ class SurveyItemAnswer
     private Uuid|null $id = null;
     #[ORM\Column(name: 'survey_item_id', type: 'uuid', nullable: false)]
     private Uuid $surveyItemId;
-    #[ORM\Column(type: 'answer_data', nullable: false)]
-    private AnswerDataInterface $answer;
+    #[ORM\Column(type: 'answer_data', nullable: true, options: ['jsonb' => true])]
+    private AnswerDataInterface|null $answer;
     #[ORM\Column(name: 'created_at', type: 'datetime_immutable', nullable: false, options: ['default' => 'CURRENT_TIMESTAMP'])]
     private DateTimeImmutable $createdAt;
 

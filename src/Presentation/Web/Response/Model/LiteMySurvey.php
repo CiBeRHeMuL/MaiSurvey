@@ -5,15 +5,10 @@ namespace App\Presentation\Web\Response\Model;
 use App\Domain\Entity\MySurvey as DomainMySurvey;
 use OpenApi\Attributes as OA;
 
-readonly class MySurvey
+readonly class LiteMySurvey
 {
-    /**
-     * @param Survey $survey
-     * @param bool $completed
-     * @param string|null $completed_at
-     */
     public function __construct(
-        public Survey $survey,
+        public LiteSurvey $survey,
         public bool $completed,
         #[OA\Property(format: 'date-time')]
         public string|null $completed_at,
@@ -23,7 +18,7 @@ readonly class MySurvey
     public static function fromMySurvey(DomainMySurvey $survey): self
     {
         return new self(
-            Survey::fromMySurvey($survey),
+            LiteSurvey::fromMySurvey($survey),
             $survey->isCompleted(),
             $survey->getCompletedAt()?->format(DATE_RFC3339),
         );

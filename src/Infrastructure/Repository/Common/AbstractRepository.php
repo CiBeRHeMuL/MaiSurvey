@@ -315,7 +315,7 @@ abstract class AbstractRepository implements RepositoryInterface
         $query->limit(1);
         if ($entityClassName) {
             if ($relations) {
-                return $this->findWithRelations($query, $entityClassName, $relations);
+                return $this->findWithRelations($query, $entityClassName, $relations, true);
             }
             return $this->getEmNativeQuery($entityClassName, $query)->getOneOrNullResult();
         } else {
@@ -451,13 +451,15 @@ abstract class AbstractRepository implements RepositoryInterface
      * Поиск с учетом релейшенов
      *
      * @template T of object
-     * @param SelectQuery $query
-     * @param string $class
-     * @param string[] $relations
      *
-     * @return T[]
+     * @param SelectQuery $query
+     * @param class-string<T> $class
+     * @param string[] $relations
+     * @param bool $one
+     *
+     * @return ($one is false ? T[] : T)
      */
-    protected function findWithRelations(SelectQuery $query, string $class, array $relations): array
+    protected function findWithRelations(SelectQuery $query, string $class, array $relations, bool $one = false): array|object
     {
         $metadata = $this->getEntityManager()->getClassMetadata($class);
 
@@ -515,6 +517,9 @@ abstract class AbstractRepository implements RepositoryInterface
             }
         }
 
+        if ($one) {
+            return $qb->getQuery()->getOneOrNullResult();
+        }
         // Выполняем запрос и получаем сущности с подгруженными ассоциациями
         return $qb->getQuery()->getResult();
     }
