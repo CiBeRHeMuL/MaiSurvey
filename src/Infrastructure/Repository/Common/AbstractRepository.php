@@ -457,9 +457,9 @@ abstract class AbstractRepository implements RepositoryInterface
      * @param string[] $relations
      * @param bool $one
      *
-     * @return ($one is false ? T[] : T)
+     * @return ($one is false ? T[] : (T|null))
      */
-    protected function findWithRelations(SelectQuery $query, string $class, array $relations, bool $one = false): array|object
+    protected function findWithRelations(SelectQuery $query, string $class, array $relations, bool $one = false): array|object|null
     {
         $metadata = $this->getEntityManager()->getClassMetadata($class);
 
@@ -471,6 +471,10 @@ abstract class AbstractRepository implements RepositoryInterface
 
         // Получаем id сущностей из запроса (ВАЖНО, названия полей в id это названия колонок, а не свойств сущности)
         $ids = $this->findAllByQuery($idQuery);
+
+        if ($ids === []) {
+            return $one === true ? null : [];
+        }
 
         // Формируем DQL-запрос для подгрузки ассоциаций с учетом сложных ключей
         $qb = $this->getEntityManager()->createQueryBuilder()->select('e')->from("$class", 'e');
