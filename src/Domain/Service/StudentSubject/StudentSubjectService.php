@@ -1,19 +1,19 @@
 <?php
 
-namespace App\Domain\Service\UserSubject;
+namespace App\Domain\Service\StudentSubject;
 
 use App\Domain\DataProvider\DataProviderInterface;
-use App\Domain\Dto\UserSubject\GetAllUserSubjectsDto;
-use App\Domain\Dto\UserSubject\GetMyUserSubjectsDto;
+use App\Domain\Dto\StudentSubject\GetAllStudentSubjectsDto;
+use App\Domain\Dto\StudentSubject\GetMyStudentSubjectsDto;
+use App\Domain\Entity\StudentSubject;
 use App\Domain\Entity\User;
-use App\Domain\Entity\UserSubject;
 use App\Domain\Enum\ValidationErrorSlugEnum;
 use App\Domain\Exception\ValidationException;
-use App\Domain\Repository\UserSubjectRepositoryInterface;
+use App\Domain\Repository\StudentSubjectRepositoryInterface;
 use App\Domain\Validation\ValidationError;
 use Psr\Log\LoggerInterface;
 
-class UserSubjectService
+class StudentSubjectService
 {
     public const array GET_ALL_SORT = ['name', 'actual_from', 'actual_to'];
 
@@ -21,23 +21,23 @@ class UserSubjectService
 
     public function __construct(
         LoggerInterface $logger,
-        private UserSubjectRepositoryInterface $userSubjectRepository,
+        private StudentSubjectRepositoryInterface $userSubjectRepository,
     ) {
         $this->setLogger($logger);
     }
 
-    public function setLogger(LoggerInterface $logger): UserSubjectService
+    public function setLogger(LoggerInterface $logger): StudentSubjectService
     {
         $this->logger = $logger;
         return $this;
     }
 
     /**
-     * @param GetAllUserSubjectsDto $dto
+     * @param GetAllStudentSubjectsDto $dto
      *
-     * @return DataProviderInterface<UserSubject>
+     * @return DataProviderInterface<StudentSubject>
      */
-    public function getAll(GetAllUserSubjectsDto $dto): DataProviderInterface
+    public function getAll(GetAllStudentSubjectsDto $dto): DataProviderInterface
     {
         if (!in_array($dto->getSortBy(), self::GET_ALL_SORT, true)) {
             throw ValidationException::new([
@@ -56,11 +56,11 @@ class UserSubjectService
 
     /**
      * @param User $user
-     * @param GetMyUserSubjectsDto $dto
+     * @param GetMyStudentSubjectsDto $dto
      *
-     * @return DataProviderInterface<UserSubject>
+     * @return DataProviderInterface<StudentSubject>
      */
-    public function getMy(User $user, GetMyUserSubjectsDto $dto): DataProviderInterface
+    public function getMy(User $user, GetMyStudentSubjectsDto $dto): DataProviderInterface
     {
         if (!in_array($dto->getSortBy(), self::GET_ALL_SORT, true)) {
             throw ValidationException::new([

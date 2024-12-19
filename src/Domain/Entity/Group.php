@@ -16,7 +16,7 @@ class Group
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
     #[ORM\CustomIdGenerator(UuidGenerator::class)]
     #[ORM\Column(type: UuidType::NAME, nullable: false)]
-    private Uuid|null $id = null;
+    private Uuid $id;
     #[ORM\Column(type: 'string', length: 255, unique: true, nullable: false)]
     private string $name;
     #[ORM\Column(name: 'created_at', type: 'datetime_immutable', nullable: false, options: ['default' => 'CURRENT_TIMESTAMP'])]
@@ -24,12 +24,12 @@ class Group
     #[ORM\Column(name: 'updated_at', type: 'datetime_immutable', nullable: false, options: ['default' => 'CURRENT_TIMESTAMP'])]
     private DateTimeImmutable $updatedAt;
 
-    public function getId(): Uuid|null
+    public function getId(): Uuid
     {
         return $this->id;
     }
 
-    public function setId(Uuid|null $id): Group
+    public function setId(Uuid $id): Group
     {
         $this->id = $id;
         return $this;

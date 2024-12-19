@@ -13,9 +13,9 @@ class UserDataGroup
 {
     #[ORM\Id]
     #[ORM\Column(type: UuidType::NAME, nullable: false)]
-    private Uuid|null $user_data_id = null;
+    private Uuid $user_data_id;
     #[ORM\Column(type: UuidType::NAME, nullable: false)]
-    private Uuid|null $group_id = null;
+    private Uuid $group_id;
     #[ORM\Column(name: 'created_at', type: 'datetime_immutable', nullable: false, options: ['default' => 'CURRENT_TIMESTAMP'])]
     private DateTimeImmutable $createdAt;
     #[ORM\Column(name: 'updated_at', type: 'datetime_immutable', nullable: false, options: ['default' => 'CURRENT_TIMESTAMP'])]
@@ -29,23 +29,23 @@ class UserDataGroup
     #[ORM\JoinColumn(name: 'group_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
     private Group $group;
 
-    public function getUserDataId(): Uuid|null
+    public function getUserDataId(): Uuid
     {
         return $this->user_data_id;
     }
 
-    public function setUserDataId(Uuid|null $user_data_id): UserDataGroup
+    public function setUserDataId(Uuid $user_data_id): UserDataGroup
     {
         $this->user_data_id = $user_data_id;
         return $this;
     }
 
-    public function getGroupId(): Uuid|null
+    public function getGroupId(): Uuid
     {
         return $this->group_id;
     }
 
-    public function setGroupId(Uuid|null $group_id): UserDataGroup
+    public function setGroupId(Uuid $group_id): UserDataGroup
     {
         $this->group_id = $group_id;
         return $this;

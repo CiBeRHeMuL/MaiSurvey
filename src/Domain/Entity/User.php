@@ -22,7 +22,7 @@ class User
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
     #[ORM\CustomIdGenerator(UuidGenerator::class)]
     #[ORM\Column(type: UuidType::NAME, nullable: false)]
-    private Uuid|null $id = null;
+    private Uuid $id;
     #[ORM\Column(type: 'string', length: 255, nullable: false, enumType: UserStatusEnum::class)]
     private UserStatusEnum $status;
     #[ORM\Column(type: 'text[]', nullable: false, enumType: RoleEnum::class)]
@@ -50,11 +50,11 @@ class User
 
     #[ORM\OneToOne(targetEntity: UserData::class, mappedBy: 'user', cascade: ['persist'])]
     private UserData|null $data = null;
-    /** @var Collection<UserSubject> $studyingSubjects */
-    #[ORM\OneToMany(targetEntity: UserSubject::class, mappedBy: 'user')]
+    /** @var Collection<StudentSubject> $studyingSubjects */
+    #[ORM\OneToMany(targetEntity: StudentSubject::class, mappedBy: 'user')]
     private Collection $studyingSubjects;
-    /** @var Collection<UserSubject> $teachingSubjects */
-    #[ORM\OneToMany(targetEntity: UserSubject::class, mappedBy: 'teacher')]
+    /** @var Collection<TeacherSubject> $teachingSubjects */
+    #[ORM\OneToMany(targetEntity: TeacherSubject::class, mappedBy: 'teacher')]
     private Collection $teachingSubjects;
 
     public function __construct()
@@ -63,7 +63,7 @@ class User
         $this->teachingSubjects = new ArrayCollection();
     }
 
-    public function getId(): Uuid|null
+    public function getId(): Uuid
     {
         return $this->id;
     }

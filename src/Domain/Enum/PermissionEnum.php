@@ -33,9 +33,9 @@ enum PermissionEnum: string
     case SubjectImport = 'subject.import';
 
     // User Subject
-    case UserSubjectViewAll = 'user_subject.view_all';
-    case UserSubjectViewMy = 'user_subject.view_my';
-    case UserSubjectImport = 'user_subject.import';
+    case StudentSubjectViewAll = 'student_subject.view_all';
+    case StudentSubjectViewMy = 'student_subject.view_my';
+    case StudentSubjectImport = 'student_subject.import';
 
     // Role
     case RoleViewAll = 'role.view_all';

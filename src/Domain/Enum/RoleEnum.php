@@ -43,18 +43,17 @@ enum RoleEnum: string
                 PermissionEnum::GroupImport,
                 PermissionEnum::SubjectCreate,
                 PermissionEnum::SubjectImport,
-                PermissionEnum::UserSubjectViewAll,
+                PermissionEnum::StudentSubjectViewAll,
                 PermissionEnum::RoleViewAll,
             ],
             self::Student => [
                 PermissionEnum::SurveyComplete,
                 PermissionEnum::SurveyView,
                 PermissionEnum::SurveyViewResult,
-                PermissionEnum::UserSubjectViewMy,
+                PermissionEnum::StudentSubjectViewMy,
                 PermissionEnum::SurveyViewMy,
             ],
             self::Teacher => [
-                PermissionEnum::UserSubjectViewMy,
             ],
             self::SurveyCreator => [
                 PermissionEnum::SurveyCreate,

@@ -433,6 +433,260 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+  /student-subjects:
+    get:
+      tags:
+        - student-subjects
+      summary: 'Список предметов пользователей с пагинацией и фильтрацией'
+      operationId: get_get-all-student-subjects
+      parameters:
+        -
+          name: 'user_ids[]'
+          in: query
+          required: false
+          schema:
+            title: 'Пользователи для фильтрации'
+            type: array
+            items: {  }
+            default: null
+            maxItems: 50
+            nullable: true
+        -
+          name: 'teacher_ids[]'
+          in: query
+          required: false
+          schema:
+            title: 'Преподаватели для фильтрации'
+            type: array
+            items: {  }
+            default: null
+            maxItems: 50
+            nullable: true
+        -
+          name: 'subject_ids[]'
+          in: query
+          required: false
+          schema:
+            title: 'Предметы для фильтрации'
+            type: array
+            items: {  }
+            default: null
+            maxItems: 50
+            nullable: true
+        -
+          name: is_actual_from
+          in: query
+          required: false
+          schema:
+            title: 'Был актуален с'
+            type: string
+            nullable: true
+        -
+          name: is_actual_to
+          in: query
+          required: false
+          schema:
+            title: 'Был актуален до'
+            type: string
+            nullable: true
+        -
+          name: sort_by
+          in: query
+          required: false
+          schema:
+            title: 'Сортировка по'
+            type: string
+            default: name
+            enum:
+              - name
+              - actual_from
+              - actual_to
+        -
+          name: sort_type
+          in: query
+          required: false
+          schema:
+            title: 'Тип сортировки'
+            type: string
+            default: asc
+            enum:
+              - asc
+              - desc
+        -
+          name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+        -
+          name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 100
+            maximum: 100
+            minimum: 0
+            nullable: true
+      responses:
+        '500':
+          description: 'Internal Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: 'Unprocessable Entity'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResponse'
+        '400':
+          description: 'Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 'Not Found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/SuccessWithPaginationResponse' }
+                  - { properties: { data: { properties: { items: { type: array, items: { $ref: '#/components/schemas/StudentSubject' } } }, type: object } }, type: object }
+  /student-subjects/my:
+    get:
+      tags:
+        - student-subjects
+      summary: 'Список моих предметов с пагинацией и фильтрацией'
+      operationId: get_get-my-student-subjects
+      parameters:
+        -
+          name: actual
+          in: query
+          required: false
+          schema:
+            title: 'Актуален ли предмет на текущий момент'
+            type: boolean
+            default: null
+            nullable: true
+        -
+          name: 'subject_ids[]'
+          in: query
+          required: false
+          schema:
+            title: 'Предметы для фильтрации'
+            type: array
+            items: {  }
+            default: null
+            maxItems: 50
+            nullable: true
+        -
+          name: 'teacher_ids[]'
+          in: query
+          required: false
+          schema:
+            title: 'Преподаватели для фильтрации'
+            type: array
+            items: {  }
+            default: null
+            maxItems: 50
+            nullable: true
+        -
+          name: sort_by
+          in: query
+          required: false
+          schema:
+            title: 'Сортировка по'
+            type: string
+            default: name
+            enum:
+              - name
+              - actual_from
+              - actual_to
+        -
+          name: sort_type
+          in: query
+          required: false
+          schema:
+            title: 'Тип сортировки'
+            type: string
+            default: asc
+            enum:
+              - asc
+              - desc
+        -
+          name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+        -
+          name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 100
+            maximum: 100
+            minimum: 0
+            nullable: true
+      responses:
+        '500':
+          description: 'Internal Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: 'Unprocessable Entity'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResponse'
+        '400':
+          description: 'Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 'Not Found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/SuccessWithPaginationResponse' }
+                  - { properties: { data: { properties: { items: { type: array, items: { $ref: '#/components/schemas/MyStudentSubject' } } }, type: object } }, type: object }
   /subjects:
     get:
       tags:
@@ -1519,249 +1773,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-  /user-subjects:
-    get:
-      tags:
-        - user-subjects
-      summary: 'Список предметов пользователей с пагинацией и фильтрацией'
-      operationId: get_get-all-user-subjects
-      parameters:
-        -
-          name: 'user_ids[]'
-          in: query
-          required: false
-          schema:
-            title: 'Пользователи для фильтрации'
-            type: array
-            items: {  }
-            default: null
-            maxItems: 50
-            nullable: true
-        -
-          name: 'teacher_ids[]'
-          in: query
-          required: false
-          schema:
-            title: 'Преподаватели для фильтрации'
-            type: array
-            items: {  }
-            default: null
-            maxItems: 50
-            nullable: true
-        -
-          name: 'subject_ids[]'
-          in: query
-          required: false
-          schema:
-            title: 'Предметы для фильтрации'
-            type: array
-            items: {  }
-            default: null
-            maxItems: 50
-            nullable: true
-        -
-          name: is_actual_from
-          in: query
-          required: false
-          schema:
-            title: 'Был актуален с'
-            type: string
-            nullable: true
-        -
-          name: is_actual_to
-          in: query
-          required: false
-          schema:
-            title: 'Был актуален до'
-            type: string
-            nullable: true
-        -
-          name: sort_by
-          in: query
-          required: false
-          schema:
-            title: 'Сортировка по'
-            type: string
-            default: name
-            enum:
-              - name
-              - actual_from
-              - actual_to
-        -
-          name: sort_type
-          in: query
-          required: false
-          schema:
-            title: 'Тип сортировки'
-            type: string
-            default: asc
-            enum:
-              - asc
-              - desc
-        -
-          name: offset
-          in: query
-          required: false
-          schema:
-            type: integer
-            default: 0
-            minimum: 0
-        -
-          name: limit
-          in: query
-          required: false
-          schema:
-            type: integer
-            default: 100
-            maximum: 100
-            minimum: 0
-            nullable: true
-      responses:
-        '500':
-          description: 'Internal Server Error'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '422':
-          description: 'Unprocessable Entity'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ValidationResponse'
-        '400':
-          description: 'Bad Request'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '401':
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '404':
-          description: 'Not Found'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - { $ref: '#/components/schemas/SuccessWithPaginationResponse' }
-                  - { properties: { data: { properties: { items: { type: array, items: { $ref: '#/components/schemas/UserSubject' } } }, type: object } }, type: object }
-  /user-subjects/my:
-    get:
-      tags:
-        - user-subjects
-      summary: 'Список моих предметов с пагинацией и фильтрацией'
-      operationId: get_get-my-user-subjects
-      parameters:
-        -
-          name: actual
-          in: query
-          required: false
-          schema:
-            title: 'Актуален ли предмет на текущий момент'
-            type: boolean
-            default: null
-            nullable: true
-        -
-          name: 'subject_ids[]'
-          in: query
-          required: false
-          schema:
-            title: 'Предметы для фильтрации'
-            type: array
-            items: {  }
-            default: null
-            maxItems: 50
-            nullable: true
-        -
-          name: sort_by
-          in: query
-          required: false
-          schema:
-            title: 'Сортировка по'
-            type: string
-            default: name
-            enum:
-              - name
-              - actual_from
-              - actual_to
-        -
-          name: sort_type
-          in: query
-          required: false
-          schema:
-            title: 'Тип сортировки'
-            type: string
-            default: asc
-            enum:
-              - asc
-              - desc
-        -
-          name: offset
-          in: query
-          required: false
-          schema:
-            type: integer
-            default: 0
-            minimum: 0
-        -
-          name: limit
-          in: query
-          required: false
-          schema:
-            type: integer
-            default: 100
-            maximum: 100
-            minimum: 0
-            nullable: true
-      responses:
-        '500':
-          description: 'Internal Server Error'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '422':
-          description: 'Unprocessable Entity'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ValidationResponse'
-        '400':
-          description: 'Bad Request'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '401':
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '404':
-          description: 'Not Found'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - { $ref: '#/components/schemas/SuccessWithPaginationResponse' }
-                  - { properties: { data: { properties: { items: { type: array, items: { $ref: '#/components/schemas/MyUserSubject' } } }, type: object } }, type: object }
 components:
   schemas:
     SignInDto:
@@ -1860,6 +1871,110 @@ components:
           title: 'Столбец с названием'
           type: string
           default: A
+      type: object
+    GetAllStudentSubjectsDto:
+      properties:
+        user_ids:
+          title: 'Пользователи для фильтрации'
+          type: array
+          items: {  }
+          default: null
+          maxItems: 50
+          nullable: true
+        teacher_ids:
+          title: 'Преподаватели для фильтрации'
+          type: array
+          items: {  }
+          default: null
+          maxItems: 50
+          nullable: true
+        subject_ids:
+          title: 'Предметы для фильтрации'
+          type: array
+          items: {  }
+          default: null
+          maxItems: 50
+          nullable: true
+        is_actual_from:
+          title: 'Был актуален с'
+          type: string
+          nullable: true
+        is_actual_to:
+          title: 'Был актуален до'
+          type: string
+          nullable: true
+        sort_by:
+          title: 'Сортировка по'
+          type: string
+          default: name
+          enum:
+            - name
+            - actual_from
+            - actual_to
+        sort_type:
+          title: 'Тип сортировки'
+          type: string
+          default: asc
+          enum:
+            - asc
+            - desc
+        offset:
+          type: integer
+          default: 0
+          minimum: 0
+        limit:
+          type: integer
+          default: 100
+          maximum: 100
+          minimum: 0
+          nullable: true
+      type: object
+    GetMyStudentSubjectsDto:
+      properties:
+        actual:
+          title: 'Актуален ли предмет на текущий момент'
+          type: boolean
+          default: null
+          nullable: true
+        subject_ids:
+          title: 'Предметы для фильтрации'
+          type: array
+          items: {  }
+          default: null
+          maxItems: 50
+          nullable: true
+        teacher_ids:
+          title: 'Преподаватели для фильтрации'
+          type: array
+          items: {  }
+          default: null
+          maxItems: 50
+          nullable: true
+        sort_by:
+          title: 'Сортировка по'
+          type: string
+          default: name
+          enum:
+            - name
+            - actual_from
+            - actual_to
+        sort_type:
+          title: 'Тип сортировки'
+          type: string
+          default: asc
+          enum:
+            - asc
+            - desc
+        offset:
+          type: integer
+          default: 0
+          minimum: 0
+        limit:
+          type: integer
+          default: 100
+          maximum: 100
+          minimum: 0
+          nullable: true
       type: object
     GetAllSubjectsDto:
       properties:
@@ -2262,103 +2377,6 @@ components:
           type: string
           default: D
       type: object
-    GetAllSubjectsDto2:
-      properties:
-        user_ids:
-          title: 'Пользователи для фильтрации'
-          type: array
-          items: {  }
-          default: null
-          maxItems: 50
-          nullable: true
-        teacher_ids:
-          title: 'Преподаватели для фильтрации'
-          type: array
-          items: {  }
-          default: null
-          maxItems: 50
-          nullable: true
-        subject_ids:
-          title: 'Предметы для фильтрации'
-          type: array
-          items: {  }
-          default: null
-          maxItems: 50
-          nullable: true
-        is_actual_from:
-          title: 'Был актуален с'
-          type: string
-          nullable: true
-        is_actual_to:
-          title: 'Был актуален до'
-          type: string
-          nullable: true
-        sort_by:
-          title: 'Сортировка по'
-          type: string
-          default: name
-          enum:
-            - name
-            - actual_from
-            - actual_to
-        sort_type:
-          title: 'Тип сортировки'
-          type: string
-          default: asc
-          enum:
-            - asc
-            - desc
-        offset:
-          type: integer
-          default: 0
-          minimum: 0
-        limit:
-          type: integer
-          default: 100
-          maximum: 100
-          minimum: 0
-          nullable: true
-      type: object
-    GetMySubjectsDto:
-      properties:
-        actual:
-          title: 'Актуален ли предмет на текущий момент'
-          type: boolean
-          default: null
-          nullable: true
-        subject_ids:
-          title: 'Предметы для фильтрации'
-          type: array
-          items: {  }
-          default: null
-          maxItems: 50
-          nullable: true
-        sort_by:
-          title: 'Сортировка по'
-          type: string
-          default: name
-          enum:
-            - name
-            - actual_from
-            - actual_to
-        sort_type:
-          title: 'Тип сортировки'
-          type: string
-          default: asc
-          enum:
-            - asc
-            - desc
-        offset:
-          type: integer
-          default: 0
-          minimum: 0
-        limit:
-          type: integer
-          default: 100
-          maximum: 100
-          minimum: 0
-          nullable: true
-      type: object
     SuccessResponse:
       properties:
         data:
@@ -2492,6 +2510,45 @@ components:
         import_enabled:
           type: boolean
       type: object
+    StudentSubject:
+      required:
+        - subject
+        - teacher
+        - user
+        - actual_from
+        - actual_to
+      properties:
+        subject:
+          $ref: '#/components/schemas/Subject'
+        teacher:
+          $ref: '#/components/schemas/LiteUser'
+        user:
+          $ref: '#/components/schemas/LiteUser'
+        actual_from:
+          type: string
+          format: date-time
+        actual_to:
+          type: string
+          format: date-time
+      type: object
+    MyStudentSubject:
+      required:
+        - subject
+        - teacher
+        - actual_from
+        - actual_to
+      properties:
+        subject:
+          $ref: '#/components/schemas/Subject'
+        teacher:
+          $ref: '#/components/schemas/LiteUser'
+        actual_from:
+          type: string
+          format: date-time
+        actual_to:
+          type: string
+          format: date-time
+      type: object
     Subject:
       required:
         - id
@@ -2572,45 +2629,6 @@ components:
         created:
           type: integer
       type: object
-    UserSubject:
-      required:
-        - subject
-        - teacher
-        - user
-        - actual_from
-        - actual_to
-      properties:
-        subject:
-          $ref: '#/components/schemas/Subject'
-        teacher:
-          $ref: '#/components/schemas/LiteUser'
-        user:
-          $ref: '#/components/schemas/LiteUser'
-        actual_from:
-          type: string
-          format: date-time
-        actual_to:
-          type: string
-          format: date-time
-      type: object
-    MyUserSubject:
-      required:
-        - subject
-        - teacher
-        - actual_from
-        - actual_to
-      properties:
-        subject:
-          $ref: '#/components/schemas/Subject'
-        teacher:
-          $ref: '#/components/schemas/LiteUser'
-        actual_from:
-          type: string
-          format: date-time
-        actual_to:
-          type: string
-          format: date-time
-      type: object
     Meta:
       required:
         - mode
@@ -2654,9 +2672,9 @@ components:
         - group.import
         - subject.create
         - subject.import
-        - user_subject.view_all
-        - user_subject.view_my
-        - user_subject.import
+        - student_subject.view_all
+        - student_subject.view_my
+        - student_subject.import
         - role.view_all
     PaginatedData:
       properties:
@@ -2692,6 +2710,22 @@ components:
         - student
         - teacher
         - survey_creator
+    LiteUser:
+      required:
+        - id
+        - email
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+          format: email
+        data:
+          nullable: true
+          oneOf:
+            -
+              $ref: '#/components/schemas/UserData'
+      type: object
     LiteSurvey:
       required:
         - id
@@ -2726,22 +2760,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SurveyItem'
-      type: object
-    LiteUser:
-      required:
-        - id
-        - email
-      properties:
-        id:
-          type: string
-        email:
-          type: string
-          format: email
-        data:
-          nullable: true
-          oneOf:
-            -
-              $ref: '#/components/schemas/UserData'
       type: object
     SurveyItem:
       required:
@@ -2849,12 +2867,11 @@ tags:
     name: subjects
     description: 'Ручки для работы с предметами'
   -
-    name: user-subjects
-    description: 'Ручки для работы с предметами, привязанными к пользователям'
-  -
     name: roles
     description: 'Ручки для получения ролей'
   -
     name: surveys
     description: 'Ручки для работы с опросами'
+  -
+    name: student-subjects
 

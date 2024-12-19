@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Application\UseCase\UserSubject;
+namespace App\Application\UseCase\StudentSubject;
 
-use App\Application\Dto\UserSubject\GetAllSubjectsDto;
+use App\Application\Dto\StudentSubject\GetAllStudentSubjectsDto;
 use App\Domain\DataProvider\DataProviderInterface;
-use App\Domain\Dto\UserSubject\GetAllUserSubjectsDto;
-use App\Domain\Entity\UserSubject;
+use App\Domain\Dto\StudentSubject\GetAllStudentSubjectsDto as DomainGetAllStudentSubjectsDto;
+use App\Domain\Entity\StudentSubject;
 use App\Domain\Enum\SortTypeEnum;
-use App\Domain\Service\UserSubject\UserSubjectService;
+use App\Domain\Service\StudentSubject\StudentSubjectService;
 use DateTimeImmutable;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Uid\Uuid;
@@ -18,7 +18,7 @@ class GetAllUseCase
 
     public function __construct(
         LoggerInterface $logger,
-        private UserSubjectService $userSubjectService,
+        private StudentSubjectService $userSubjectService,
     ) {
         $this->setLogger($logger);
     }
@@ -31,16 +31,16 @@ class GetAllUseCase
     }
 
     /**
-     * @param GetAllSubjectsDto $dto
+     * @param GetAllStudentSubjectsDto $dto
      *
-     * @return DataProviderInterface<UserSubject>
+     * @return DataProviderInterface<StudentSubject>
      */
-    public function execute(GetAllSubjectsDto $dto): DataProviderInterface
+    public function execute(GetAllStudentSubjectsDto $dto): DataProviderInterface
     {
         return $this
             ->userSubjectService
             ->getAll(
-                new GetAllUserSubjectsDto(
+                new DomainGetAllStudentSubjectsDto(
                     $dto->user_ids !== null
                         ? array_map(Uuid::fromRfc4122(...), $dto->user_ids)
                         : null,

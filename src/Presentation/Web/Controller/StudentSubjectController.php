@@ -2,16 +2,16 @@
 
 namespace App\Presentation\Web\Controller;
 
-use App\Application\Dto\UserSubject\GetAllSubjectsDto;
-use App\Application\Dto\UserSubject\GetMySubjectsDto;
-use App\Application\UseCase\UserSubject\GetAllUseCase;
-use App\Application\UseCase\UserSubject\GetMyUseCase;
+use App\Application\Dto\StudentSubject\GetAllStudentSubjectsDto;
+use App\Application\Dto\StudentSubject\GetMyStudentSubjectsDto;
+use App\Application\UseCase\StudentSubject\GetAllUseCase;
+use App\Application\UseCase\StudentSubject\GetMyUseCase;
 use App\Domain\Enum\PermissionEnum;
 use App\Presentation\Web\OpenApi\Attribute as LOA;
 use App\Presentation\Web\Response\Model\Common\PaginatedData;
 use App\Presentation\Web\Response\Model\Common\SuccessWithPaginationResponse;
-use App\Presentation\Web\Response\Model\MyUserSubject;
-use App\Presentation\Web\Response\Model\UserSubject;
+use App\Presentation\Web\Response\Model\MyStudentSubject;
+use App\Presentation\Web\Response\Model\StudentSubject;
 use App\Presentation\Web\Response\Response;
 use OpenApi\Attributes as OA;
 use Psr\Log\LoggerInterface;
@@ -20,23 +20,23 @@ use Symfony\Component\HttpKernel\Attribute\MapQueryString;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-class UserSubjectController extends BaseController
+class StudentSubjectController extends BaseController
 {
     /** Список предметов пользователей с пагинацией и фильтрацией */
-    #[Route('/user-subjects', 'get-all-user-subjects', methods: ['GET'])]
-    #[IsGranted(PermissionEnum::UserSubjectViewAll->value, statusCode: 404, exceptionCode: 404)]
-    #[OA\Tag('user-subjects')]
+    #[Route('/student-subjects', 'get-all-student-subjects', methods: ['GET'])]
+    #[IsGranted(PermissionEnum::StudentSubjectViewAll->value, statusCode: 404, exceptionCode: 404)]
+    #[OA\Tag('student-subjects')]
     #[LOA\ErrorResponse(500)]
     #[LOA\ValidationResponse]
     #[LOA\ErrorResponse(400)]
     #[LOA\ErrorResponse(401)]
     #[LOA\ErrorResponse(404)]
-    #[LOA\SuccessPaginationResponse(UserSubject::class)]
+    #[LOA\SuccessPaginationResponse(StudentSubject::class)]
     public function getAll(
         LoggerInterface $logger,
         GetAllUseCase $useCase,
         #[MapQueryString]
-        GetAllSubjectsDto $dto = new GetAllSubjectsDto(),
+        GetAllStudentSubjectsDto $dto = new GetAllStudentSubjectsDto(),
     ): JsonResponse {
         $useCase->setLogger($logger);
         $provider = $useCase->execute($dto);
@@ -44,27 +44,27 @@ class UserSubjectController extends BaseController
             new SuccessWithPaginationResponse(
                 PaginatedData::fromDataProvider(
                     $provider,
-                    UserSubject::fromUserSubject(...),
+                    StudentSubject::fromStudentSubject(...),
                 ),
             ),
         );
     }
 
     /** Список моих предметов с пагинацией и фильтрацией */
-    #[Route('/user-subjects/my', 'get-my-user-subjects', methods: ['GET'])]
-    #[IsGranted(PermissionEnum::UserSubjectViewMy->value, statusCode: 404, exceptionCode: 404)]
-    #[OA\Tag('user-subjects')]
+    #[Route('/student-subjects/my', 'get-my-student-subjects', methods: ['GET'])]
+    #[IsGranted(PermissionEnum::StudentSubjectViewMy->value, statusCode: 404, exceptionCode: 404)]
+    #[OA\Tag('student-subjects')]
     #[LOA\ErrorResponse(500)]
     #[LOA\ValidationResponse]
     #[LOA\ErrorResponse(400)]
     #[LOA\ErrorResponse(401)]
     #[LOA\ErrorResponse(404)]
-    #[LOA\SuccessPaginationResponse(MyUserSubject::class)]
+    #[LOA\SuccessPaginationResponse(MyStudentSubject::class)]
     public function getMy(
         LoggerInterface $logger,
         GetMyUseCase $useCase,
         #[MapQueryString]
-        GetMySubjectsDto $dto = new GetMySubjectsDto(),
+        GetMyStudentSubjectsDto $dto = new GetMyStudentSubjectsDto(),
     ): JsonResponse {
         $useCase->setLogger($logger);
         $provider = $useCase->execute($this->getUser()->getUser(), $dto);
@@ -72,7 +72,7 @@ class UserSubjectController extends BaseController
             new SuccessWithPaginationResponse(
                 PaginatedData::fromDataProvider(
                     $provider,
-                    MyUserSubject::fromUserSubject(...),
+                    MyStudentSubject::fromStudentSubject(...),
                 ),
             ),
         );

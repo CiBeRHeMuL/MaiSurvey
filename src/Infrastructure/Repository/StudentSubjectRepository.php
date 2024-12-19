@@ -6,31 +6,36 @@ use App\Domain\DataProvider\DataProviderInterface;
 use App\Domain\DataProvider\DataSort;
 use App\Domain\DataProvider\LimitOffset;
 use App\Domain\DataProvider\SortColumn;
-use App\Domain\Dto\UserSubject\GetAllUserSubjectsDto;
-use App\Domain\Dto\UserSubject\GetMyUserSubjectsDto;
+use App\Domain\Dto\StudentSubject\GetAllStudentSubjectsDto;
+use App\Domain\Dto\StudentSubject\GetMyStudentSubjectsDto;
+use App\Domain\Entity\StudentSubject;
 use App\Domain\Entity\Subject;
+use App\Domain\Entity\TeacherSubject;
 use App\Domain\Entity\User;
-use App\Domain\Entity\UserSubject;
-use App\Domain\Repository\UserSubjectRepositoryInterface;
+use App\Domain\Repository\StudentSubjectRepositoryInterface;
 use DateTimeImmutable;
 use Qstart\Db\QueryBuilder\DML\Expression\BetweenExpr;
 use Qstart\Db\QueryBuilder\DML\Expression\Expr;
 use Qstart\Db\QueryBuilder\Query;
 use Symfony\Component\Uid\Uuid;
 
-class UserSubjectRepository extends Common\AbstractRepository implements UserSubjectRepositoryInterface
+class StudentSubjectRepository extends Common\AbstractRepository implements StudentSubjectRepositoryInterface
 {
     /**
      * @inheritDoc
      */
-    public function findAll(GetAllUserSubjectsDto $dto): DataProviderInterface
+    public function findAll(GetAllStudentSubjectsDto $dto): DataProviderInterface
     {
         $q = Query::select()
             ->select(['us.*', 'name' => 's.name'])
-            ->from(['us' => $this->getClassTable(UserSubject::class)])
+            ->from(['us' => $this->getClassTable(StudentSubject::class)])
+            ->innerJoin(
+                ['ts' => $this->getClassTable(TeacherSubject::class)],
+                'ts.id = us.teacher_subject_id',
+            )
             ->innerJoin(
                 ['s' => $this->getClassTable(Subject::class)],
-                's.id = us.subject_id',
+                's.id = ts.subject_id'
             );
         if ($dto->getUserIds() !== null) {
             $userIds = array_unique($dto->getUserIds(), SORT_REGULAR);
@@ -41,13 +46,13 @@ class UserSubjectRepository extends Common\AbstractRepository implements UserSub
         if ($dto->getSubjectIds() !== null) {
             $userIds = array_unique($dto->getSubjectIds(), SORT_REGULAR);
             $q->andWhere([
-                'us.subject_id' => array_map(fn(Uuid $id) => $id->toRfc4122(), $userIds),
+                'ts.subject_id' => array_map(fn(Uuid $id) => $id->toRfc4122(), $userIds),
             ]);
         }
         if ($dto->getTeacherIds() !== null) {
             $userIds = array_unique($dto->getTeacherIds(), SORT_REGULAR);
             $q->andWhere([
-                'us.teacher_id' => array_map(fn(Uuid $id) => $id->toRfc4122(), $userIds),
+                'ts.teacher_id' => array_map(fn(Uuid $id) => $id->toRfc4122(), $userIds),
             ]);
         }
         if ($dto->getIsActualFrom() !== null) {
@@ -69,8 +74,8 @@ class UserSubjectRepository extends Common\AbstractRepository implements UserSub
         return $this
             ->findWithLazyBatchedProvider(
                 $q,
-                UserSubject::class,
-                ['user', 'subject', 'teacher'],
+                StudentSubject::class,
+                ['user', 'teacherSubject', 'teacherSubject.subject', 'teacherSubject.teacher'],
                 new LimitOffset(
                     $dto->getLimit(),
                     $dto->getOffset(),
@@ -84,41 +89,47 @@ class UserSubjectRepository extends Common\AbstractRepository implements UserSub
             );
     }
 
-    public function findMy(User $user, GetMyUserSubjectsDto $dto): DataProviderInterface
+    public function findMy(User $user, GetMyStudentSubjectsDto $dto): DataProviderInterface
     {
         $q = Query::select()
             ->select(['us.*', 'name' => 's.name'])
-            ->from(['us' => $this->getClassTable(UserSubject::class)])
+            ->from(['us' => $this->getClassTable(StudentSubject::class)])
+            ->innerJoin(
+                ['ts' => $this->getClassTable(TeacherSubject::class)],
+                'ts.id = us.teacher_subject_id',
+            )
             ->innerJoin(
                 ['s' => $this->getClassTable(Subject::class)],
-                's.id = us.subject_id',
+                's.id = ts.subject_id'
             )
-            ->where([
-                'OR',
-                ['us.user_id' => $user->getId()->toRfc4122()],
-                ['us.teacher_id' => $user->getId()->toRfc4122()],
-            ]);
+            ->where(['us.user_id' => $user->getId()->toRfc4122()]);
         if ($dto->getSubjectIds() !== null) {
-            $userIds = array_unique($dto->getSubjectIds(), SORT_REGULAR);
+            $subjectIds = array_unique($dto->getSubjectIds(), SORT_REGULAR);
             $q->andWhere([
-                'us.subject_id' => array_map(fn(Uuid $id) => $id->toRfc4122(), $userIds),
+                'ts.subject_id' => array_map(fn(Uuid $id) => $id->toRfc4122(), $subjectIds),
             ]);
         }
-        if ($dto->isActual() !== null) {
+        if ($dto->getTeacherIds() !== null) {
+            $teacherIds = array_unique($dto->getTeacherIds(), SORT_REGULAR);
+            $q->andWhere([
+                'ts.teacher_id' => array_map(fn(Uuid $id) => $id->toRfc4122(), $teacherIds),
+            ]);
+        }
+        if ($dto->getActual() !== null) {
             $q->andWhere(
                 new BetweenExpr(
                     (new DateTimeImmutable())->format(DATE_RFC3339),
                     'us.actual_from',
                     'us.actual_to',
-                    $dto->isActual(),
+                    $dto->getActual(),
                 ),
             );
         }
         return $this
             ->findWithLazyBatchedProvider(
                 $q,
-                UserSubject::class,
-                ['user', 'subject', 'teacher'],
+                StudentSubject::class,
+                ['user', 'teacherSubject', 'teacherSubject.subject', 'teacherSubject.teacher'],
                 new LimitOffset(
                     $dto->getLimit(),
                     $dto->getOffset(),

@@ -23,10 +23,10 @@ readonly class MySurvey
         #[ORM\Column(name: 'completed_at', type: 'datetime_immutable', nullable: true)]
         private DateTimeImmutable|null $completedAt,
         #[ORM\ManyToOne(targetEntity: Survey::class)]
-        #[ORM\JoinColumn(name: 'id', referencedColumnName: 'id', nullable: false)]
+        #[ORM\JoinColumn(name: 'id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
         private Survey $survey,
         #[ORM\ManyToOne(targetEntity: User::class)]
-        #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id', nullable: false)]
+        #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
         private User $user,
     ) {
     }

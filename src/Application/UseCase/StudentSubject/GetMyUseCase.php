@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Application\UseCase\UserSubject;
+namespace App\Application\UseCase\StudentSubject;
 
-use App\Application\Dto\UserSubject\GetMySubjectsDto;
+use App\Application\Dto\StudentSubject\GetMyStudentSubjectsDto;
 use App\Domain\DataProvider\DataProviderInterface;
-use App\Domain\Dto\UserSubject\GetMyUserSubjectsDto;
+use App\Domain\Dto\StudentSubject\GetMyStudentSubjectsDto as DomainGetMyStudentSubjectsDto;
+use App\Domain\Entity\StudentSubject;
 use App\Domain\Entity\User;
-use App\Domain\Entity\UserSubject;
 use App\Domain\Enum\SortTypeEnum;
-use App\Domain\Service\UserSubject\UserSubjectService;
+use App\Domain\Service\StudentSubject\StudentSubjectService;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Uid\Uuid;
 
@@ -18,7 +18,7 @@ class GetMyUseCase
 
     public function __construct(
         LoggerInterface $logger,
-        private UserSubjectService $userSubjectService,
+        private StudentSubjectService $userSubjectService,
     ) {
         $this->setLogger($logger);
     }
@@ -32,20 +32,23 @@ class GetMyUseCase
 
     /**
      * @param User $me
-     * @param GetMySubjectsDto $dto
+     * @param GetMyStudentSubjectsDto $dto
      *
-     * @return DataProviderInterface<UserSubject>
+     * @return DataProviderInterface<StudentSubject>
      */
-    public function execute(User $me, GetMySubjectsDto $dto): DataProviderInterface
+    public function execute(User $me, GetMyStudentSubjectsDto $dto): DataProviderInterface
     {
         return $this
             ->userSubjectService
             ->getMy(
                 $me,
-                new GetMyUserSubjectsDto(
+                new DomainGetMyStudentSubjectsDto(
                     $dto->actual,
                     $dto->subject_ids !== null
                         ? array_map(Uuid::fromRfc4122(...), $dto->subject_ids)
+                        : null,
+                    $dto->teacher_ids !== null
+                        ? array_map(Uuid::fromRfc4122(...), $dto->teacher_ids)
                         : null,
                     $dto->sort_by,
                     SortTypeEnum::from($dto->sort_type),

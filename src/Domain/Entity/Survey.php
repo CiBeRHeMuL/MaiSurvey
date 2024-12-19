@@ -17,7 +17,7 @@ class Survey
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
     #[ORM\CustomIdGenerator(UuidGenerator::class)]
     #[ORM\Column(type: 'uuid', nullable: false)]
-    private Uuid|null $id = null;
+    private Uuid $id;
     #[ORM\Column(name: 'subject_id', type: 'uuid', nullable: false)]
     private Uuid $subjectId;
     #[ORM\Column(name: 'teacher_id', type: 'uuid', nullable: true)]
@@ -42,7 +42,7 @@ class Survey
         $this->items = new ArrayCollection();
     }
 
-    public function getId(): Uuid|null
+    public function getId(): Uuid
     {
         return $this->id;
     }

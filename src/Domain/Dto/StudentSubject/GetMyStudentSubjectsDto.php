@@ -1,30 +1,25 @@
 <?php
 
-namespace App\Domain\Dto\UserSubject;
+namespace App\Domain\Dto\StudentSubject;
 
 use App\Domain\Enum\SortTypeEnum;
-use DateTimeImmutable;
 use Symfony\Component\Uid\Uuid;
 
-readonly class GetAllUserSubjectsDto
+readonly class GetMyStudentSubjectsDto
 {
     /**
-     * @param Uuid[]|null $userIds
-     * @param Uuid[]|null $teacherIds
+     * @param bool|null $actual
      * @param Uuid[]|null $subjectIds
-     * @param DateTimeImmutable|null $isActualFrom
-     * @param DateTimeImmutable|null $isActualTo
+     * @param Uuid[]|null $teacherIds
      * @param string $sortBy
      * @param SortTypeEnum $sortType
      * @param int $offset
      * @param int|null $limit
      */
     public function __construct(
-        private array|null $userIds = null,
-        private array|null $teacherIds = null,
+        private bool|null $actual = null,
         private array|null $subjectIds = null,
-        private DateTimeImmutable|null $isActualFrom = null,
-        private DateTimeImmutable|null $isActualTo = null,
+        private array|null $teacherIds = null,
         private string $sortBy = 'name',
         private SortTypeEnum $sortType = SortTypeEnum::Asc,
         private int $offset = 0,
@@ -32,14 +27,9 @@ readonly class GetAllUserSubjectsDto
     ) {
     }
 
-    public function getUserIds(): array|null
+    public function getActual(): bool|null
     {
-        return $this->userIds;
-    }
-
-    public function getTeacherIds(): array|null
-    {
-        return $this->teacherIds;
+        return $this->actual;
     }
 
     public function getSubjectIds(): array|null
@@ -47,14 +37,9 @@ readonly class GetAllUserSubjectsDto
         return $this->subjectIds;
     }
 
-    public function getIsActualFrom(): DateTimeImmutable|null
+    public function getTeacherIds(): array|null
     {
-        return $this->isActualFrom;
-    }
-
-    public function getIsActualTo(): DateTimeImmutable|null
-    {
-        return $this->isActualTo;
+        return $this->teacherIds;
     }
 
     public function getSortBy(): string

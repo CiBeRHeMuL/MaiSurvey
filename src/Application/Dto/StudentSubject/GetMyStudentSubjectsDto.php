@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Application\Dto\UserSubject;
+namespace App\Application\Dto\StudentSubject;
 
 use App\Application\Validator\Constraints as LAssert;
 use App\Domain\Enum\SortTypeEnum;
-use App\Domain\Service\UserSubject\UserSubjectService;
+use App\Domain\Service\StudentSubject\StudentSubjectService;
 use Symfony\Component\Validator\Constraints as Assert;
 
-readonly class GetMySubjectsDto
+readonly class GetMyStudentSubjectsDto
 {
     public function __construct(
         /** Актуален ли предмет на текущий момент */
@@ -20,9 +20,16 @@ readonly class GetMySubjectsDto
         ])]
         #[Assert\Count(max: 50, maxMessage: 'Поиск по более чем 50 значениям не поддерживается')]
         public array|null $subject_ids = null,
+        /** Преподаватели для фильтрации */
+        #[Assert\All([
+            new Assert\Type('string', message: 'Значение должно быть строкой'),
+            new Assert\Uuid(message: 'Значение должно быть uuid'),
+        ])]
+        #[Assert\Count(max: 50, maxMessage: 'Поиск по более чем 50 значениям не поддерживается')]
+        public array|null $teacher_ids = null,
         /** Сортировка по */
         #[Assert\Type('string', message: 'Значение должно быть строкой')]
-        #[Assert\Choice(choices: UserSubjectService::GET_ALL_SORT, message: 'Значение должно входить в список допустимых')]
+        #[Assert\Choice(choices: StudentSubjectService::GET_ALL_SORT, message: 'Значение должно входить в список допустимых')]
         public string $sort_by = 'name',
         /** Тип сортировки */
         #[Assert\Type('string', message: 'Значение должно быть строкой')]

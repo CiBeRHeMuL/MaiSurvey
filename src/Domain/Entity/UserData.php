@@ -17,7 +17,7 @@ class UserData
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
     #[ORM\CustomIdGenerator(UuidGenerator::class)]
     #[ORM\Column(type: UuidType::NAME, nullable: false)]
-    private Uuid|null $id = null;
+    private Uuid $id;
     #[ORM\Column(type: 'string', length: 255, nullable: false)]
     private string $firstName;
     #[ORM\Column(type: 'string', length: 255, nullable: false)]

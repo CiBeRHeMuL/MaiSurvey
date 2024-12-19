@@ -7,18 +7,15 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity]
-#[ORM\Table('user_subject')]
-class UserSubject
+#[ORM\Table('student_subject')]
+class StudentSubject
 {
     #[ORM\Id]
     #[ORM\Column(type: 'uuid', nullable: false)]
     private Uuid $userId;
     #[ORM\Id]
-    #[ORM\Column(type: 'uuid', nullable: false)]
-    private Uuid $subjectId;
-    #[ORM\Id]
-    #[ORM\Column(type: 'uuid', nullable: false)]
-    private Uuid $teacherId;
+    #[ORM\Column(name: 'teacher_subject_id', type: 'uuid', nullable: false)]
+    private Uuid $teacherSubjectId;
     #[ORM\Column(name: 'actual_from', type: 'datetime_immutable', nullable: false)]
     private DateTimeImmutable $actualFrom;
     #[ORM\Column(name: 'actual_to', type: 'datetime_immutable', nullable: false)]
@@ -31,43 +28,29 @@ class UserSubject
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'studyingSubjects')]
     #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
     private User $user;
-    #[ORM\ManyToOne(targetEntity: Subject::class, inversedBy: 'users')]
-    #[ORM\JoinColumn(name: 'subject_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
-    private Subject $subject;
-    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'teachingSubjects')]
-    #[ORM\JoinColumn(name: 'teacher_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
-    private User $teacher;
+    #[ORM\ManyToOne(targetEntity: TeacherSubject::class, inversedBy: 'students')]
+    #[ORM\JoinColumn(name: 'teacher_subject_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
+    private TeacherSubject $teacherSubject;
 
     public function getUserId(): Uuid
     {
         return $this->userId;
     }
 
-    public function setUserId(Uuid $userId): UserSubject
+    public function setUserId(Uuid $userId): StudentSubject
     {
         $this->userId = $userId;
         return $this;
     }
 
-    public function getSubjectId(): Uuid
+    public function getTeacherSubjectId(): Uuid
     {
-        return $this->subjectId;
+        return $this->teacherSubjectId;
     }
 
-    public function setSubjectId(Uuid $subjectId): UserSubject
+    public function setTeacherSubjectId(Uuid $teacherSubjectId): StudentSubject
     {
-        $this->subjectId = $subjectId;
-        return $this;
-    }
-
-    public function getTeacherId(): Uuid
-    {
-        return $this->teacherId;
-    }
-
-    public function setTeacherId(Uuid $teacherId): UserSubject
-    {
-        $this->teacherId = $teacherId;
+        $this->teacherSubjectId = $teacherSubjectId;
         return $this;
     }
 
@@ -76,7 +59,7 @@ class UserSubject
         return $this->actualFrom;
     }
 
-    public function setActualFrom(DateTimeImmutable $actualFrom): UserSubject
+    public function setActualFrom(DateTimeImmutable $actualFrom): StudentSubject
     {
         $this->actualFrom = $actualFrom;
         return $this;
@@ -87,7 +70,7 @@ class UserSubject
         return $this->actualTo;
     }
 
-    public function setActualTo(DateTimeImmutable $actualTo): UserSubject
+    public function setActualTo(DateTimeImmutable $actualTo): StudentSubject
     {
         $this->actualTo = $actualTo;
         return $this;
@@ -98,7 +81,7 @@ class UserSubject
         return $this->createdAt;
     }
 
-    public function setCreatedAt(DateTimeImmutable $createdAt): UserSubject
+    public function setCreatedAt(DateTimeImmutable $createdAt): StudentSubject
     {
         $this->createdAt = $createdAt;
         return $this;
@@ -109,7 +92,7 @@ class UserSubject
         return $this->updatedAt;
     }
 
-    public function setUpdatedAt(DateTimeImmutable $updatedAt): UserSubject
+    public function setUpdatedAt(DateTimeImmutable $updatedAt): StudentSubject
     {
         $this->updatedAt = $updatedAt;
         return $this;
@@ -120,7 +103,7 @@ class UserSubject
         return $this->user;
     }
 
-    public function setUser(User $user): UserSubject
+    public function setUser(User $user): StudentSubject
     {
         $this->user = $user;
         return $this;
@@ -128,23 +111,22 @@ class UserSubject
 
     public function getSubject(): Subject
     {
-        return $this->subject;
-    }
-
-    public function setSubject(Subject $subject): UserSubject
-    {
-        $this->subject = $subject;
-        return $this;
+        return $this->getTeacherSubject()->getSubject();
     }
 
     public function getTeacher(): User
     {
-        return $this->teacher;
+        return $this->getTeacherSubject()->getTeacher();
     }
 
-    public function setTeacher(User $teacher): UserSubject
+    public function getTeacherSubject(): TeacherSubject
     {
-        $this->teacher = $teacher;
+        return $this->teacherSubject;
+    }
+
+    public function setTeacherSubject(TeacherSubject $teacherSubject): StudentSubject
+    {
+        $this->teacherSubject = $teacherSubject;
         return $this;
     }
 }

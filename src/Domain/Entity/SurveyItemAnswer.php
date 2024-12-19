@@ -16,7 +16,7 @@ class SurveyItemAnswer
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
     #[ORM\CustomIdGenerator(UuidGenerator::class)]
     #[ORM\Column(type: 'uuid', nullable: false)]
-    private Uuid|null $id = null;
+    private Uuid $id;
     #[ORM\Column(name: 'survey_item_id', type: 'uuid', nullable: false)]
     private Uuid $surveyItemId;
     #[ORM\Column(type: 'answer_data', nullable: true, options: ['jsonb' => true])]
@@ -28,12 +28,12 @@ class SurveyItemAnswer
     #[ORM\JoinColumn(name: 'survey_item_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
     private SurveyItem $item;
 
-    public function getId(): Uuid|null
+    public function getId(): Uuid
     {
         return $this->id;
     }
 
-    public function setId(Uuid|null $id): SurveyItemAnswer
+    public function setId(Uuid $id): SurveyItemAnswer
     {
         $this->id = $id;
         return $this;

@@ -3,29 +3,29 @@
 namespace App\Domain\Repository;
 
 use App\Domain\DataProvider\DataProviderInterface;
-use App\Domain\Dto\UserSubject\GetAllUserSubjectsDto;
-use App\Domain\Dto\UserSubject\GetMyUserSubjectsDto;
+use App\Domain\Dto\StudentSubject\GetAllStudentSubjectsDto;
+use App\Domain\Dto\StudentSubject\GetMyStudentSubjectsDto;
 use App\Domain\Entity\User;
 use App\Domain\Repository\Common\RepositoryInterface;
 
-interface UserSubjectRepositoryInterface extends RepositoryInterface
+interface StudentSubjectRepositoryInterface extends RepositoryInterface
 {
     /**
      * Поиск с учетом пагинации и сортировки
      *
-     * @param GetAllUserSubjectsDto $dto
+     * @param GetAllStudentSubjectsDto $dto
      *
      * @return DataProviderInterface
      */
-    public function findAll(GetAllUserSubjectsDto $dto): DataProviderInterface;
+    public function findAll(GetAllStudentSubjectsDto $dto): DataProviderInterface;
 
     /**
      * Поиск моих предметов с пагинацией и сортировкой
      *
      * @param User $user
-     * @param GetMyUserSubjectsDto $dto
+     * @param GetMyStudentSubjectsDto $dto
      *
      * @return DataProviderInterface
      */
-    public function findMy(User $user, GetMyUserSubjectsDto $dto): DataProviderInterface;
+    public function findMy(User $user, GetMyStudentSubjectsDto $dto): DataProviderInterface;
 }

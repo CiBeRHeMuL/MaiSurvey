@@ -17,7 +17,7 @@ class Subject
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
     #[ORM\CustomIdGenerator(UuidGenerator::class)]
     #[ORM\Column(type: 'uuid', nullable: false)]
-    private Uuid|null $id = null;
+    private Uuid $id;
     #[ORM\Column(type: 'string', length: 255, unique: true, nullable: false)]
     private string $name;
     #[ORM\Column(name: 'created_at', type: 'datetime_immutable', nullable: false, options: ['default' => 'CURRENT_TIMESTAMP'])]
@@ -25,16 +25,16 @@ class Subject
     #[ORM\Column(name: 'updated_at', type: 'datetime_immutable', nullable: false, options: ['default' => 'CURRENT_TIMESTAMP'])]
     private DateTimeImmutable $updatedAt;
 
-    /** @var Collection<UserSubject> */
-    #[ORM\OneToMany(targetEntity: UserSubject::class, mappedBy: 'subject')]
-    private Collection $users;
+    /** @var Collection<TeacherSubject> $teacherSubjects */
+    #[ORM\OneToMany(targetEntity: TeacherSubject::class, mappedBy: 'subject')]
+    private Collection $teacherSubjects;
 
     public function __construct()
     {
-        $this->users = new ArrayCollection();
+        $this->teacherSubjects = new ArrayCollection();
     }
 
-    public function getId(): Uuid|null
+    public function getId(): Uuid
     {
         return $this->id;
     }
@@ -78,14 +78,14 @@ class Subject
         return $this;
     }
 
-    public function getUsers(): Collection
+    public function getTeacherSubjects(): Collection
     {
-        return $this->users;
+        return $this->teacherSubjects;
     }
 
-    public function setUsers(Collection $users): Subject
+    public function setTeacherSubjects(Collection $teacherSubjects): Subject
     {
-        $this->users = $users;
+        $this->teacherSubjects = $teacherSubjects;
         return $this;
     }
 }

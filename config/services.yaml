@@ -57,8 +57,8 @@ services:
     class: App\Infrastructure\Repository\UserDataGroupRepository
   App\Domain\Repository\SubjectRepositoryInterface:
     class: App\Infrastructure\Repository\SubjectRepository
-  App\Domain\Repository\UserSubjectRepositoryInterface:
-    class: App\Infrastructure\Repository\UserSubjectRepository
+  App\Domain\Repository\StudentSubjectRepositoryInterface:
+    class: App\Infrastructure\Repository\StudentSubjectRepository
   App\Domain\Repository\SurveyRepositoryInterface:
     class: App\Infrastructure\Repository\SurveyRepository
   # --- end repositories
