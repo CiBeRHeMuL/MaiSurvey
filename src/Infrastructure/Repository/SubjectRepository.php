@@ -36,6 +36,7 @@ class SubjectRepository extends AbstractRepository implements SubjectRepositoryI
             ),
             sort: new DataSort([
                 new SortColumn(
+                    "s.{$dto->getSortBy()}",
                     $dto->getSortBy(),
                     $dto->getSortType()->getPhpSort(),
                 ),

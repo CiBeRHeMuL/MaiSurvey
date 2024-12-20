@@ -9,6 +9,7 @@ class SortColumn implements SortColumnInterface
 {
     public function __construct(
         private string $column,
+        private string $name,
         private int $sort,
     ) {
     }
@@ -19,6 +20,14 @@ class SortColumn implements SortColumnInterface
     public function getColumn(): string
     {
         return $this->column;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getName(): string
+    {
+        return $this->name;
     }
 
     /**

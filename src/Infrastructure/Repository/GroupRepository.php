@@ -36,6 +36,7 @@ class GroupRepository extends AbstractRepository implements GroupRepositoryInter
             ),
             sort: new DataSort([
                 new SortColumn(
+                    "g.{$dto->getSortBy()}",
                     $dto->getSortBy(),
                     $dto->getSortType()->getPhpSort(),
                 ),

@@ -43,7 +43,7 @@ readonly class PaginatedData
             $dataProvider->getDataLimit()->getOffset(),
             $dataProvider->getDataLimit()->getLimit(),
             $dataProvider->getTotal(),
-            $sortColumn?->getColumn(),
+            $sortColumn?->getName(),
             $sortColumn !== null
                 ? $sortColumn->getSort() === SORT_ASC ? 'asc' : 'desc'
                 : null,

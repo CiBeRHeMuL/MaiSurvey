@@ -121,6 +121,7 @@ class UserRepository extends AbstractRepository implements UserRepositoryInterfa
                 ),
                 new DataSort([
                     new SortColumn(
+                        "u.{$dto->getSortBy()}",
                         $dto->getSortBy(),
                         $dto->getSortType()->getPhpSort(),
                     ),

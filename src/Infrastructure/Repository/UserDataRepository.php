@@ -88,6 +88,7 @@ class UserDataRepository extends AbstractRepository implements UserDataRepositor
             ),
             sort: new DataSort([
                 new SortColumn(
+                    "ud.{$dto->getSortBy()}",
                     $dto->getSortBy(),
                     $dto->getSortType()->getPhpSort(),
                 ),

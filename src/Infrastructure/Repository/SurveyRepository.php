@@ -48,6 +48,7 @@ class SurveyRepository extends Common\AbstractRepository implements SurveyReposi
             ),
             new DataSort([
                 new SortColumn(
+                    "ms.{$dto->getSortBy()}",
                     $dto->getSortBy(),
                     $dto->getSortType()->getPhpSort(),
                 ),
