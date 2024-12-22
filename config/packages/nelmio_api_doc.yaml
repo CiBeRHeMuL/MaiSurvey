@@ -19,8 +19,10 @@ nelmio_api_doc:
         description: Ручки для работы с пользователями
       - name: subjects
         description: Ручки для работы с предметами
-      - name: user-subjects
-        description: Ручки для работы с предметами, привязанными к пользователям
+      - name: student-subjects
+        description: Ручки для работы с предметами, привязанными к студентам
+      - name: teacher-subjects
+        description: Ручки для работы с предметами, привязанными к преподавателям
       - name: roles
         description: Ручки для получения ролей
       - name: surveys

@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Application\UseCase\StudentSubject;
+namespace App\Application\UseCase\TeacherSubject;
 
-use App\Application\Dto\StudentSubject\GetMyStudentSubjectsDto;
+use App\Application\Dto\TeacherSubject\GetMyTeacherSubjectsDto;
 use App\Domain\DataProvider\DataProviderInterface;
-use App\Domain\Dto\StudentSubject\GetMyStudentSubjectsDto as DomainGetMyStudentSubjectsDto;
-use App\Domain\Entity\StudentSubject;
+use App\Domain\Dto\TeacherSubject\GetMyTeacherSubjectsDto as DomainGetMyTeacherSubjectsDto;
+use App\Domain\Entity\MyTeacherSubject;
 use App\Domain\Entity\User;
 use App\Domain\Enum\SortTypeEnum;
-use App\Domain\Service\StudentSubject\StudentSubjectService;
+use App\Domain\Service\TeacherSubject\TeacherSubjectService;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Uid\Uuid;
 
@@ -18,7 +18,7 @@ class GetMyUseCase
 
     public function __construct(
         LoggerInterface $logger,
-        private StudentSubjectService $studentSubjectService,
+        private TeacherSubjectService $teacherSubjectService,
     ) {
         $this->setLogger($logger);
     }
@@ -26,29 +26,25 @@ class GetMyUseCase
     public function setLogger(LoggerInterface $logger): GetMyUseCase
     {
         $this->logger = $logger;
-        $this->studentSubjectService->setLogger($logger);
+        $this->teacherSubjectService->setLogger($logger);
         return $this;
     }
 
     /**
      * @param User $me
-     * @param GetMyStudentSubjectsDto $dto
+     * @param GetMyTeacherSubjectsDto $dto
      *
-     * @return DataProviderInterface<StudentSubject>
+     * @return DataProviderInterface<MyTeacherSubject>
      */
-    public function execute(User $me, GetMyStudentSubjectsDto $dto): DataProviderInterface
+    public function execute(User $me, GetMyTeacherSubjectsDto $dto): DataProviderInterface
     {
         return $this
-            ->studentSubjectService
+            ->teacherSubjectService
             ->getMy(
                 $me,
-                new DomainGetMyStudentSubjectsDto(
-                    $dto->actual,
+                new DomainGetMyTeacherSubjectsDto(
                     $dto->subject_ids !== null
                         ? array_map(Uuid::fromRfc4122(...), $dto->subject_ids)
-                        : null,
-                    $dto->teacher_ids !== null
-                        ? array_map(Uuid::fromRfc4122(...), $dto->teacher_ids)
                         : null,
                     $dto->sort_by,
                     SortTypeEnum::from($dto->sort_type),

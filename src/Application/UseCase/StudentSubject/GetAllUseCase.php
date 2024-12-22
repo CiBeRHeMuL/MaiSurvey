@@ -18,7 +18,7 @@ class GetAllUseCase
 
     public function __construct(
         LoggerInterface $logger,
-        private StudentSubjectService $userSubjectService,
+        private StudentSubjectService $studentSubjectService,
     ) {
         $this->setLogger($logger);
     }
@@ -26,7 +26,7 @@ class GetAllUseCase
     public function setLogger(LoggerInterface $logger): GetAllUseCase
     {
         $this->logger = $logger;
-        $this->userSubjectService->setLogger($logger);
+        $this->studentSubjectService->setLogger($logger);
         return $this;
     }
 
@@ -38,7 +38,7 @@ class GetAllUseCase
     public function execute(GetAllStudentSubjectsDto $dto): DataProviderInterface
     {
         return $this
-            ->userSubjectService
+            ->studentSubjectService
             ->getAll(
                 new DomainGetAllStudentSubjectsDto(
                     $dto->user_ids !== null

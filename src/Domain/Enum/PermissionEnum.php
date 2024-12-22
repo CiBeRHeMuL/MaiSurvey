@@ -32,11 +32,16 @@ enum PermissionEnum: string
     case SubjectCreate = 'subject.create';
     case SubjectImport = 'subject.import';
 
-    // User Subject
+    // Student Subject
     case StudentSubjectViewAll = 'student_subject.view_all';
     case StudentSubjectViewMy = 'student_subject.view_my';
     case StudentSubjectImport = 'student_subject.import';
 
     // Role
     case RoleViewAll = 'role.view_all';
+
+    // Teacher Subject
+    case TeacherSubjectViewAll = 'teacher_subject.view_all';
+    case TeacherSubjectViewMy = 'teacher_subject.view_my';
+    case TeacherSubjectImport = 'teacher_subject.import';
 }

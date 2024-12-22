@@ -1,43 +1,46 @@
 <?php
 
-namespace App\Domain\Service\StudentSubject;
+namespace App\Domain\Service\TeacherSubject;
 
 use App\Domain\DataProvider\DataProviderInterface;
-use App\Domain\Dto\StudentSubject\GetAllStudentSubjectsDto;
-use App\Domain\Dto\StudentSubject\GetMyStudentSubjectsDto;
-use App\Domain\Entity\StudentSubject;
+use App\Domain\DataProvider\EmptyDataProvider;
+use App\Domain\Dto\TeacherSubject\GetAllTeacherSubjectsDto;
+use App\Domain\Dto\TeacherSubject\GetMyTeacherSubjectsDto;
+use App\Domain\Entity\MyTeacherSubject;
+use App\Domain\Entity\TeacherSubject;
 use App\Domain\Entity\User;
 use App\Domain\Enum\ValidationErrorSlugEnum;
 use App\Domain\Exception\ValidationException;
-use App\Domain\Repository\StudentSubjectRepositoryInterface;
+use App\Domain\Repository\TeacherSubjectRepositoryInterface;
 use App\Domain\Validation\ValidationError;
 use Psr\Log\LoggerInterface;
 
-class StudentSubjectService
+class TeacherSubjectService
 {
-    public const array GET_ALL_SORT = ['name', 'actual_from', 'actual_to'];
+    public const array GET_ALL_SORT = ['name', 'created_at'];
 
     private LoggerInterface $logger;
 
     public function __construct(
+        private TeacherSubjectRepositoryInterface $teacherSubjectRepository,
         LoggerInterface $logger,
-        private StudentSubjectRepositoryInterface $userSubjectRepository,
     ) {
         $this->setLogger($logger);
     }
 
-    public function setLogger(LoggerInterface $logger): StudentSubjectService
+    public function setLogger(LoggerInterface $logger): TeacherSubjectService
     {
         $this->logger = $logger;
         return $this;
     }
 
     /**
-     * @param GetAllStudentSubjectsDto $dto
+     * @param User $me
+     * @param GetMyTeacherSubjectsDto $dto
      *
-     * @return DataProviderInterface<StudentSubject>
+     * @return DataProviderInterface<MyTeacherSubject>
      */
-    public function getAll(GetAllStudentSubjectsDto $dto): DataProviderInterface
+    public function getMy(User $me, GetMyTeacherSubjectsDto $dto): DataProviderInterface
     {
         if (!in_array($dto->getSortBy(), self::GET_ALL_SORT, true)) {
             throw ValidationException::new([
@@ -48,32 +51,35 @@ class StudentSubjectService
                 ),
             ]);
         }
-
+        if ($dto->getSubjectIds() === []) {
+            return new EmptyDataProvider();
+        }
         return $this
-            ->userSubjectRepository
-            ->findAll($dto);
+            ->teacherSubjectRepository
+            ->findMy($me, $dto);
     }
 
     /**
-     * @param User $user
-     * @param GetMyStudentSubjectsDto $dto
+     * @param GetAllTeacherSubjectsDto $dto
      *
-     * @return DataProviderInterface<StudentSubject>
+     * @return DataProviderInterface<TeacherSubject>
      */
-    public function getMy(User $user, GetMyStudentSubjectsDto $dto): DataProviderInterface
+    public function getAll(GetAllTeacherSubjectsDto $dto): DataProviderInterface
     {
         if (!in_array($dto->getSortBy(), self::GET_ALL_SORT, true)) {
             throw ValidationException::new([
                 new ValidationError(
-                    'name',
+                    'sort_by',
                     ValidationErrorSlugEnum::WrongField->getSlug(),
                     sprintf('Сортировка доступна по полям: %s', implode(', ', self::GET_ALL_SORT)),
                 ),
             ]);
         }
-
+        if ($dto->getSubjectIds() === [] || $dto->getTeacherIds() === []) {
+            return new EmptyDataProvider();
+        }
         return $this
-            ->userSubjectRepository
-            ->findMy($user, $dto);
+            ->teacherSubjectRepository
+            ->findAll($dto);
     }
 }

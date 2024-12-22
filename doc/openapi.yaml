@@ -437,7 +437,7 @@ paths:
     get:
       tags:
         - student-subjects
-      summary: 'Список предметов пользователей с пагинацией и фильтрацией'
+      summary: 'Список предметов студентов с пагинацией и фильтрацией'
       operationId: get_get-all-student-subjects
       parameters:
         -
@@ -1015,6 +1015,211 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationResponse'
+  /teacher-subjects:
+    get:
+      tags:
+        - teacher-subjects
+      summary: 'Список предметов преподавателей с пагинацией и фильтрацией'
+      operationId: get_get-all-teacher-subjects
+      parameters:
+        -
+          name: 'teacher_ids[]'
+          in: query
+          required: false
+          schema:
+            title: 'Преподаватели для фильтрации'
+            type: array
+            items: {  }
+            default: null
+            maxItems: 50
+            nullable: true
+        -
+          name: 'subject_ids[]'
+          in: query
+          required: false
+          schema:
+            title: 'Предметы для фильтрации'
+            type: array
+            items: {  }
+            default: null
+            maxItems: 50
+            nullable: true
+        -
+          name: sort_by
+          in: query
+          required: false
+          schema:
+            title: 'Сортировка по'
+            type: string
+            default: name
+            enum:
+              - name
+              - created_at
+        -
+          name: sort_type
+          in: query
+          required: false
+          schema:
+            title: 'Тип сортировки'
+            type: string
+            default: asc
+            enum:
+              - asc
+              - desc
+        -
+          name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+        -
+          name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 100
+            maximum: 100
+            minimum: 0
+            nullable: true
+      responses:
+        '500':
+          description: 'Internal Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: 'Unprocessable Entity'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResponse'
+        '400':
+          description: 'Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 'Not Found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/SuccessWithPaginationResponse' }
+                  - { properties: { data: { properties: { items: { type: array, items: { $ref: '#/components/schemas/TeacherSubject' } } }, type: object } }, type: object }
+  /teacher-subjects/my:
+    get:
+      tags:
+        - teacher-subjects
+      summary: 'Список моих предметов с пагинацией и фильтрацией'
+      operationId: get_get-my-teacher-subjects
+      parameters:
+        -
+          name: 'subject_ids[]'
+          in: query
+          required: false
+          schema:
+            title: 'Предметы для фильтрации'
+            type: array
+            items: {  }
+            default: null
+            maxItems: 50
+            nullable: true
+        -
+          name: sort_by
+          in: query
+          required: false
+          schema:
+            title: 'Сортировка по'
+            type: string
+            default: name
+            enum:
+              - name
+              - created_at
+        -
+          name: sort_type
+          in: query
+          required: false
+          schema:
+            title: 'Тип сортировки'
+            type: string
+            default: asc
+            enum:
+              - asc
+              - desc
+        -
+          name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+        -
+          name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 100
+            maximum: 100
+            minimum: 0
+            nullable: true
+      responses:
+        '500':
+          description: 'Internal Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: 'Unprocessable Entity'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResponse'
+        '400':
+          description: 'Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 'Not Found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/SuccessWithPaginationResponse' }
+                  - { properties: { data: { properties: { items: { type: array, items: { $ref: '#/components/schemas/MyTeacherSubject' } } }, type: object } }, type: object }
   /user:
     post:
       tags:
@@ -2077,6 +2282,81 @@ components:
           default: null
           nullable: true
       type: object
+    GetAllTeacherSubjectsDto:
+      properties:
+        teacher_ids:
+          title: 'Преподаватели для фильтрации'
+          type: array
+          items: {  }
+          default: null
+          maxItems: 50
+          nullable: true
+        subject_ids:
+          title: 'Предметы для фильтрации'
+          type: array
+          items: {  }
+          default: null
+          maxItems: 50
+          nullable: true
+        sort_by:
+          title: 'Сортировка по'
+          type: string
+          default: name
+          enum:
+            - name
+            - created_at
+        sort_type:
+          title: 'Тип сортировки'
+          type: string
+          default: asc
+          enum:
+            - asc
+            - desc
+        offset:
+          type: integer
+          default: 0
+          minimum: 0
+        limit:
+          type: integer
+          default: 100
+          maximum: 100
+          minimum: 0
+          nullable: true
+      type: object
+    GetMyTeacherSubjectsDto:
+      properties:
+        subject_ids:
+          title: 'Предметы для фильтрации'
+          type: array
+          items: {  }
+          default: null
+          maxItems: 50
+          nullable: true
+        sort_by:
+          title: 'Сортировка по'
+          type: string
+          default: name
+          enum:
+            - name
+            - created_at
+        sort_type:
+          title: 'Тип сортировки'
+          type: string
+          default: asc
+          enum:
+            - asc
+            - desc
+        offset:
+          type: integer
+          default: 0
+          minimum: 0
+        limit:
+          type: integer
+          default: 100
+          maximum: 100
+          minimum: 0
+          nullable: true
+      type: object
     CreateFullUserDto:
       required:
         - email
@@ -2594,6 +2874,32 @@ components:
           format: date-time
           nullable: true
       type: object
+    TeacherSubject:
+      required:
+        - subject
+        - teacher
+        - type
+      properties:
+        subject:
+          $ref: '#/components/schemas/Subject'
+        teacher:
+          $ref: '#/components/schemas/LiteUser'
+        type:
+          $ref: '#/components/schemas/TeacherSubjectTypeEnum'
+      type: object
+    MyTeacherSubject:
+      required:
+        - subject
+        - type
+        - students_count
+      properties:
+        subject:
+          $ref: '#/components/schemas/Subject'
+        type:
+          $ref: '#/components/schemas/TeacherSubjectTypeEnum'
+        students_count:
+          type: integer
+      type: object
     UpdatedUsersInfo:
       required:
         - updated
@@ -2676,6 +2982,9 @@ components:
         - student_subject.view_my
         - student_subject.import
         - role.view_all
+        - teacher_subject.view_all
+        - teacher_subject.view_my
+        - teacher_subject.import
     PaginatedData:
       properties:
         items:
@@ -2761,6 +3070,13 @@ components:
           items:
             $ref: '#/components/schemas/SurveyItem'
       type: object
+    TeacherSubjectTypeEnum:
+      type: string
+      enum:
+        - lecture
+        - practical_lesson
+        - laboratory_lesson
+        - course_paper
     SurveyItem:
       required:
         - id
@@ -2778,7 +3094,7 @@ components:
         answer_required:
           type: boolean
         type:
-          type: string
+          $ref: '#/components/schemas/SurveyItemTypeEnum'
         text:
           type: string
         position:
@@ -2792,13 +3108,19 @@ components:
             -
               $ref: '#/components/schemas/CommentItemData'
       type: object
+    SurveyItemTypeEnum:
+      type: string
+      enum:
+        - choice
+        - multi_choice
+        - comment
     ChoiceItemData:
       required:
         - type
         - choices
       properties:
         type:
-          type: string
+          $ref: '#/components/schemas/SurveyItemTypeEnum'
         choices:
           type: array
           items:
@@ -2810,7 +3132,7 @@ components:
         - choices
       properties:
         type:
-          type: string
+          $ref: '#/components/schemas/SurveyItemTypeEnum'
         choices:
           type: array
           items:
@@ -2821,7 +3143,7 @@ components:
         - type
       properties:
         type:
-          type: string
+          $ref: '#/components/schemas/SurveyItemTypeEnum'
         placeholder:
           type: string
           nullable: true
@@ -2867,11 +3189,15 @@ tags:
     name: subjects
     description: 'Ручки для работы с предметами'
   -
+    name: student-subjects
+    description: 'Ручки для работы с предметами, привязанными к студентам'
+  -
+    name: teacher-subjects
+    description: 'Ручки для работы с предметами, привязанными к преподавателям'
+  -
     name: roles
     description: 'Ручки для получения ролей'
   -
     name: surveys
     description: 'Ручки для работы с опросами'
-  -
-    name: student-subjects
 

@@ -82,7 +82,10 @@ class StudentSubjectRepository extends Common\AbstractRepository implements Stud
                 ),
                 new DataSort([
                     new SortColumn(
-                        "us.{$dto->getSortBy()}",
+                        match ($dto->getSortBy()) {
+                            'name' => 'name',
+                            default => 'us.' . $dto->getSortBy(),
+                        },
                         $dto->getSortBy(),
                         $dto->getSortType()->getPhpSort(),
                     ),
@@ -137,7 +140,10 @@ class StudentSubjectRepository extends Common\AbstractRepository implements Stud
                 ),
                 new DataSort([
                     new SortColumn(
-                        "us.{$dto->getSortBy()}",
+                        match ($dto->getSortBy()) {
+                            'name' => 'name',
+                            default => 'us.' . $dto->getSortBy(),
+                        },
                         $dto->getSortBy(),
                         $dto->getSortType()->getPhpSort(),
                     ),

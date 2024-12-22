@@ -6,7 +6,7 @@ use App\Domain\Entity\User as DomainUser;
 use App\Domain\Enum\PermissionEnum;
 use App\Domain\Enum\RoleEnum;
 use App\Domain\Enum\UserStatusEnum;
-use Nelmio\ApiDocBundle\Attribute\Model;
+use App\Presentation\Web\OpenApi\Attribute as LOA;
 use OpenApi\Attributes as OA;
 
 readonly class User
@@ -25,15 +25,12 @@ readonly class User
         #[OA\Property(format: 'email')]
         public string $email,
         public UserData|null $data,
-        #[OA\Property(ref: new Model(type: UserStatusEnum::class))]
+        #[LOA\Enum(UserStatusEnum::class)]
         public string $status,
         public bool $deleted,
         #[OA\Property(format: 'date-time')]
         public string|null $deleted_at,
-        #[OA\Property(
-            type: 'array',
-            items: new OA\Items(ref: new Model(type: PermissionEnum::class)),
-        )]
+        #[LOA\EnumItems(PermissionEnum::class)]
         public array $permissions,
     ) {
     }

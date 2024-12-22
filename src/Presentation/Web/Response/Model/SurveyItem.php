@@ -3,6 +3,8 @@
 namespace App\Presentation\Web\Response\Model;
 
 use App\Domain\Entity\SurveyItem as DomainSurveyItem;
+use App\Domain\Enum\SurveyItemTypeEnum;
+use App\Presentation\Web\OpenApi\Attribute as LOA;
 use App\Presentation\Web\Response\Model\SurveyItemData\ChoiceItemData;
 use App\Presentation\Web\Response\Model\SurveyItemData\CommentItemData;
 use App\Presentation\Web\Response\Model\SurveyItemData\Factory\SurveyItemDataFactory;
@@ -24,6 +26,7 @@ readonly class SurveyItem
         public string $id,
         public string $survey_id,
         public bool $answer_required,
+        #[LOA\Enum(SurveyItemTypeEnum::class)]
         public string $type,
         public string $text,
         public int $position,
