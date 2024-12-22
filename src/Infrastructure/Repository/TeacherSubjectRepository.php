@@ -7,12 +7,16 @@ use App\Domain\DataProvider\DataSort;
 use App\Domain\DataProvider\LimitOffset;
 use App\Domain\DataProvider\SortColumn;
 use App\Domain\Dto\TeacherSubject\GetAllTeacherSubjectsDto;
+use App\Domain\Dto\TeacherSubject\GetByIndexDto;
 use App\Domain\Dto\TeacherSubject\GetMyTeacherSubjectsDto;
 use App\Domain\Entity\MyTeacherSubject;
 use App\Domain\Entity\Subject;
 use App\Domain\Entity\TeacherSubject;
 use App\Domain\Entity\User;
 use App\Domain\Repository\TeacherSubjectRepositoryInterface;
+use ArrayIterator;
+use Iterator;
+use Qstart\Db\QueryBuilder\DML\Expression\InExpr;
 use Qstart\Db\QueryBuilder\Query;
 use Symfony\Component\Uid\Uuid;
 
@@ -121,5 +125,34 @@ class TeacherSubjectRepository extends Common\AbstractRepository implements Teac
                     ),
                 ]),
             );
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function findAllByIndexes(array $indexes): Iterator
+    {
+        if ($indexes === []) {
+            return new ArrayIterator([]);
+        }
+        $q = Query::select()
+            ->from(['ts' => $this->getClassTable(TeacherSubject::class)])
+            ->where(new InExpr(
+                ['teacher_id', 'subject_id', 'type'],
+                array_map(
+                    fn(GetByIndexDto $dto) => [
+                        'teacher_id' => $dto->getTeacherId()->toRfc4122(),
+                        'subject_id' => $dto->getSubjectId()->toRfc4122(),
+                        'type' => $dto->getType()->value,
+                    ],
+                    $indexes,
+                ),
+            ));
+        return new ArrayIterator(
+            $this->findAllByQuery(
+                $q,
+                TeacherSubject::class,
+            ),
+        );
     }
 }

@@ -1220,6 +1220,56 @@ paths:
                 allOf:
                   - { $ref: '#/components/schemas/SuccessWithPaginationResponse' }
                   - { properties: { data: { properties: { items: { type: array, items: { $ref: '#/components/schemas/MyTeacherSubject' } } }, type: object } }, type: object }
+  /teacher-subjects/import:
+    post:
+      tags:
+        - teacher-subjects
+      summary: 'Импорт предметов для преподавателей'
+      operationId: post_import-teacher-subjects
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              allOf:
+                -
+                  $ref: '#/components/schemas/ImportTeacherSubjectsDto'
+                -
+                  properties: { file: { type: string, format: binary } }
+                  type: object
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/SuccessResponse' }
+                  - { properties: { data: { $ref: '#/components/schemas/CreatedTeacherSubjectsInfo' } }, type: object }
+        '422':
+          description: 'Unprocessable Entity'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResponse'
+        '400':
+          description: 'Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: 'Internal Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /user:
     post:
       tags:
@@ -2357,6 +2407,25 @@ components:
           minimum: 0
           nullable: true
       type: object
+    ImportTeacherSubjectsDto:
+      properties:
+        headers_in_first_row:
+          title: 'Находятся ли в первой строке файла заголовки для столбцов'
+          type: boolean
+          default: true
+        subject_col:
+          title: 'Столбец с фамилией'
+          type: string
+          default: A
+        email_col:
+          title: 'Столбец с именем'
+          type: string
+          default: B
+        type_col:
+          title: 'Столбец с отчеством'
+          type: string
+          default: C
+      type: object
     CreateFullUserDto:
       required:
         - email
@@ -2898,6 +2967,13 @@ components:
         type:
           $ref: '#/components/schemas/TeacherSubjectTypeEnum'
         students_count:
+          type: integer
+      type: object
+    CreatedTeacherSubjectsInfo:
+      required:
+        - created
+      properties:
+        created:
           type: integer
       type: object
     UpdatedUsersInfo:

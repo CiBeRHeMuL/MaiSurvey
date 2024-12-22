@@ -20,7 +20,6 @@ use App\Presentation\Web\Response\Model\Common\ValidationResponse;
 use App\Presentation\Web\Response\Model\CreatedSubjectsInfo;
 use App\Presentation\Web\Response\Model\Subject;
 use App\Presentation\Web\Response\Response;
-use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -87,29 +86,7 @@ class SubjectController extends BaseController
     #[Route('/subjects/import', 'import-subjects', methods: ['POST'])]
     #[IsGranted(PermissionEnum::SubjectImport->value, statusCode: 404, exceptionCode: 404)]
     #[OA\Tag('subjects')]
-    #[OA\RequestBody(
-        content: new OA\MediaType(
-            mediaType: 'multipart/form-data',
-            schema: new OA\Schema(
-                allOf: [
-                    new OA\Schema(
-                        ref: new Model(type: ImportSubjectsDto::class),
-                        type: 'object',
-                    ),
-                    new OA\Schema(
-                        properties: [
-                            new OA\Property(
-                                property: 'file',
-                                type: 'string',
-                                format: 'binary',
-                            )
-                        ],
-                        type: 'object',
-                    ),
-                ],
-            ),
-        ),
-    )]
+    #[LOa\ImportRequestBody(ImportSubjectsDto::class)]
     #[LOA\SuccessResponse(CreatedSubjectsInfo::class)]
     #[LOA\ValidationResponse]
     #[LOA\ErrorResponse(400)]

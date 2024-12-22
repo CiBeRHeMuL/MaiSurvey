@@ -21,7 +21,6 @@ use App\Presentation\Web\Response\Model\Common\ValidationResponse;
 use App\Presentation\Web\Response\Model\CreatedUserDataInfo;
 use App\Presentation\Web\Response\Model\UserData;
 use App\Presentation\Web\Response\Response;
-use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -91,29 +90,7 @@ class UserDataController extends BaseController
     #[Route('/user-data/import', 'import-user-data', methods: ['POST'])]
     #[IsGranted(PermissionEnum::UserDataImport->value, statusCode: 404, exceptionCode: 404)]
     #[OA\Tag('user-data')]
-    #[OA\RequestBody(
-        content: new OA\MediaType(
-            mediaType: 'multipart/form-data',
-            schema: new OA\Schema(
-                allOf: [
-                    new OA\Schema(
-                        ref: new Model(type: ImportUserDataDto::class),
-                        type: 'object',
-                    ),
-                    new OA\Schema(
-                        properties: [
-                            new OA\Property(
-                                property: 'file',
-                                type: 'string',
-                                format: 'binary',
-                            )
-                        ],
-                        type: 'object',
-                    ),
-                ],
-            ),
-        ),
-    )]
+    #[LOA\ImportRequestBody(ImportUserDataDto::class)]
     #[LOA\SuccessResponse(CreatedUserDataInfo::class)]
     #[LOA\ValidationResponse]
     #[LOA\ErrorResponse(400)]

@@ -4,7 +4,9 @@ namespace App\Domain\Service\TeacherSubject;
 
 use App\Domain\DataProvider\DataProviderInterface;
 use App\Domain\DataProvider\EmptyDataProvider;
+use App\Domain\Dto\TeacherSubject\CreateTeacherSubjectDto;
 use App\Domain\Dto\TeacherSubject\GetAllTeacherSubjectsDto;
+use App\Domain\Dto\TeacherSubject\GetByIndexDto;
 use App\Domain\Dto\TeacherSubject\GetMyTeacherSubjectsDto;
 use App\Domain\Entity\MyTeacherSubject;
 use App\Domain\Entity\TeacherSubject;
@@ -12,8 +14,13 @@ use App\Domain\Entity\User;
 use App\Domain\Enum\ValidationErrorSlugEnum;
 use App\Domain\Exception\ValidationException;
 use App\Domain\Repository\TeacherSubjectRepositoryInterface;
+use App\Domain\Service\Db\TransactionManagerInterface;
 use App\Domain\Validation\ValidationError;
+use ArrayIterator;
+use DateTimeImmutable;
+use Iterator;
 use Psr\Log\LoggerInterface;
+use Throwable;
 
 class TeacherSubjectService
 {
@@ -23,6 +30,7 @@ class TeacherSubjectService
 
     public function __construct(
         private TeacherSubjectRepositoryInterface $teacherSubjectRepository,
+        private TransactionManagerInterface $transactionManager,
         LoggerInterface $logger,
     ) {
         $this->setLogger($logger);
@@ -81,5 +89,133 @@ class TeacherSubjectService
         return $this
             ->teacherSubjectRepository
             ->findAll($dto);
+    }
+
+    /**
+     * @param CreateTeacherSubjectDto[] $dtos
+     * @param bool $validate
+     * @param bool $transaction
+     * @param bool $throwOnError
+     *
+     * @return int
+     * @throws Throwable
+     */
+    public function createMulti(array $dtos, bool $validate = true, bool $transaction = true, bool $throwOnError = false): int
+    {
+        if ($dtos === []) {
+            return 0;
+        }
+
+        if ($transaction) {
+            $this->transactionManager->beginTransaction();
+        }
+
+        try {
+            $entities = [];
+            foreach ($dtos as $dto) {
+                if ($validate) {
+                    $this->validateCreateDto($dto);
+                }
+
+                $entities[] = $this->entityFromCreateDto($dto);
+            }
+
+            $created = $this->teacherSubjectRepository->createMulti($entities);
+
+            if ($transaction) {
+                $this->transactionManager->commit();
+            }
+
+            return $created;
+        } catch (Throwable $e) {
+            $this->logger->error($e);
+            $this->transactionManager->rollback();
+            if ($throwOnError) {
+                throw $e;
+            } else {
+                return 0;
+            }
+        }
+    }
+
+    /**
+     * @param GetByIndexDto[] $indexes
+     *
+     * @return Iterator<int, TeacherSubject>
+     */
+    public function getAllByIndexes(array $indexes): Iterator
+    {
+        if ($indexes === []) {
+            return new ArrayIterator([]);
+        }
+        return $this
+            ->teacherSubjectRepository
+            ->findAllByIndexes($indexes);
+    }
+
+    private function entityFromCreateDto(CreateTeacherSubjectDto $dto): TeacherSubject
+    {
+        $teacherSubject = new TeacherSubject();
+        $teacherSubject
+            ->setTeacherId($dto->getTeacher()->getId())
+            ->setSubjectId($dto->getSubject()->getId())
+            ->setType($dto->getType())
+            ->setTeacher($dto->getTeacher())
+            ->setSubject($dto->getSubject())
+            ->setCreatedAt(new DateTimeImmutable());
+        return $teacherSubject;
+    }
+
+    public function validateCreateDto(CreateTeacherSubjectDto $dto, bool $checkExisting = true): void
+    {
+        if ($dto->getTeacher()->isActive() === false) {
+            throw ValidationException::new([
+                new ValidationError(
+                    'teacher_id',
+                    ValidationErrorSlugEnum::WrongField->getSlug(),
+                    'Преподаватель должен быть активен',
+                ),
+            ]);
+        }
+        if ($dto->getTeacher()->isTeacher() === false) {
+            throw ValidationException::new([
+                new ValidationError(
+                    'teacher_id',
+                    ValidationErrorSlugEnum::WrongField->getSlug(),
+                    'Преподаватель должен быть преподавателем',
+                ),
+            ]);
+        }
+
+        if ($checkExisting) {
+            $existing = $this
+                ->teacherSubjectRepository
+                ->findAllByIndexes([
+                    new GetByIndexDto(
+                        $dto->getTeacher()->getId(),
+                        $dto->getSubject()->getId(),
+                        $dto->getType(),
+                    ),
+                ]);
+            if (iterator_count($existing) > 0) {
+                throw ValidationException::new([
+                    new ValidationError(
+                        'teacher_id',
+                        ValidationErrorSlugEnum::AlreadyExists->getSlug(),
+                        'Этот преподаватель уже ведет этот предмет',
+                    ),
+                    new ValidationError(
+                        'subject_id',
+                        ValidationErrorSlugEnum::AlreadyExists->getSlug(),
+                        'Этот преподаватель уже ведет этот предмет',
+                    ),
+                    new ValidationError(
+                        'type',
+                        ValidationErrorSlugEnum::AlreadyExists->getSlug(),
+                        'Этот преподаватель уже ведет этот предмет',
+                    ),
+                ]);
+            }
+        }
     }
 }

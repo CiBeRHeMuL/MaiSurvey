@@ -6,17 +6,28 @@ use App\Application\Dto\TeacherSubject\GetAllTeacherSubjectsDto;
 use App\Application\Dto\TeacherSubject\GetMyTeacherSubjectsDto;
 use App\Application\UseCase\TeacherSubject\GetAllUseCase;
 use App\Application\UseCase\TeacherSubject\GetMyUseCase;
+use App\Application\UseCase\TeacherSubject\ImportTeacherSubjectsUseCase;
+use App\Domain\Dto\TeacherSubject\ImportDto;
 use App\Domain\Enum\PermissionEnum;
+use App\Presentation\Web\Dto\TeacherSubject\ImportTeacherSubjectsDto;
+use App\Presentation\Web\Enum\ErrorSlugEnum;
 use App\Presentation\Web\OpenApi\Attribute as LOA;
+use App\Presentation\Web\Response\Model\Common\Error;
 use App\Presentation\Web\Response\Model\Common\PaginatedData;
+use App\Presentation\Web\Response\Model\Common\SuccessResponse;
 use App\Presentation\Web\Response\Model\Common\SuccessWithPaginationResponse;
+use App\Presentation\Web\Response\Model\Common\ValidationResponse;
+use App\Presentation\Web\Response\Model\CreatedTeacherSubjectsInfo;
 use App\Presentation\Web\Response\Model\MyTeacherSubject;
 use App\Presentation\Web\Response\Model\TeacherSubject;
 use App\Presentation\Web\Response\Response;
 use OpenApi\Attributes as OA;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Attribute\MapQueryString;
+use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
+use Symfony\Component\HttpKernel\Attribute\MapUploadedFile;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
@@ -74,6 +85,54 @@ class TeacherSubjectController extends BaseController
                     $provider,
                     MyTeacherSubject::fromTeacherSubject(...),
                 ),
+            ),
+        );
+    }
+
+    /** Импорт предметов для преподавателей */
+    #[Route('/teacher-subjects/import', 'import-teacher-subjects', methods: ['POST'])]
+    #[IsGranted(PermissionEnum::TeacherSubjectImport->value, statusCode: 404, exceptionCode: 404)]
+    #[OA\Tag('teacher-subjects')]
+    #[LOA\ImportRequestBody(ImportTeacherSubjectsDto::class)]
+    #[LOA\SuccessResponse(CreatedTeacherSubjectsInfo::class)]
+    #[LOA\ValidationResponse]
+    #[LOA\ErrorResponse(400)]
+    #[LOA\ErrorResponse(401)]
+    #[LOA\ErrorResponse(500)]
+    public function import(
+        ImportTeacherSubjectsUseCase $useCase,
+        LoggerInterface $logger,
+        #[MapRequestPayload]
+        ImportTeacherSubjectsDto $dto,
+        #[MapUploadedFile]
+        UploadedFile|array $file = [],
+    ): JsonResponse {
+        if (is_array($file)) {
+            return Response::validation(
+                new ValidationResponse([
+                    'file' => [
+                        new Error(
+                            ErrorSlugEnum::WrongField->getSlug(),
+                            'Не удалось прочитать файл',
+                        ),
+                    ],
+                ]),
+            );
+        }
+
+        $useCase->setLogger($logger);
+        $created = $useCase->execute(
+            new ImportDto(
+                $file->getPathname(),
+                $dto->headers_in_first_row,
+                $dto->email_col,
+                $dto->subject_col,
+                $dto->type_col,
+            ),
+        );
+        return Response::success(
+            new SuccessResponse(
+                new CreatedTeacherSubjectsInfo($created),
             ),
         );
     }
