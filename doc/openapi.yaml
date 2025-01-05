@@ -3114,33 +3114,29 @@ components:
     LiteSurvey:
       required:
         - id
+        - title
         - subject
       properties:
         id:
           type: string
+        title:
+          type: string
         subject:
           $ref: '#/components/schemas/Subject'
-        teacher:
-          nullable: true
-          oneOf:
-            -
-              $ref: '#/components/schemas/LiteUser'
       type: object
     Survey:
       required:
         - id
+        - title
         - subject
         - items
       properties:
         id:
           type: string
+        title:
+          type: string
         subject:
           $ref: '#/components/schemas/Subject'
-        teacher:
-          nullable: true
-          oneOf:
-            -
-              $ref: '#/components/schemas/LiteUser'
         items:
           type: array
           items:

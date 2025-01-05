@@ -3,6 +3,7 @@
 namespace App\Domain\Entity;
 
 use DateTimeImmutable;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Uid\Uuid;
 
@@ -11,6 +12,15 @@ use Symfony\Component\Uid\Uuid;
 #[ORM\ChangeTrackingPolicy('DEFERRED_EXPLICIT')]
 readonly class MySurvey
 {
+    /**
+     * @param Uuid $id
+     * @param Uuid $userId
+     * @param bool $completed
+     * @param DateTimeImmutable|null $completedAt
+     * @param Survey $survey
+     * @param User $user
+     * @param Collection<int, MySurveyItem> $myItems
+     */
     public function __construct(
         #[ORM\Id]
         #[ORM\Column(name: 'id', type: 'uuid', nullable: false)]
@@ -28,6 +38,9 @@ readonly class MySurvey
         #[ORM\ManyToOne(targetEntity: User::class)]
         #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
         private User $user,
+        #[ORM\OneToMany(targetEntity: MySurveyItem::class, mappedBy: 'mySurvey')]
+        #[ORM\InverseJoinColumn(name: 'id', referencedColumnName: 'survey_id')]
+        private Collection $myItems,
     ) {
     }
 
@@ -59,5 +72,13 @@ readonly class MySurvey
     public function getUser(): User
     {
         return $this->user;
+    }
+
+    /**
+     * @return Collection<int, MySurveyItem>
+     */
+    public function getMyItems(): Collection
+    {
+        return $this->myItems;
     }
 }

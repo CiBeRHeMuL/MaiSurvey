@@ -2,6 +2,7 @@
 
 namespace App\Presentation\Web\Response\Model;
 
+use App\Domain\Entity\MySurveyItem;
 use App\Domain\Entity\SurveyItem as DomainSurveyItem;
 use App\Domain\Enum\SurveyItemTypeEnum;
 use App\Presentation\Web\OpenApi\Attribute as LOA;
@@ -45,5 +46,10 @@ readonly class SurveyItem
             $item->getPosition(),
             SurveyItemDataFactory::fromItemData($item->getData()),
         );
+    }
+
+    public static function fromMyItem(MySurveyItem $item): self
+    {
+        return self::fromItem($item->getSurveyItem());
     }
 }

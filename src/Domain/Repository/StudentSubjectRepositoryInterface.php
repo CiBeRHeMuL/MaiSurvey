@@ -5,8 +5,11 @@ namespace App\Domain\Repository;
 use App\Domain\DataProvider\DataProviderInterface;
 use App\Domain\Dto\StudentSubject\GetAllStudentSubjectsDto;
 use App\Domain\Dto\StudentSubject\GetMyStudentSubjectsDto;
+use App\Domain\Dto\StudentSubject\GetStudentSubjectByIntersectionDto;
+use App\Domain\Entity\StudentSubject;
 use App\Domain\Entity\User;
 use App\Domain\Repository\Common\RepositoryInterface;
+use Iterator;
 
 interface StudentSubjectRepositoryInterface extends RepositoryInterface
 {
@@ -28,4 +31,11 @@ interface StudentSubjectRepositoryInterface extends RepositoryInterface
      * @return DataProviderInterface
      */
     public function findMy(User $user, GetMyStudentSubjectsDto $dto): DataProviderInterface;
+
+    /**
+     * @param GetStudentSubjectByIntersectionDto[] $intersections
+     *
+     * @return Iterator<int, StudentSubject>
+     */
+    public function findAllByIntersections(array $intersections): Iterator;
 }

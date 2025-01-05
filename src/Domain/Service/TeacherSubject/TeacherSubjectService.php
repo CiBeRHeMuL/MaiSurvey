@@ -6,8 +6,8 @@ use App\Domain\DataProvider\DataProviderInterface;
 use App\Domain\DataProvider\EmptyDataProvider;
 use App\Domain\Dto\TeacherSubject\CreateTeacherSubjectDto;
 use App\Domain\Dto\TeacherSubject\GetAllTeacherSubjectsDto;
-use App\Domain\Dto\TeacherSubject\GetByIndexDto;
 use App\Domain\Dto\TeacherSubject\GetMyTeacherSubjectsDto;
+use App\Domain\Dto\TeacherSubject\GetTeacherSubjectByIndexDto;
 use App\Domain\Entity\MyTeacherSubject;
 use App\Domain\Entity\TeacherSubject;
 use App\Domain\Entity\User;
@@ -139,7 +139,7 @@ class TeacherSubjectService
     }
 
     /**
-     * @param GetByIndexDto[] $indexes
+     * @param GetTeacherSubjectByIndexDto[] $indexes
      *
      * @return Iterator<int, TeacherSubject>
      */
@@ -191,7 +191,7 @@ class TeacherSubjectService
             $existing = $this
                 ->teacherSubjectRepository
                 ->findAllByIndexes([
-                    new GetByIndexDto(
+                    new GetTeacherSubjectByIndexDto(
                         $dto->getTeacher()->getId(),
                         $dto->getSubject()->getId(),
                         $dto->getType(),

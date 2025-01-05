@@ -20,8 +20,8 @@ class Survey
     private Uuid $id;
     #[ORM\Column(name: 'subject_id', type: 'uuid', nullable: false)]
     private Uuid $subjectId;
-    #[ORM\Column(name: 'teacher_id', type: 'uuid', nullable: true)]
-    private Uuid|null $teacherId = null;
+    #[ORM\Column(type: 'string', length: 255, nullable: false)]
+    private string $title;
     #[ORM\Column(name: 'actual_to', type: 'datetime_immutable', nullable: false)]
     private DateTimeImmutable $actualTo;
     #[ORM\Column(name: 'created_at', type: 'datetime_immutable', nullable: false, options: ['default' => 'CURRENT_TIMESTAMP'])]
@@ -30,9 +30,6 @@ class Survey
     #[ORM\ManyToOne(targetEntity: Subject::class)]
     #[ORM\JoinColumn(name: 'subject_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
     private Subject $subject;
-    #[ORM\ManyToOne(targetEntity: User::class)]
-    #[ORM\JoinColumn(name: 'teacher_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
-    private User|null $teacher = null;
     /** @var Collection<SurveyItem> $items */
     #[ORM\OneToMany(targetEntity: SurveyItem::class, mappedBy: 'survey')]
     private Collection $items;
@@ -64,14 +61,14 @@ class Survey
         return $this;
     }
 
-    public function getTeacherId(): Uuid|null
+    public function getTitle(): string
     {
-        return $this->teacherId;
+        return $this->title;
     }
 
-    public function setTeacherId(Uuid|null $teacherId): Survey
+    public function setTitle(string $title): Survey
     {
-        $this->teacherId = $teacherId;
+        $this->title = $title;
         return $this;
     }
 
@@ -105,17 +102,6 @@ class Survey
     public function setSubject(Subject $subject): Survey
     {
         $this->subject = $subject;
-        return $this;
-    }
-
-    public function getTeacher(): User|null
-    {
-        return $this->teacher;
-    }
-
-    public function setTeacher(User|null $teacher): Survey
-    {
-        $this->teacher = $teacher;
         return $this;
     }
 

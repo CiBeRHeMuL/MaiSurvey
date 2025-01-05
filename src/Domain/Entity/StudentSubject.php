@@ -4,6 +4,7 @@ namespace App\Domain\Entity;
 
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\IdGenerator\UuidGenerator;
 use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity]
@@ -11,9 +12,12 @@ use Symfony\Component\Uid\Uuid;
 class StudentSubject
 {
     #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'CUSTOM')]
+    #[ORM\CustomIdGenerator(class: UuidGenerator::class)]
+    #[ORM\Column(type: 'uuid', nullable: false)]
+    private Uuid $id;
     #[ORM\Column(type: 'uuid', nullable: false)]
     private Uuid $userId;
-    #[ORM\Id]
     #[ORM\Column(name: 'teacher_subject_id', type: 'uuid', nullable: false)]
     private Uuid $teacherSubjectId;
     #[ORM\Column(name: 'actual_from', type: 'datetime_immutable', nullable: false)]
@@ -31,6 +35,17 @@ class StudentSubject
     #[ORM\ManyToOne(targetEntity: TeacherSubject::class, inversedBy: 'students')]
     #[ORM\JoinColumn(name: 'teacher_subject_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
     private TeacherSubject $teacherSubject;
+
+    public function getId(): Uuid
+    {
+        return $this->id;
+    }
+
+    public function setId(Uuid $id): StudentSubject
+    {
+        $this->id = $id;
+        return $this;
+    }
 
     public function getUserId(): Uuid
     {

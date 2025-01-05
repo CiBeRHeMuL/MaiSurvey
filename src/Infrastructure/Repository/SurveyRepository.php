@@ -35,20 +35,23 @@ class SurveyRepository extends Common\AbstractRepository implements SurveyReposi
                 array_map(
                     fn(Uuid $uuid) => $uuid->toRfc4122(),
                     $dto->getSubjectIds(),
-                )
+                ),
             ));
         }
         return $this->findWithLazyBatchedProvider(
             $q,
             MySurvey::class,
-            ['survey', 'survey.subject', 'survey.teacher', 'survey.teacher.data', 'survey.items', 'user', 'user.data'],
+            ['survey', 'survey.subject', 'user', 'user.data', 'myItems', 'myItems', 'myItems.surveyItem'],
             new LimitOffset(
                 $dto->getLimit(),
                 $dto->getOffset(),
             ),
             new DataSort([
                 new SortColumn(
-                    "ms.{$dto->getSortBy()}",
+                    match ($dto->getSortBy()) {
+                        'created_at' => 's.created_at',
+                        default => "ms.{$dto->getSortBy()}",
+                    },
                     $dto->getSortBy(),
                     $dto->getSortType()->getPhpSort(),
                 ),
@@ -66,7 +69,7 @@ class SurveyRepository extends Common\AbstractRepository implements SurveyReposi
         return $this->findOneByQuery(
             $q,
             MySurvey::class,
-            ['survey', 'survey.subject', 'survey.teacher', 'survey.teacher.data', 'survey.items', 'user', 'user.data'],
+            ['survey', 'survey.subject', 'survey.items', 'user', 'user.data', 'myItems', 'myItems.surveyItem'],
         );
     }
 

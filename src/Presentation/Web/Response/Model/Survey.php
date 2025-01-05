@@ -9,14 +9,14 @@ readonly class Survey
 {
     /**
      * @param string $id
+     * @param string $title
      * @param Subject $subject
-     * @param LiteUser|null $teacher
      * @param SurveyItem[] $items
      */
     public function __construct(
         public string $id,
+        public string $title,
         public Subject $subject,
-        public LiteUser|null $teacher,
         public array $items,
     ) {
     }
@@ -25,10 +25,8 @@ readonly class Survey
     {
         return new self(
             $survey->getId()->toRfc4122(),
+            $survey->getTitle(),
             Subject::fromSubject($survey->getSubject()),
-            $survey->getTeacher() !== null
-                ? LiteUser::fromUser($survey->getTeacher())
-                : null,
             array_map(
                 SurveyItem::fromItem(...),
                 $survey->getItems()->toArray(),
@@ -40,13 +38,11 @@ readonly class Survey
     {
         return new self(
             $survey->getId()->toRfc4122(),
+            $survey->getSurvey()->getTitle(),
             Subject::fromSubject($survey->getSurvey()->getSubject()),
-            $survey->getSurvey()->getTeacher() !== null
-                ? LiteUser::fromUser($survey->getSurvey()->getTeacher())
-                : null,
             array_map(
-                SurveyItem::fromItem(...),
-                $survey->getSurvey()->getItems()->toArray(),
+                SurveyItem::fromMyItem(...),
+                $survey->getMyItems()->toArray(),
             ),
         );
     }

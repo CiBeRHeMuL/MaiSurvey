@@ -28,7 +28,7 @@ final class Version20241128233417 extends AbstractMigration
     public function down(Schema $schema): void
     {
         // this down() migration is auto-generated, please modify it to your needs
-        $this->addSql('DROP INDEX user_data_group_pkey');
+        $this->addSql('ALTER TABLE user_data_group DROP CONSTRAINT user_data_group_pkey');
         $this->addSql('CREATE UNIQUE INDEX uniq_84184eb66ff8bf36 ON user_data_group (user_data_id)');
         $this->addSql('ALTER TABLE user_data_group ADD PRIMARY KEY (user_data_id, group_id)');
     }

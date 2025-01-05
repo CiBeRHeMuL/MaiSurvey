@@ -5,7 +5,7 @@ namespace App\Domain\Dto\TeacherSubject;
 use App\Domain\Enum\TeacherSubjectTypeEnum;
 use Symfony\Component\Uid\Uuid;
 
-readonly class GetByIndexDto
+readonly class GetTeacherSubjectByIndexDto
 {
     public function __construct(
         private Uuid $teacherId,

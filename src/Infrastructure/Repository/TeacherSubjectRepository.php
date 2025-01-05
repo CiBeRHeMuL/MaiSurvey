@@ -7,8 +7,8 @@ use App\Domain\DataProvider\DataSort;
 use App\Domain\DataProvider\LimitOffset;
 use App\Domain\DataProvider\SortColumn;
 use App\Domain\Dto\TeacherSubject\GetAllTeacherSubjectsDto;
-use App\Domain\Dto\TeacherSubject\GetByIndexDto;
 use App\Domain\Dto\TeacherSubject\GetMyTeacherSubjectsDto;
+use App\Domain\Dto\TeacherSubject\GetTeacherSubjectByIndexDto;
 use App\Domain\Entity\MyTeacherSubject;
 use App\Domain\Entity\Subject;
 use App\Domain\Entity\TeacherSubject;
@@ -140,7 +140,7 @@ class TeacherSubjectRepository extends Common\AbstractRepository implements Teac
             ->where(new InExpr(
                 ['teacher_id', 'subject_id', 'type'],
                 array_map(
-                    fn(GetByIndexDto $dto) => [
+                    fn(GetTeacherSubjectByIndexDto $dto) => [
                         'teacher_id' => $dto->getTeacherId()->toRfc4122(),
                         'subject_id' => $dto->getSubjectId()->toRfc4122(),
                         'type' => $dto->getType()->value,

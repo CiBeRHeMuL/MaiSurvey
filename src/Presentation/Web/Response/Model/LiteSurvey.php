@@ -9,8 +9,8 @@ readonly class LiteSurvey
 {
     public function __construct(
         public string $id,
+        public string $title,
         public Subject $subject,
-        public LiteUser|null $teacher,
     ) {
     }
 
@@ -18,10 +18,8 @@ readonly class LiteSurvey
     {
         return new self(
             $survey->getId()->toRfc4122(),
+            $survey->getTitle(),
             Subject::fromSubject($survey->getSubject()),
-            $survey->getTeacher() !== null
-                ? LiteUser::fromUser($survey->getTeacher())
-                : null,
         );
     }
 
@@ -29,10 +27,8 @@ readonly class LiteSurvey
     {
         return new self(
             $survey->getId()->toRfc4122(),
+            $survey->getSurvey()->getTitle(),
             Subject::fromSubject($survey->getSurvey()->getSubject()),
-            $survey->getSurvey()->getTeacher() !== null
-                ? LiteUser::fromUser($survey->getSurvey()->getTeacher())
-                : null,
         );
     }
 }

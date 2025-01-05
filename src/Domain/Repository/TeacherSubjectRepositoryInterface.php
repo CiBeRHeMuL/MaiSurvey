@@ -4,8 +4,8 @@ namespace App\Domain\Repository;
 
 use App\Domain\DataProvider\DataProviderInterface;
 use App\Domain\Dto\TeacherSubject\GetAllTeacherSubjectsDto;
-use App\Domain\Dto\TeacherSubject\GetByIndexDto;
 use App\Domain\Dto\TeacherSubject\GetMyTeacherSubjectsDto;
+use App\Domain\Dto\TeacherSubject\GetTeacherSubjectByIndexDto;
 use App\Domain\Entity\MyTeacherSubject;
 use App\Domain\Entity\TeacherSubject;
 use App\Domain\Entity\User;
@@ -29,7 +29,7 @@ interface TeacherSubjectRepositoryInterface extends Common\RepositoryInterface
     public function findAll(GetAllTeacherSubjectsDto $dto): DataProviderInterface;
 
     /**
-     * @param GetByIndexDto[] $indexes
+     * @param GetTeacherSubjectByIndexDto[] $indexes
      *
      * @return Iterator<int, TeacherSubject>
      */

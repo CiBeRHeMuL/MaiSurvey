@@ -13,7 +13,10 @@ use App\Domain\Entity\Subject;
 use App\Domain\Entity\TeacherSubject;
 use App\Domain\Entity\User;
 use App\Domain\Repository\StudentSubjectRepositoryInterface;
+use App\Infrastructure\Db\Expr\StudentSubjectIntersectionExpr;
+use ArrayIterator;
 use DateTimeImmutable;
+use Iterator;
 use Qstart\Db\QueryBuilder\DML\Expression\BetweenExpr;
 use Qstart\Db\QueryBuilder\DML\Expression\Expr;
 use Qstart\Db\QueryBuilder\Query;
@@ -149,5 +152,23 @@ class StudentSubjectRepository extends Common\AbstractRepository implements Stud
                     ),
                 ]),
             );
+    }
+
+    public function findAllByIntersections(array $intersections): Iterator
+    {
+        if ($intersections === []) {
+            return new ArrayIterator([]);
+        }
+        $q = Query::select()
+            ->from(['ss' => $this->getClassTable(StudentSubject::class)]);
+        foreach ($intersections as $index) {
+            $q->andWhere(new StudentSubjectIntersectionExpr($index, 'ss'));
+        }
+        return new ArrayIterator(
+            $this->findAllByQuery(
+                $q,
+                StudentSubject::class,
+            ),
+        );
     }
 }

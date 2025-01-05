@@ -23,10 +23,15 @@ class SurveyItemAnswer
     private AnswerDataInterface|null $answer;
     #[ORM\Column(name: 'created_at', type: 'datetime_immutable', nullable: false, options: ['default' => 'CURRENT_TIMESTAMP'])]
     private DateTimeImmutable $createdAt;
+    #[ORM\Column(name: 'teacher_subject_id', type: 'uuid', nullable: false)]
+    private Uuid $teacherSubjectId;
 
     #[ORM\ManyToOne(targetEntity: SurveyItem::class)]
     #[ORM\JoinColumn(name: 'survey_item_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
     private SurveyItem $item;
+    #[ORM\ManyToOne(targetEntity: TeacherSubject::class)]
+    #[ORM\JoinColumn(name: 'teacher_subject_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
+    private TeacherSubject $teacherSubject;
 
     public function getId(): Uuid
     {
@@ -61,6 +66,17 @@ class SurveyItemAnswer
         return $this;
     }
 
+    public function getTeacherSubjectId(): Uuid
+    {
+        return $this->teacherSubjectId;
+    }
+
+    public function setTeacherSubjectId(Uuid $teacherSubjectId): SurveyItemAnswer
+    {
+        $this->teacherSubjectId = $teacherSubjectId;
+        return $this;
+    }
+
     public function getCreatedAt(): DateTimeImmutable
     {
         return $this->createdAt;
@@ -80,6 +96,17 @@ class SurveyItemAnswer
     public function setItem(SurveyItem $item): SurveyItemAnswer
     {
         $this->item = $item;
+        return $this;
+    }
+
+    public function getTeacherSubject(): TeacherSubject
+    {
+        return $this->teacherSubject;
+    }
+
+    public function setTeacherSubject(TeacherSubject $teacherSubject): SurveyItemAnswer
+    {
+        $this->teacherSubject = $teacherSubject;
         return $this;
     }
 }
