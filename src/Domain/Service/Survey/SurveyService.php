@@ -71,7 +71,7 @@ class SurveyService
 
     private function prepareMySurvey(MySurvey $survey): MySurvey
     {
-        $items = $survey->getMyItems();
+        $items = $survey->getMyItems()->toArray();
         array_walk($items, $this->templateService->putTsIntoMySurveyItem(...));
         return $survey;
     }

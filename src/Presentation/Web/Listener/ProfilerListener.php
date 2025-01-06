@@ -57,7 +57,7 @@ class ProfilerListener
                             ? array_values(
                                 array_filter(
                                     $query['backtrace'],
-                                    fn(array $trace) => str_starts_with($trace['file'], "$this->projectDir/src"),
+                                    fn(array $trace) => str_starts_with($trace['file'] ?? '', "$this->projectDir/src"),
                                 ),
                             )
                             : null,
