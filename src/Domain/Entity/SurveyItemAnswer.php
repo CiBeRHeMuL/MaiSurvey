@@ -3,6 +3,7 @@
 namespace App\Domain\Entity;
 
 use App\Domain\Dto\SurveyItemAnswer\AnswerDataInterface;
+use App\Domain\Enum\SurveyItemTypeEnum;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\IdGenerator\UuidGenerator;
@@ -25,6 +26,8 @@ class SurveyItemAnswer
     private DateTimeImmutable $createdAt;
     #[ORM\Column(name: 'teacher_subject_id', type: 'uuid', nullable: false)]
     private Uuid $teacherSubjectId;
+    #[ORM\Column(type: 'string', length: 255, nullable: false, enumType: SurveyItemTypeEnum::class)]
+    private SurveyItemTypeEnum $type;
 
     #[ORM\ManyToOne(targetEntity: SurveyItem::class)]
     #[ORM\JoinColumn(name: 'survey_item_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
@@ -85,6 +88,17 @@ class SurveyItemAnswer
     public function setCreatedAt(DateTimeImmutable $createdAt): SurveyItemAnswer
     {
         $this->createdAt = $createdAt;
+        return $this;
+    }
+
+    public function getType(): SurveyItemTypeEnum
+    {
+        return $this->type;
+    }
+
+    public function setType(SurveyItemTypeEnum $type): SurveyItemAnswer
+    {
+        $this->type = $type;
         return $this;
     }
 

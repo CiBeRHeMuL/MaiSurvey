@@ -111,6 +111,7 @@ class SurveyItemAnswerService
             ->setTeacherSubjectId($dto->getTeacherSubject()->getId())
             ->setAnswer($dto->getData())
             ->setCreatedAt(new DateTimeImmutable())
+            ->setType($dto->getSurveyItem()->getType())
             ->setItem($dto->getSurveyItem())
             ->setTeacherSubject($dto->getTeacherSubject());
         return $entity;
