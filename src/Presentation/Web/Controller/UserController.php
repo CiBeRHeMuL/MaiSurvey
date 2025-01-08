@@ -48,7 +48,7 @@ class UserController extends BaseController
     #[LOA\ValidationResponse]
     #[LOA\ErrorResponse(500)]
     public function create(
-        #[MapRequestPayload]
+        #[MapRequestPayload('json')]
         CreateFullUserDto $dto,
         CreateUserUseCase $useCase,
         LoggerInterface $logger,
@@ -166,7 +166,7 @@ class UserController extends BaseController
     public function updateMulti(
         LoggerInterface $logger,
         MultiUpdateUseCase $useCase,
-        #[MapRequestPayload]
+        #[MapRequestPayload('form')]
         UpdateUsersDto $dto = new UpdateUsersDto(),
         #[MapUploadedFile]
         UploadedFile|array $file = [],

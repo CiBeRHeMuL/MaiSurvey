@@ -68,7 +68,7 @@ class GroupController extends BaseController
     #[LOA\ErrorResponse(401)]
     #[LOA\ErrorResponse(500)]
     public function create(
-        #[MapRequestPayload]
+        #[MapRequestPayload('json')]
         CreateGroupDto $dto,
         LoggerInterface $logger,
         CreateUseCase $useCase,
@@ -95,7 +95,7 @@ class GroupController extends BaseController
     public function import(
         ImportUseCase $useCase,
         LoggerInterface $logger,
-        #[MapRequestPayload]
+        #[MapRequestPayload('form')]
         ImportGroupsDto $dto,
         #[MapUploadedFile]
         UploadedFile|array $file = [],

@@ -44,7 +44,7 @@ class AuthController extends BaseController
     #[LOA\ValidationResponse]
     #[LOA\ErrorResponse(500)]
     public function signIn(
-        #[MapRequestPayload]
+        #[MapRequestPayload('json')]
         SignInDto $dto,
         SignInUseCase $useCase,
         LoggerInterface $logger,
@@ -71,7 +71,7 @@ class AuthController extends BaseController
     #[LOA\ValidationResponse]
     #[LOA\ErrorResponse(500)]
     public function signUpStep1(
-        #[MapRequestPayload]
+        #[MapRequestPayload('json')]
         SignUpStep1Dto $dto,
         SignUpStep1UseCase $useCase,
         LoggerInterface $logger,
@@ -99,7 +99,7 @@ class AuthController extends BaseController
     #[LOA\ValidationResponse]
     #[LOA\ErrorResponse(500)]
     public function signUpStep2(
-        #[MapRequestPayload]
+        #[MapRequestPayload('json')]
         SignUpStep2Dto $dto,
         SignUpStep2UseCase $useCase,
         LoggerInterface $logger,
@@ -121,7 +121,7 @@ class AuthController extends BaseController
     #[LOA\ValidationResponse]
     #[LOA\ErrorResponse(500)]
     public function refreshCredentials(
-        #[MapRequestPayload]
+        #[MapRequestPayload('json')]
         RefreshCredentialsDto $dto,
         JwtServiceInterface $jwtService,
         RefreshCredentialsUseCase $useCase,

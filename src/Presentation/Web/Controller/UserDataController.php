@@ -99,7 +99,7 @@ class UserDataController extends BaseController
     public function import(
         ImportUseCase $useCase,
         LoggerInterface $logger,
-        #[MapRequestPayload]
+        #[MapRequestPayload('form')]
         ImportUserDataDto $dto,
         #[MapUploadedFile]
         UploadedFile|array $file = [],

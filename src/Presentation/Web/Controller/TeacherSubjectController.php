@@ -102,7 +102,7 @@ class TeacherSubjectController extends BaseController
     public function import(
         ImportTeacherSubjectsUseCase $useCase,
         LoggerInterface $logger,
-        #[MapRequestPayload]
+        #[MapRequestPayload('form')]
         ImportTeacherSubjectsDto $dto,
         #[MapUploadedFile]
         UploadedFile|array $file = [],
