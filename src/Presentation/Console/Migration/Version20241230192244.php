@@ -19,6 +19,7 @@ final class Version20241230192244 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
+        $this->addSql('CREATE EXTENSION btree_gist;');
         $this->addSql('ALTER TABLE student_subject ADD COLUMN id UUID NOT NULL DEFAULT gen_random_uuid()');
         $this->addSql('ALTER TABLE student_subject ALTER COLUMN id DROP DEFAULT');
         $this->addSql('ALTER TABLE student_subject DROP CONSTRAINT user_subject_pkey');
@@ -44,5 +45,6 @@ SQL,
         $this->addSql('ALTER TABLE student_subject DROP COLUMN id');
         $this->addSql('ALTER INDEX idx_16f88b8288217e27 RENAME TO idx_a3c3207088217e27');
         $this->addSql('ALTER INDEX idx_16f88b82a76ed395 RENAME TO idx_a3c32070a76ed395');
+        $this->addSql('DROP EXTENSION btree_gist;');
     }
 }
