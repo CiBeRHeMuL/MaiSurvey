@@ -9,6 +9,7 @@ use App\Presentation\Web\Response\Model\SurveyItemData\ChoiceItemData;
 use App\Presentation\Web\Response\Model\SurveyItemData\CommentItemData;
 use App\Presentation\Web\Response\Model\SurveyItemData\ItemDataInterface;
 use App\Presentation\Web\Response\Model\SurveyItemData\MultiChoiceItemData;
+use App\Presentation\Web\Response\Model\SurveyItemData\RatingItemData;
 
 class SurveyItemDataFactory
 {
@@ -32,6 +33,10 @@ class SurveyItemDataFactory
             SurveyItemTypeEnum::Comment => new CommentItemData(
                 $data->getType()->value,
                 $data->getPlaceholder(),
+            ),
+            SurveyItemTypeEnum::Rating => new RatingItemData(
+                $data->getType()->value,
+                $data->getRatings(),
             ),
         };
     }

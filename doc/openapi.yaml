@@ -1015,6 +1015,53 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationResponse'
+  '/surveys/my/{id}/complete':
+    put:
+      tags:
+        - surveys
+      summary: 'Пройти опрос'
+      operationId: put_survey-complete-my-by-id
+      parameters:
+        -
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '[0-9a-f]{8}-[0-9a-f]{4}-[13-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/CompleteSurveyItemDto'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 'Not Found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: 'Unprocessable Entity'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResponse'
   /teacher-subjects:
     get:
       tags:
@@ -2332,6 +2379,18 @@ components:
           default: null
           nullable: true
       type: object
+    CompleteSurveyItemDto:
+      required:
+        - id
+      properties:
+        id:
+          type: string
+        data:
+          nullable: true
+          oneOf:
+            -
+              $ref: '#/components/schemas/AnswerDataDtoInterface'
+      type: object
     GetAllTeacherSubjectsDto:
       properties:
         teacher_ids:
@@ -3011,6 +3070,29 @@ components:
         created:
           type: integer
       type: object
+    AnswerDataDtoInterface:
+      required:
+        - type
+      properties:
+        type:
+          $ref: '#/components/schemas/SurveyItemTypeEnum'
+      type: object
+      discriminator:
+        propertyName: type
+        mapping:
+          comment: '#/components/schemas/CommentAnswerDataDto'
+          choice: '#/components/schemas/ChoiceAnswerDataDto'
+          multi_choice: '#/components/schemas/MultiChoiceAnswerDataDto'
+          rating: '#/components/schemas/RatingAnswerDataDto'
+      oneOf:
+        -
+          $ref: '#/components/schemas/CommentAnswerDataDto'
+        -
+          $ref: '#/components/schemas/ChoiceAnswerDataDto'
+        -
+          $ref: '#/components/schemas/MultiChoiceAnswerDataDto'
+        -
+          $ref: '#/components/schemas/RatingAnswerDataDto'
     Meta:
       required:
         - mode
@@ -3149,6 +3231,55 @@ components:
         - practical_lesson
         - laboratory_lesson
         - course_paper
+    CommentAnswerDataDto:
+      required:
+        - comment
+        - type
+      properties:
+        comment:
+          type: string
+        type:
+          type: string
+      type: object
+    ChoiceAnswerDataDto:
+      required:
+        - choice
+        - type
+      properties:
+        choice:
+          type: string
+        type:
+          type: string
+      type: object
+    MultiChoiceAnswerDataDto:
+      required:
+        - choices
+        - type
+      properties:
+        choices:
+          type: array
+          items:
+            type: string
+        type:
+          type: string
+      type: object
+    RatingAnswerDataDto:
+      required:
+        - rating
+        - type
+      properties:
+        rating:
+          type: integer
+        type:
+          type: string
+      type: object
+    SurveyItemTypeEnum:
+      type: string
+      enum:
+        - choice
+        - multi_choice
+        - comment
+        - rating
     SurveyItem:
       required:
         - id
@@ -3172,20 +3303,41 @@ components:
         position:
           type: integer
         data:
-          oneOf:
-            -
-              $ref: '#/components/schemas/ChoiceItemData'
-            -
-              $ref: '#/components/schemas/MultiChoiceItemData'
-            -
-              $ref: '#/components/schemas/CommentItemData'
+          $ref: '#/components/schemas/ItemDataInterface'
       type: object
-    SurveyItemTypeEnum:
-      type: string
-      enum:
-        - choice
-        - multi_choice
-        - comment
+    ItemDataInterface:
+      required:
+        - type
+      properties:
+        type:
+          $ref: '#/components/schemas/SurveyItemTypeEnum'
+      type: object
+      discriminator:
+        propertyName: type
+        mapping:
+          comment: '#/components/schemas/CommentItemData'
+          choice: '#/components/schemas/ChoiceItemData'
+          multi_choice: '#/components/schemas/MultiChoiceItemData'
+          rating: '#/components/schemas/RatingItemData'
+      oneOf:
+        -
+          $ref: '#/components/schemas/CommentItemData'
+        -
+          $ref: '#/components/schemas/ChoiceItemData'
+        -
+          $ref: '#/components/schemas/MultiChoiceItemData'
+        -
+          $ref: '#/components/schemas/RatingItemData'
+    CommentItemData:
+      required:
+        - type
+      properties:
+        type:
+          $ref: '#/components/schemas/SurveyItemTypeEnum'
+        placeholder:
+          type: string
+          nullable: true
+      type: object
     ChoiceItemData:
       required:
         - type
@@ -3210,15 +3362,17 @@ components:
           items:
             $ref: '#/components/schemas/Choice'
       type: object
-    CommentItemData:
+    RatingItemData:
       required:
         - type
+        - ratings
       properties:
         type:
           $ref: '#/components/schemas/SurveyItemTypeEnum'
-        placeholder:
-          type: string
-          nullable: true
+        ratings:
+          type: array
+          items:
+            type: integer
       type: object
     Choice:
       required:

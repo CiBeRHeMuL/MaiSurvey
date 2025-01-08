@@ -2,7 +2,10 @@
 
 namespace App\Presentation\Web\Controller;
 
+use App\Application\Dto\Survey\CompleteSurveyDto;
+use App\Application\Dto\Survey\CompleteSurveyItemDto;
 use App\Application\Dto\Survey\GetMySurveysDto;
+use App\Application\UseCase\Survey\CompleteSurveyUseCase;
 use App\Application\UseCase\Survey\GetMySurveyByIdUseCase;
 use App\Application\UseCase\Survey\GetMySurveysUseCase;
 use App\Domain\Dto\Survey\GetMySurveyByIdDto as DomainGetMySurveyByIdDto;
@@ -19,6 +22,7 @@ use OpenApi\Attributes as OA;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Attribute\MapQueryString;
+use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Requirement\Requirement;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
@@ -82,5 +86,31 @@ class SurveyController extends BaseController
                 ),
             );
         }
+    }
+
+    /** Пройти опрос */
+    #[Route('/surveys/my/{id}/complete', 'survey-complete-my-by-id', requirements: ['id' => Requirement::UUID], methods: ['PUT'])]
+    #[IsGranted(PermissionEnum::SurveyComplete->value, statusCode: 404, exceptionCode: 404)]
+    #[OA\Tag('surveys')]
+    #[LOA\SuccessResponse]
+    #[LOA\ErrorResponse(401)]
+    #[LOA\ErrorResponse(404)]
+    #[LOA\ValidationResponse]
+    public function complete(
+        Uuid $id,
+        LoggerInterface $logger,
+        CompleteSurveyUseCase $useCase,
+        #[MapRequestPayload('json', type: CompleteSurveyItemDto::class)]
+        array $answers,
+    ): JsonResponse {
+        $useCase->setLogger($logger);
+        $useCase->execute(
+            $this->getUser()->getUser(),
+            new CompleteSurveyDto(
+                $id,
+                $answers,
+            ),
+        );
+        return Response::success();
     }
 }

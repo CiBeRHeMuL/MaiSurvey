@@ -9,6 +9,7 @@ use App\Domain\Enum\SurveyItemTypeEnum;
     ChoiceItemData::class,
     MultiChoiceItemData::class,
     CommentItemData::class,
+    RatingItemData::class,
 ])]
 interface ItemDataInterface
 {

@@ -1,21 +1,22 @@
 <?php
 
-namespace App\Domain\Dto\SurveyItemAnswer;
+namespace App\Domain\Dto\SurveyItem;
 
 use AndrewGos\ClassBuilder\Attribute as MA;
 use AndrewGos\ClassBuilder\Checker\FieldIsChecker;
 use App\Domain\Enum\SurveyItemTypeEnum;
 
-#[MA\BuildIf(new FieldIsChecker('type', SurveyItemTypeEnum::Choice->value))]
-readonly class ChoiceAnswerData implements AnswerDataInterface
+#[MA\BuildIf(new FieldIsChecker('type', SurveyItemTypeEnum::Rating->value))]
+readonly class RatingItemData implements ItemDataInterface
 {
     /**
      * @param SurveyItemTypeEnum $type
-     * @param string $choice
+     * @param int[] $ratings
      */
     public function __construct(
         public SurveyItemTypeEnum $type,
-        public string $choice,
+        #[MA\ArrayType('integer')]
+        public array $ratings,
     ) {
     }
 
@@ -24,8 +25,8 @@ readonly class ChoiceAnswerData implements AnswerDataInterface
         return $this->type;
     }
 
-    public function getChoice(): string
+    public function getRatings(): array
     {
-        return $this->choice;
+        return $this->ratings;
     }
 }

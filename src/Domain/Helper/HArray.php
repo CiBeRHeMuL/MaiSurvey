@@ -268,15 +268,15 @@ class HArray
      * @template Proj
      *
      * @param iterable<T> $array
-     * @param string|int|(callable(T): Key) $key
-     * @param (callable(T): Proj)|null $projection проекция
+     * @param string|int|callable(T): Key $key
+     * @param callable(T): Proj $projection проекция
      *
-     * @return ($projection is null ? array<Key, T> : array<Key, Proj>)
+     * @return array<Key, Proj>
      */
     public static function indexExtended(
         iterable $array,
         string|int|callable $key,
-        callable|null $projection = null,
+        callable $projection,
     ): array {
         if ($array instanceof Traversable) {
             $array = iterator_to_array($array);
@@ -285,10 +285,6 @@ class HArray
         $key = is_callable($key)
             ? $key
             : fn($el) => $el[$key] ?? null;
-
-        $projection = is_callable($projection)
-            ? $projection
-            : fn($el) => $el;
 
         $result = [];
         foreach ($array as $i => $el) {

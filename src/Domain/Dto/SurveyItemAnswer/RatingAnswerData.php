@@ -6,26 +6,22 @@ use AndrewGos\ClassBuilder\Attribute as MA;
 use AndrewGos\ClassBuilder\Checker\FieldIsChecker;
 use App\Domain\Enum\SurveyItemTypeEnum;
 
-#[MA\BuildIf(new FieldIsChecker('type', SurveyItemTypeEnum::Choice->value))]
-readonly class ChoiceAnswerData implements AnswerDataInterface
+#[MA\BuildIf(new FieldIsChecker('type', SurveyItemTypeEnum::Rating->value))]
+readonly class RatingAnswerData implements AnswerDataInterface
 {
-    /**
-     * @param SurveyItemTypeEnum $type
-     * @param string $choice
-     */
     public function __construct(
         public SurveyItemTypeEnum $type,
-        public string $choice,
+        public int $rating,
     ) {
     }
 
     public function getType(): SurveyItemTypeEnum
     {
-        return $this->type;
+        return SurveyItemTypeEnum::Rating;
     }
 
-    public function getChoice(): string
+    public function getRating(): int
     {
-        return $this->choice;
+        return $this->rating;
     }
 }

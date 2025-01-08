@@ -32,6 +32,7 @@ class Survey
     private Subject $subject;
     /** @var Collection<SurveyItem> $items */
     #[ORM\OneToMany(targetEntity: SurveyItem::class, mappedBy: 'survey')]
+    #[ORM\OrderBy(['position' => 'ASC'])]
     private Collection $items;
 
     public function __construct()

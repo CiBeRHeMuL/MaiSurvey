@@ -12,7 +12,7 @@ readonly class MultiChoiceAnswerData implements AnswerDataInterface
 {
     /**
      * @param SurveyItemTypeEnum $type
-     * @param Choice[] $choices
+     * @param string[] $choices
      */
     public function __construct(
         public SurveyItemTypeEnum $type,
@@ -26,6 +26,9 @@ readonly class MultiChoiceAnswerData implements AnswerDataInterface
         return $this->type;
     }
 
+    /**
+     * @return string[]
+     */
     public function getChoices(): array
     {
         return $this->choices;

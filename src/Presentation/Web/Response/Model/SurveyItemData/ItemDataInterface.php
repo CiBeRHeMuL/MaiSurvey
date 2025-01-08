@@ -3,11 +3,20 @@
 namespace App\Presentation\Web\Response\Model\SurveyItemData;
 
 use App\Domain\Enum\SurveyItemTypeEnum;
+use App\Presentation\Web\OpenApi\Attribute as LOA;
+use Symfony\Component\Serializer\Attribute\DiscriminatorMap;
 
+#[DiscriminatorMap(
+    typeProperty: 'type',
+    mapping: [
+        SurveyItemTypeEnum::Comment->value => CommentItemData::class,
+        SurveyItemTypeEnum::Choice->value => ChoiceItemData::class,
+        SurveyItemTypeEnum::MultiChoice->value => MultiChoiceItemData::class,
+        SurveyItemTypeEnum::Rating->value => RatingItemData::class,
+    ],
+)]
 interface ItemDataInterface
 {
-    /**
-     * @return value-of<SurveyItemTypeEnum>
-     */
+    #[LOA\Enum(SurveyItemTypeEnum::class)]
     public function getType(): string;
 }

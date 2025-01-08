@@ -40,6 +40,7 @@ readonly class MySurvey
         private User $user,
         #[ORM\OneToMany(targetEntity: MySurveyItem::class, mappedBy: 'mySurvey')]
         #[ORM\InverseJoinColumn(name: 'id', referencedColumnName: 'survey_id')]
+        #[ORM\OrderBy(['position' => 'ASC'])]
         private Collection $myItems,
     ) {
     }

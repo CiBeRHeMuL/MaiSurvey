@@ -6,11 +6,8 @@ use App\Domain\Entity\MySurveyItem;
 use App\Domain\Entity\SurveyItem as DomainSurveyItem;
 use App\Domain\Enum\SurveyItemTypeEnum;
 use App\Presentation\Web\OpenApi\Attribute as LOA;
-use App\Presentation\Web\Response\Model\SurveyItemData\ChoiceItemData;
-use App\Presentation\Web\Response\Model\SurveyItemData\CommentItemData;
 use App\Presentation\Web\Response\Model\SurveyItemData\Factory\SurveyItemDataFactory;
 use App\Presentation\Web\Response\Model\SurveyItemData\ItemDataInterface;
-use App\Presentation\Web\Response\Model\SurveyItemData\MultiChoiceItemData;
 
 readonly class SurveyItem
 {
@@ -21,7 +18,7 @@ readonly class SurveyItem
      * @param string $type
      * @param string $text
      * @param int $position
-     * @param ChoiceItemData|MultiChoiceItemData|CommentItemData $data
+     * @param ItemDataInterface $data
      */
     public function __construct(
         public string $id,
