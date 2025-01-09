@@ -3365,14 +3365,15 @@ components:
     RatingItemData:
       required:
         - type
-        - ratings
+        - min
+        - max
       properties:
         type:
           $ref: '#/components/schemas/SurveyItemTypeEnum'
-        ratings:
-          type: array
-          items:
-            type: integer
+        min:
+          type: integer
+        max:
+          type: integer
       type: object
     Choice:
       required:

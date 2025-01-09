@@ -166,7 +166,7 @@ class UserController extends BaseController
     public function updateMulti(
         LoggerInterface $logger,
         MultiUpdateUseCase $useCase,
-        #[MapRequestPayload('form')]
+        #[MapRequestPayload]
         UpdateUsersDto $dto = new UpdateUsersDto(),
         #[MapUploadedFile]
         UploadedFile|array $file = [],

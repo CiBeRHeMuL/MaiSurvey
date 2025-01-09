@@ -11,12 +11,13 @@ readonly class RatingItemData implements ItemDataInterface
 {
     /**
      * @param SurveyItemTypeEnum $type
-     * @param int[] $ratings
+     * @param int $min
+     * @param int $max
      */
     public function __construct(
         public SurveyItemTypeEnum $type,
-        #[MA\ArrayType('integer')]
-        public array $ratings,
+        public int $min,
+        public int $max,
     ) {
     }
 
@@ -25,8 +26,13 @@ readonly class RatingItemData implements ItemDataInterface
         return $this->type;
     }
 
-    public function getRatings(): array
+    public function getMin(): int
     {
-        return $this->ratings;
+        return $this->min;
+    }
+
+    public function getMax(): int
+    {
+        return $this->max;
     }
 }

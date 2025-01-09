@@ -95,7 +95,7 @@ class GroupController extends BaseController
     public function import(
         ImportUseCase $useCase,
         LoggerInterface $logger,
-        #[MapRequestPayload('form')]
+        #[MapRequestPayload]
         ImportGroupsDto $dto,
         #[MapUploadedFile]
         UploadedFile|array $file = [],

@@ -87,8 +87,10 @@ class SurveyItemAnswerService
                 }
                 break;
             case SurveyItemTypeEnum::Rating:
-                $ratings = $dto->getSurveyItem()->getData()->getRatings();
-                if (!in_array($dto->getData()->getRating(), $ratings)) {
+                if (
+                    $dto->getData()->getRating() < $dto->getSurveyItem()->getData()->getMin()
+                    || $dto->getData()->getRating() > $dto->getSurveyItem()->getData()->getMax()
+                ) {
                     throw ValidationException::new([
                         new ValidationError(
                             'answer.rating',

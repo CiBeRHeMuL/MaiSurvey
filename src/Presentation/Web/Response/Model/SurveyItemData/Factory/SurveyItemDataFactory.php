@@ -36,7 +36,8 @@ class SurveyItemDataFactory
             ),
             SurveyItemTypeEnum::Rating => new RatingItemData(
                 $data->getType()->value,
-                $data->getRatings(),
+                $data->getMin(),
+                $data->getMax(),
             ),
         };
     }

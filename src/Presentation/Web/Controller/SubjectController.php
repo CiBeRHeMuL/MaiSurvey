@@ -95,7 +95,7 @@ class SubjectController extends BaseController
     public function import(
         ImportUseCase $useCase,
         LoggerInterface $logger,
-        #[MapRequestPayload('form')]
+        #[MapRequestPayload]
         ImportSubjectsDto $dto,
         #[MapUploadedFile]
         UploadedFile|array $file = [],
