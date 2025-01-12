@@ -73,14 +73,14 @@ class UserRepository extends AbstractRepository implements UserRepositoryInterfa
                 ),
             );
             $roles = array_combine(
-                array_map(fn(int $e) => ":r_$e", range(0, count($roles))),
+                array_map(fn(int $e) => ":r_$e", range(0, count($roles) - 1)),
                 $roles,
             );
 
             $q
                 ->andWhere(
                     new Expr(
-                        'u.roles && ARRAY[' . implode(', ', array_keys($roles)) . ']::varchar[]',
+                        'u.roles && ARRAY[' . implode(', ', array_keys($roles)) . ']::text[]',
                         $roles,
                     ),
                 );
@@ -121,7 +121,10 @@ class UserRepository extends AbstractRepository implements UserRepositoryInterfa
                 ),
                 new DataSort([
                     new SortColumn(
-                        "u.{$dto->getSortBy()}",
+                        match ($dto->getSortBy()) {
+                            'name' => (new FullNameExpr('ud'))->getExpression(),
+                            default => "u.{$dto->getSortBy()}",
+                        },
                         $dto->getSortBy(),
                         $dto->getSortType()->getPhpSort(),
                     ),

@@ -444,7 +444,18 @@ abstract class AbstractRepository implements RepositoryInterface
         $expr = $qb->build();
 
         $connection = $this->getEntityManager()->getConnection();
-        return $connection->executeQuery($expr->getExpression(), $expr->getParams());
+        $params = $expr->getParams();
+        $preparedParams = [];
+        array_walk(
+            $params,
+            function ($val, $k) use (&$preparedParams) {
+                $preparedParams[ltrim($k, ':')] = $val;
+            },
+        );
+        return $connection->executeQuery(
+            $expr->getExpression(),
+            $preparedParams,
+        );
     }
 
     /**
