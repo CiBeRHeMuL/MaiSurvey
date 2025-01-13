@@ -66,6 +66,15 @@ class UserService
         return $user;
     }
 
+    public function refreshCredentialsIfNeeded(User $user): User
+    {
+        $expiresAt = $user->getAccessTokenExpiresAt();
+        if ($expiresAt->getTimestamp() <= (new DateTimeImmutable())->getTimestamp()) {
+            $this->refreshCredentials($user);
+        }
+        return $user;
+    }
+
     public function create(CreateUserDto $dto, bool $checkExisting = true): User
     {
         if ($checkExisting) {

@@ -82,7 +82,7 @@ class AuthService
             ) {
                 $this
                     ->userService
-                    ->refreshCredentials($user);
+                    ->refreshCredentialsIfNeeded($user);
                 return $user;
             } else {
                 throw ValidationException::new(
