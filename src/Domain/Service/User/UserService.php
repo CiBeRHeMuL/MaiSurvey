@@ -2,7 +2,9 @@
 
 namespace App\Domain\Service\User;
 
+use App\Domain\DataProvider\ArrayDataProvider;
 use App\Domain\DataProvider\DataProviderInterface;
+use App\Domain\DataProvider\DataSortInterface;
 use App\Domain\Dto\User\CreateUserDto;
 use App\Domain\Dto\User\GetAllUsersDto;
 use App\Domain\Entity\User;
@@ -10,6 +12,7 @@ use App\Domain\Enum\ValidationErrorSlugEnum;
 use App\Domain\Exception\ErrorException;
 use App\Domain\Exception\ValidationException;
 use App\Domain\Repository\UserRepositoryInterface;
+use App\Domain\Service\Db\TransactionManagerInterface;
 use App\Domain\Service\Security\EmailCheckerServiceInterface;
 use App\Domain\Service\Security\PasswordHasherServiceInterface;
 use App\Domain\Service\Security\SecurityService;
@@ -18,6 +21,7 @@ use App\Domain\ValueObject\Email;
 use DateTimeImmutable;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Uid\Uuid;
+use Throwable;
 
 class UserService
 {
@@ -30,6 +34,7 @@ class UserService
         private EmailCheckerServiceInterface $emailCheckerService,
         private SecurityService $securityService,
         private PasswordHasherServiceInterface $passwordHasherService,
+        private TransactionManagerInterface $transactionManager,
         LoggerInterface $logger,
     ) {
         $this->setLogger($logger);
@@ -77,41 +82,9 @@ class UserService
 
     public function create(CreateUserDto $dto, bool $checkExisting = true): User
     {
-        if ($checkExisting) {
-            $exists = $this
-                ->userRepository
-                ->findByEmail($dto->getEmail());
-            if ($exists) {
-                throw ValidationException::new(
-                    [
-                        new ValidationError(
-                            'email',
-                            ValidationErrorSlugEnum::AlreadyExists->getSlug(),
-                            'Пользователь с такой почтой уже существует',
-                        ),
-                    ],
-                );
-            }
-        }
-        $this->emailCheckerService->checkEmail($dto->getEmail());
+        $this->validateCreateDto($dto, $checkExisting);
 
-        $accessToken = $this->securityService->generateAccessToken();
-        $refreshToken = $this->securityService->generateRefreshToken();
-
-        $user = new User();
-        $user
-            ->setEmail($dto->getEmail())
-            ->setAccessToken($accessToken->getToken())
-            ->setAccessTokenExpiresAt($accessToken->getExpiresAt())
-            ->setRefreshToken($refreshToken->getToken())
-            ->setRefreshTokenExpiresAt($refreshToken->getExpiresAt())
-            ->setCreatedAt(new DateTimeImmutable())
-            ->setUpdatedAt(new DateTimeImmutable())
-            ->setStatus($dto->getStatus())
-            ->setRoles([$dto->getRole()])
-            ->setPassword($this->passwordHasherService->hashPassword($dto->getPassword()))
-            ->setDeletedAt(null)
-            ->setDeleted(false);
+        $user = $this->entityFromCreateDto($dto);
 
         if ($this->userRepository->create($user) === false) {
             throw ErrorException::new(
@@ -198,5 +171,112 @@ class UserService
         return $this
             ->userRepository
             ->findAllByEmails($emails);
+    }
+
+    public function validateCreateDto(CreateUserDto $dto, bool $checkExisting = true): void
+    {
+        if ($checkExisting) {
+            $exists = $this
+                ->userRepository
+                ->findByEmail($dto->getEmail());
+            if ($exists) {
+                throw ValidationException::new(
+                    [
+                        new ValidationError(
+                            'email',
+                            ValidationErrorSlugEnum::AlreadyExists->getSlug(),
+                            'Пользователь с такой почтой уже существует',
+                        ),
+                    ],
+                );
+            }
+        }
+        $this->emailCheckerService->checkEmail($dto->getEmail());
+    }
+
+    /**
+     * @param CreateUserDto[] $dtos
+     * @param bool $validate
+     * @param bool $transaction
+     * @param bool $throwOnError
+     *
+     * @return int
+     */
+    public function createMulti(
+        array $dtos,
+        bool $validate = true,
+        bool $transaction = false,
+        bool $throwOnError = false,
+    ): int {
+        try {
+            if ($transaction) {
+                $this->transactionManager->beginTransaction();
+            }
+
+            /** @var User[] $users */
+            $users = [];
+            foreach ($dtos as $dto) {
+                if ($validate) {
+                    $this->validateCreateDto($dto);
+                }
+                $users[] = $this->entityFromCreateDto($dto);
+            }
+
+            $created = $this->userRepository->createMulti($users);
+
+            if ($transaction) {
+                $this->transactionManager->commit();
+            }
+            return $created;
+        } catch (ValidationException|ErrorException $e) {
+            if ($transaction) {
+                $this->transactionManager->rollback();
+            }
+            if ($throwOnError) {
+                throw $e;
+            }
+            return 0;
+        } catch (Throwable $e) {
+            $this->logger->error($e);
+            if ($transaction) {
+                $this->transactionManager->rollback();
+            }
+            if ($throwOnError) {
+                throw $e;
+            }
+            return 0;
+        }
+    }
+
+    private function entityFromCreateDto(CreateUserDto $dto): User
+    {
+        $accessToken = $this->securityService->generateAccessToken();
+        $refreshToken = $this->securityService->generateRefreshToken();
+
+        $user = new User();
+        $user
+            ->setEmail($dto->getEmail())
+            ->setAccessToken($accessToken->getToken())
+            ->setAccessTokenExpiresAt($accessToken->getExpiresAt())
+            ->setRefreshToken($refreshToken->getToken())
+            ->setRefreshTokenExpiresAt($refreshToken->getExpiresAt())
+            ->setCreatedAt(new DateTimeImmutable())
+            ->setUpdatedAt(new DateTimeImmutable())
+            ->setStatus($dto->getStatus())
+            ->setRoles([$dto->getRole()])
+            ->setPassword($this->passwordHasherService->hashPassword($dto->getPassword()))
+            ->setDeletedAt(null)
+            ->setDeleted(false);
+        return $user;
+    }
+
+    public function getLastN(int $count, DataSortInterface $sort): DataProviderInterface
+    {
+        if ($count <= 0) {
+            return new ArrayDataProvider([]);
+        }
+        return $this
+            ->userRepository
+            ->findLastN($count, $sort);
     }
 }

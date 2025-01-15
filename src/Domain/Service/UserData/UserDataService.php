@@ -2,7 +2,9 @@
 
 namespace App\Domain\Service\UserData;
 
+use App\Domain\DataProvider\ArrayDataProvider;
 use App\Domain\DataProvider\DataProviderInterface;
+use App\Domain\DataProvider\DataSortInterface;
 use App\Domain\Dto\UserData\CreateUserDataDto;
 use App\Domain\Dto\UserData\GetAllUserDataDto;
 use App\Domain\Dto\UserData\UpdateUserDataDto;
@@ -24,6 +26,7 @@ use Throwable;
 class UserDataService
 {
     public const array GET_ALL_SORT = ['name'];
+    public const array GET_LAST_N_SORT = ['created_at'];
 
     private LoggerInterface $logger;
 
@@ -398,6 +401,23 @@ class UserDataService
         }
     }
 
+    /**
+     * Список уникальных почт по полным именам
+     *
+     * @param string[] $names
+     *
+     * @return string[]
+     */
+    public function getEmailsByNames(array $names): array
+    {
+        if (!$names) {
+            return [];
+        }
+        return $this
+            ->userDataRepository
+            ->findEmailsByNames($names);
+    }
+
     private function entityFromDto(CreateUserDataDto $dto): UserData
     {
         $userData = new UserData();
@@ -409,5 +429,15 @@ class UserDataService
             ->setCreatedAt(new DateTimeImmutable())
             ->setUpdatedAt(new DateTimeImmutable());
         return $userData;
+    }
+
+    public function getLastN(int $count, DataSortInterface $sort): DataProviderInterface
+    {
+        if ($count <= 0) {
+            return new ArrayDataProvider([]);
+        }
+        return $this
+            ->userDataRepository
+            ->findLastN($count, $sort);
     }
 }

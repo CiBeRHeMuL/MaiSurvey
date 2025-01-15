@@ -254,7 +254,7 @@ abstract class AbstractRepository implements RepositoryInterface
                 }
             }
 
-            $this->createMulti($entities, $tables);
+            $this->createMulti($entities, $tables, false);
 
             // Выполняем обновление
             $updatesCount = 0;

@@ -19,7 +19,7 @@ class FullNameExpr implements ExprInterface
      */
     public function getExpression($dialect = null): string
     {
-        return "concat({$this->alias}first_name, ' ', {$this->alias}last_name, ' ', {$this->alias}patronymic)";
+        return "concat({$this->alias}first_name, ' ', {$this->alias}last_name, CASE {$this->alias}patronymic IS NULL WHEN TRUE THEN '' ELSE ' ' || {$this->alias}patronymic END)";
     }
 
     /**

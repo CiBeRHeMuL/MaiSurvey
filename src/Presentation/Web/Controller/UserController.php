@@ -6,9 +6,13 @@ use App\Application\Dto\User\CreateFullUserDto;
 use App\Application\Dto\User\GetAllUsersDto;
 use App\Application\UseCase\User\CreateUserUseCase;
 use App\Application\UseCase\User\GetAllUseCase;
+use App\Application\UseCase\User\ImportUsersUseCase;
 use App\Application\UseCase\User\MultiUpdateUseCase;
+use App\Domain\Dto\User\ImportDto as DomainImportDto;
 use App\Domain\Dto\User\MultiUpdateDto;
 use App\Domain\Enum\PermissionEnum;
+use App\Domain\Enum\RoleEnum;
+use App\Presentation\Web\Dto\User\ImportUsersDto;
 use App\Presentation\Web\Dto\User\UpdateUsersDto;
 use App\Presentation\Web\Enum\ErrorSlugEnum;
 use App\Presentation\Web\OpenApi\Attribute as LOA;
@@ -18,6 +22,8 @@ use App\Presentation\Web\Response\Model\Common\PaginatedData;
 use App\Presentation\Web\Response\Model\Common\SuccessResponse;
 use App\Presentation\Web\Response\Model\Common\SuccessWithPaginationResponse;
 use App\Presentation\Web\Response\Model\Common\ValidationResponse;
+use App\Presentation\Web\Response\Model\CreatedUserDataInfo;
+use App\Presentation\Web\Response\Model\CreatedUsersInfo;
 use App\Presentation\Web\Response\Model\UpdatedUsersInfo;
 use App\Presentation\Web\Response\Model\User;
 use App\Presentation\Web\Response\Response;
@@ -198,6 +204,54 @@ class UserController extends BaseController
         return Response::success(
             new SuccessResponse(
                 new UpdatedUsersInfo($updated),
+            ),
+        );
+    }
+
+    #[Route('/users/import', 'users-import', methods: ['POST'])]
+    #[IsGranted(PermissionEnum::UserCreate->value, statusCode: 404, exceptionCode: 404)]
+    #[OA\Tag('users')]
+    #[LOA\ErrorResponse(404)]
+    #[LOA\ValidationResponse]
+    #[LOA\ErrorResponse(500)]
+    #[LOA\SuccessResponse(CreatedUsersInfo::class)]
+    public function import(
+        #[MapRequestPayload]
+        ImportUsersDto $dto,
+        LoggerInterface $logger,
+        ImportUsersUseCase $useCase,
+        #[MapUploadedFile]
+        UploadedFile|array $file = [],
+    ): JsonResponse {
+        if (is_array($file)) {
+            return Response::validation(
+                new ValidationResponse([
+                    'file' => [
+                        new Error(
+                            ErrorSlugEnum::WrongField->getSlug(),
+                            'Не удалось прочитать файл',
+                        ),
+                    ],
+                ]),
+            );
+        }
+
+        $useCase->setLogger($logger);
+        $created = $useCase->execute(
+            new DomainImportDto(
+                $file->getPathname(),
+                RoleEnum::from($dto->for_role),
+                $dto->headers_in_first_row,
+                $dto->last_name_col,
+                $dto->first_name_col,
+                $dto->patronymic_col,
+                $dto->group_name_col,
+                $dto->password,
+            ),
+        );
+        return Response::success(
+            new SuccessResponse(
+                new CreatedUserDataInfo($created),
             ),
         );
     }

@@ -3,6 +3,7 @@
 namespace App\Domain\Repository;
 
 use App\Domain\DataProvider\DataProviderInterface;
+use App\Domain\DataProvider\DataSortInterface;
 use App\Domain\Dto\User\GetAllUsersDto;
 use App\Domain\Entity\User;
 use App\Domain\Repository\Common\RepositoryInterface;
@@ -32,4 +33,12 @@ interface UserRepositoryInterface extends RepositoryInterface
      * @return User[]
      */
     public function findAllByEmails(array $emails): array;
+
+    /**
+     * @param int $count
+     * @param DataSortInterface $sort
+     *
+     * @return DataProviderInterface<User>
+     */
+    public function findLastN(int $count, DataSortInterface $sort): DataProviderInterface;
 }

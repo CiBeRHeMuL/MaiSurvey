@@ -77,4 +77,9 @@ class StudentSubjectController extends BaseController
             ),
         );
     }
+
+    public function import(): JsonResponse
+    {
+
+    }
 }

@@ -4,6 +4,7 @@ namespace App\Infrastructure\Repository;
 
 use App\Domain\DataProvider\DataProviderInterface;
 use App\Domain\DataProvider\DataSort;
+use App\Domain\DataProvider\DataSortInterface;
 use App\Domain\DataProvider\LimitOffset;
 use App\Domain\DataProvider\SortColumn;
 use App\Domain\Dto\User\GetAllUsersDto;
@@ -152,5 +153,18 @@ class UserRepository extends AbstractRepository implements UserRepositoryInterfa
                 User::class,
                 ['data', 'data.group', 'data.group.group'],
             );
+    }
+
+    public function findLastN(int $count, DataSortInterface $sort): DataProviderInterface
+    {
+        $q = Query::select()
+            ->from($this->getClassTable(User::class));
+        return $this->findWithLazyBatchedProvider(
+            $q,
+            User::class,
+            ['data', 'data.group', 'data.group.group'],
+            new LimitOffset($count, 0),
+            $sort,
+        );
     }
 }

@@ -4,9 +4,11 @@ namespace App\Infrastructure\Repository;
 
 use App\Domain\DataProvider\DataProviderInterface;
 use App\Domain\DataProvider\DataSort;
+use App\Domain\DataProvider\DataSortInterface;
 use App\Domain\DataProvider\LimitOffset;
 use App\Domain\DataProvider\SortColumn;
 use App\Domain\Dto\UserData\GetAllUserDataDto;
+use App\Domain\Entity\User;
 use App\Domain\Entity\UserData;
 use App\Domain\Entity\UserDataGroup;
 use App\Domain\Repository\UserDataRepositoryInterface;
@@ -14,6 +16,7 @@ use App\Infrastructure\Db\Expr\FullNameExpr;
 use App\Infrastructure\Db\Expr\ILikeExpr;
 use App\Infrastructure\Repository\Common\AbstractRepository;
 use Qstart\Db\QueryBuilder\DML\Expression\Expr;
+use Qstart\Db\QueryBuilder\DML\Expression\InExpr;
 use Qstart\Db\QueryBuilder\Query;
 use Symfony\Component\Uid\Uuid;
 
@@ -94,5 +97,32 @@ class UserDataRepository extends AbstractRepository implements UserDataRepositor
                 ),
             ]),
         );
+    }
+
+    public function findLastN(int $count, DataSortInterface $sort): DataProviderInterface
+    {
+        $q = Query::select()
+            ->from($this->getClassTable(UserData::class));
+        return $this->findWithLazyBatchedProvider(
+            $q,
+            UserData::class,
+            ['user', 'group', 'group.group'],
+            new LimitOffset($count, 0),
+            $sort,
+        );
+    }
+
+    public function findEmailsByNames(array $names): array
+    {
+        $q = Query::select()
+            ->select(['u.email'])
+            ->distinct(true)
+            ->from(['ud' => $this->getClassTable(UserData::class)])
+            ->innerJoin(
+                ['u' => $this->getClassTable(User::class)],
+                'u.id = ud.user_id',
+            )
+            ->where(new InExpr(new FullNameExpr('ud'), $names));
+        return $this->findColumnByQuery($q);
     }
 }
