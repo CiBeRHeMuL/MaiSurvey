@@ -15,6 +15,7 @@ use ArrayIterator;
 use Doctrine\DBAL\Result;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Id\AssignedGenerator;
+use Doctrine\ORM\Mapping\MappingException;
 use Doctrine\ORM\NativeQuery;
 use Doctrine\ORM\Query\ResultSetMapping;
 use Exception;
@@ -76,7 +77,18 @@ abstract class AbstractRepository implements RepositoryInterface
         }
     }
 
-    public function createMulti(array $entities, array $replaceTables = []): int
+    /**
+     * @param array $entities
+     * @param array $replaceTables
+     * @param bool $generateId нужно ли генерировать идентификаторы сущностям.
+     * Нужно для вставки во временные таблицы, если генерация идентификаторов уже была, и надо просто заинсертить данные
+     *
+     * @return int
+     * @throws Throwable
+     * @throws \Doctrine\DBAL\Exception
+     * @throws MappingException
+     */
+    public function createMulti(array $entities, array $replaceTables = [], bool $generateId = true): int
     {
         if (empty($entities)) {
             return 0;
@@ -107,20 +119,22 @@ abstract class AbstractRepository implements RepositoryInterface
 
             $rowData = [];
             $idGen = $metadata->idGenerator;
-            if ($idGen->isPostInsertGenerator()) {
-                $idColumnsMap[$tableName] = $metadata->getIdentifierColumnNames();
-                $postInsertIdEntities[$tableName][$k] = $entity;
-            } else {
-                $idValue = $idGen->generateId($em, $entity);
+            if ($generateId) {
+                if ($idGen->isPostInsertGenerator()) {
+                    $idColumnsMap[$tableName] = $metadata->getIdentifierColumnNames();
+                    $postInsertIdEntities[$tableName][$k] = $entity;
+                } else {
+                    $idValue = $idGen->generateId($em, $entity);
 
-                if (!$idGen instanceof AssignedGenerator) {
-                    $idValue = [
-                        $metadata->getSingleIdentifierFieldName() => $conn->convertToPHPValue(
-                            $idValue,
-                            $metadata->getTypeOfField($metadata->getSingleIdentifierFieldName()),
-                        ),
-                    ];
-                    $metadata->setIdentifierValues($entity, $idValue);
+                    if (!$idGen instanceof AssignedGenerator) {
+                        $idValue = [
+                            $metadata->getSingleIdentifierFieldName() => $conn->convertToPHPValue(
+                                $idValue,
+                                $metadata->getTypeOfField($metadata->getSingleIdentifierFieldName()),
+                            ),
+                        ];
+                        $metadata->setIdentifierValues($entity, $idValue);
+                    }
                 }
             }
 
@@ -129,7 +143,7 @@ abstract class AbstractRepository implements RepositoryInterface
             $fieldsCount = 0;
             foreach ($fieldNames as $fieldName) {
                 // Пропускаем автогенирируемые во время вставки идентификаторы
-                if ($metadata->isIdentifier($fieldName) && $idGen->isPostInsertGenerator()) {
+                if ($generateId && $metadata->isIdentifier($fieldName) && $idGen->isPostInsertGenerator()) {
                     continue;
                 }
                 $rowData[$metadata->getColumnName($fieldName)] = $conn->convertToDatabaseValue(
@@ -164,7 +178,7 @@ abstract class AbstractRepository implements RepositoryInterface
                     $cnt += $result->rowCount();
 
                     // Если есть сущности, для которых идентификаторы проставляются после вставки, то проставляем им идентификаторы
-                    if (!empty($postInsertIdEntities[$tableName])) {
+                    if ($generateId && !empty($postInsertIdEntities[$tableName])) {
                         // Колонки ключей
                         $columns = $idColumnsMap[$tableName];
                         // Первичные ключи для связывания
@@ -333,6 +347,11 @@ abstract class AbstractRepository implements RepositoryInterface
         }
 
         return $this->executeQuery($query)->fetchAllAssociative();
+    }
+
+    public function findColumnByQuery(SelectQuery $query): array
+    {
+        return $this->executeQuery($query)->fetchFirstColumn();
     }
 
     public function findWithProvider(
