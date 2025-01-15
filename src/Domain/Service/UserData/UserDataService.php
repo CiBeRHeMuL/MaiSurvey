@@ -215,7 +215,7 @@ class UserDataService
             ]);
         }
 
-        if ($dto->getRole() === RoleEnum::Student && $dto->getGroup() === null) {
+        if ($dto->getRole()->requiresGroup() && $dto->getGroup() === null) {
             throw ValidationException::new([
                 new ValidationError(
                     'group',
@@ -224,7 +224,7 @@ class UserDataService
                 ),
             ]);
         }
-        if ($dto->getRole() !== RoleEnum::Student && $dto->getGroup() !== null) {
+        if ($dto->getRole()->requiresGroup() === false && $dto->getGroup() !== null) {
             throw ValidationException::new([
                 new ValidationError(
                     'group',

@@ -91,4 +91,17 @@ enum RoleEnum: string
             default => false,
         };
     }
+
+    /**
+     * Требуется ли роли группа
+     *
+     * @return bool
+     */
+    public function requiresGroup(): bool
+    {
+        return match ($this) {
+            self::Student => true,
+            default => false,
+        };
+    }
 }

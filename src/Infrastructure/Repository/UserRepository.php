@@ -90,7 +90,7 @@ class UserRepository extends AbstractRepository implements UserRepositoryInterfa
             $q->andWhere(new ILikeExpr(new FullNameExpr('ud'), $dto->getName()));
         }
         if ($dto->getEmail() !== null) {
-            $q->andWhere(new ILikeExpr('u.email', $dto->getEmail()));
+            $q->andWhere(new ILikeExpr(new Expr('u.email'), $dto->getEmail()));
         }
         if ($dto->getDeleted() !== null) {
             $q->andWhere(['u.deleted' => $dto->getDeleted()]);

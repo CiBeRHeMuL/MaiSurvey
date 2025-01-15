@@ -5,11 +5,14 @@ namespace App\Domain\Service\User;
 use App\Domain\DataProvider\DataSort;
 use App\Domain\DataProvider\ProjectionAwareDataProvider;
 use App\Domain\DataProvider\SortColumn;
+use App\Domain\Dto\User\CreatedUsersInfo;
 use App\Domain\Dto\User\CreateUserDto;
+use App\Domain\Dto\User\GetAllUsersDto;
 use App\Domain\Dto\User\ImportDto;
 use App\Domain\Dto\UserData\ImportDto as UserDataImportDto;
 use App\Domain\Entity\User;
 use App\Domain\Entity\UserData;
+use App\Domain\Enum\SortTypeEnum;
 use App\Domain\Enum\UserStatusEnum;
 use App\Domain\Exception\ErrorException;
 use App\Domain\Exception\ValidationException;
@@ -18,6 +21,7 @@ use App\Domain\Service\Db\TransactionManagerInterface;
 use App\Domain\Service\UserData\UserDataImporter;
 use App\Domain\Service\UserData\UserDataService;
 use App\Domain\ValueObject\Email;
+use DateTimeImmutable;
 use Exception;
 use Psr\Log\LoggerInterface;
 use Throwable;
@@ -32,6 +36,7 @@ class UserImporter
         private TransactionManagerInterface $transactionManager,
         private UserService $userService,
         private UserDataService $userDataService,
+        private string $appHost,
     ) {
         $this->setLogger($logger);
     }
@@ -45,7 +50,7 @@ class UserImporter
         return $this;
     }
 
-    public function import(ImportDto $dto): int
+    public function import(ImportDto $dto): CreatedUsersInfo
     {
         $importUserDataDto = new UserDataImportDto(
             $dto->getFile(),
@@ -62,7 +67,7 @@ class UserImporter
             $userDataCount = $this->userDataImporter->import($importUserDataDto);
 
             if ($userDataCount === 0) {
-                return 0;
+                return new CreatedUsersInfo(0);
             }
 
             $allUserData = $this
@@ -91,17 +96,17 @@ class UserImporter
 
             /** @var array<string, UserData> $userDataByEmail */
             $userDataByEmail = [];
+            $emailDomain = '@' . $dto->getForRole()->value . '.' . $this->appHost;
 
             $userDtos = new ProjectionAwareDataProvider(
                 $allUserData,
-                function (UserData $userData) use (&$dto, &$existingEmails, &$userDataByEmail): CreateUserDto {
+                function (UserData $userData) use (&$dto, &$existingEmails, &$userDataByEmail, &$emailDomain): CreateUserDto {
                     $emailUser = HString::rusToEnd(
                         $userData->getLastName()
                         . mb_substr($userData->getFirstName(), 0, 1)
                         . mb_substr($userData->getPatronymic() ?? '', 0, 1),
                     );
                     $k = 1;
-                    $emailDomain = '@mai-survey.net';
                     $tempEmail = $emailUser;
                     while (in_array("$tempEmail$emailDomain", $existingEmails)) {
                         $tempEmail = "$emailUser$k";
@@ -144,9 +149,20 @@ class UserImporter
                 ]),
             );
 
+            $createdFrom = new DateTimeImmutable();
+            $createdTo = $createdFrom->modify('-1 hour');
+            // Подготавливаем данные для обновления, сразу считаем минимальное и максимальное время создани
+            // (да, криво, но для лучшей производительности)
             $usersDataToUpdate = new ProjectionAwareDataProvider(
                 $users,
-                function (User $user) use (&$userDataByEmail): UserData {
+                function (User $user) use (&$userDataByEmail, &$createdFrom, &$createdTo): UserData {
+                    $createdTo = $user->getCreatedAt()->getTimestamp() > $createdTo->getTimestamp()
+                        ? $user->getCreatedAt()
+                        : $createdTo;
+                    $createdFrom = $user->getCreatedAt()->getTimestamp() < $createdFrom->getTimestamp()
+                        ? $user->getCreatedAt()
+                        : $createdFrom;
+
                     $userData = $userDataByEmail[$user->getEmail()->getEmail()];
                     $userData
                         ->setUserId($user->getId())
@@ -155,8 +171,9 @@ class UserImporter
                 },
             );
 
+            $usersDataToUpdate = iterator_to_array($usersDataToUpdate->getItems());
             $updatedUsersDataCount = $this->userDataService->updateMulti(
-                iterator_to_array($usersDataToUpdate->getItems()),
+                $usersDataToUpdate,
                 false,
                 true,
             );
@@ -170,7 +187,37 @@ class UserImporter
             }
 
             $this->transactionManager->commit();
-            return $created;
+
+            $groupIds = null;
+            if ($dto->getForRole()->requiresGroup()) {
+                $groupIds = array_filter(
+                    array_unique(
+                        array_map(
+                            fn(UserData $ud) => $ud->getGroup()?->getGroupId(),
+                            $usersDataToUpdate,
+                        ),
+                    ),
+                );
+                if (count($groupIds) > 50) {
+                    $groupIds = null;
+                }
+            }
+            return new CreatedUsersInfo(
+                $created,
+                new GetAllUsersDto(
+                    roles: [$dto->getForRole()],
+                    email: $emailDomain,
+                    deleted: false,
+                    status: UserStatusEnum::Active,
+                    groupIds: $groupIds,
+                    withGroup: $dto->getForRole()->requiresGroup(),
+                    createdFrom: $createdFrom,
+                    createdTo: $createdTo,
+                    sortBy: 'created_at',
+                    sortType: SortTypeEnum::Desc,
+                    limit: $created,
+                ),
+            );
         } catch (ValidationException|ErrorException $e) {
             $this->transactionManager->rollback();
             throw $e;

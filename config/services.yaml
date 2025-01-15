@@ -44,6 +44,10 @@ services:
       - setLogger: ['@logger']
   App\Domain\Service\DataImport\DataImportInterface:
     class: App\Infrastructure\Service\DataImport\XlsxDataImport
+
+  App\Domain\Service\User\UserImporter:
+    arguments:
+      $appHost: '%env(APP_HOST)%'
   # --- end services
 
   # --- start repositories

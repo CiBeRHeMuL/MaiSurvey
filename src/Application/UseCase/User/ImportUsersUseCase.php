@@ -2,6 +2,7 @@
 
 namespace App\Application\UseCase\User;
 
+use App\Domain\Dto\User\CreatedUsersInfo;
 use App\Domain\Dto\User\ImportDto;
 use App\Domain\Service\User\UserImporter;
 use Psr\Log\LoggerInterface;
@@ -24,7 +25,7 @@ class ImportUsersUseCase
         return $this;
     }
 
-    public function execute(ImportDto $dto): int
+    public function execute(ImportDto $dto): CreatedUsersInfo
     {
         return $this
             ->userImporter

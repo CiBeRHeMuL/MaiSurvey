@@ -22,7 +22,6 @@ use App\Presentation\Web\Response\Model\Common\PaginatedData;
 use App\Presentation\Web\Response\Model\Common\SuccessResponse;
 use App\Presentation\Web\Response\Model\Common\SuccessWithPaginationResponse;
 use App\Presentation\Web\Response\Model\Common\ValidationResponse;
-use App\Presentation\Web\Response\Model\CreatedUserDataInfo;
 use App\Presentation\Web\Response\Model\CreatedUsersInfo;
 use App\Presentation\Web\Response\Model\UpdatedUsersInfo;
 use App\Presentation\Web\Response\Model\User;
@@ -38,7 +37,9 @@ use Symfony\Component\HttpKernel\Attribute\MapQueryString;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\HttpKernel\Attribute\MapUploadedFile;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Uid\Uuid;
 use Throwable;
 
 class UserController extends BaseController
@@ -220,6 +221,7 @@ class UserController extends BaseController
         ImportUsersDto $dto,
         LoggerInterface $logger,
         ImportUsersUseCase $useCase,
+        UrlGeneratorInterface $urlGenerator,
         #[MapUploadedFile]
         UploadedFile|array $file = [],
     ): JsonResponse {
@@ -237,7 +239,7 @@ class UserController extends BaseController
         }
 
         $useCase->setLogger($logger);
-        $created = $useCase->execute(
+        $createdInfo = $useCase->execute(
             new DomainImportDto(
                 $file->getPathname(),
                 RoleEnum::from($dto->for_role),
@@ -249,9 +251,51 @@ class UserController extends BaseController
                 $dto->password,
             ),
         );
+        $allDto = $createdInfo->getGetAllUsersDto();
+        $urlParameters = [
+            'roles' => $allDto->getRoles() !== null
+                ? array_map(
+                    fn(RoleEnum $el) => $el->value,
+                    $allDto->getRoles(),
+                )
+                : null,
+            'name' => $allDto->getName(),
+            'email' => $allDto->getEmail(),
+            'deleted' => $allDto->getDeleted(),
+            'status' => $allDto->getStatus()?->value,
+            'group_ids' => $allDto->getGroupIds() !== null
+                ? array_map(
+                    fn(Uuid $el) => $el->toRfc4122(),
+                    $allDto->getGroupIds(),
+                )
+                : null,
+            'with_group' => $allDto->getWithGroup(),
+            'created_from' => $allDto->getCreatedFrom()?->format(DATE_RFC3339),
+            'created_to' => $allDto->getCreatedTo()?->format(DATE_RFC3339),
+            'sort_by' => $allDto->getSortBy(),
+            'sort_type' => $allDto->getSortType()?->value,
+            'offset' => $allDto->getOffset(),
+            'limit' => $allDto->getLimit(),
+        ];
+        $urlParameters = array_filter($urlParameters);
         return Response::success(
             new SuccessResponse(
-                new CreatedUserDataInfo($created),
+                new CreatedUsersInfo(
+                    $createdInfo->getCount(),
+                    $urlGenerator->generate(
+                        'get-all-users',
+                        $urlParameters,
+                        UrlGeneratorInterface::ABSOLUTE_URL,
+                    ),
+                    $urlGenerator->generate(
+                        'users-export-to-file',
+                        [
+                            'exportType' => 'xlsx',
+                            ...$urlParameters,
+                        ],
+                        UrlGeneratorInterface::ABSOLUTE_URL,
+                    ),
+                ),
             ),
         );
     }

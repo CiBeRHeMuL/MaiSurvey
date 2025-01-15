@@ -1768,6 +1768,44 @@ paths:
                 allOf:
                   - { $ref: '#/components/schemas/SuccessResponse' }
                   - { properties: { data: { $ref: '#/components/schemas/UpdatedUsersInfo' } }, type: object }
+  /users/import:
+    post:
+      tags:
+        - users
+      operationId: post_users-import
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImportUsersDto'
+      responses:
+        '404':
+          description: 'Not Found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: 'Unprocessable Entity'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResponse'
+        '500':
+          description: 'Internal Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/SuccessResponse' }
+                  - { properties: { data: { $ref: '#/components/schemas/CreatedUsersInfo' } }, type: object }
   /user-data/all:
     get:
       tags:
@@ -2637,6 +2675,43 @@ components:
           type: string
           default: E
       type: object
+    ImportUsersDto:
+      required:
+        - for_role
+        - password
+      properties:
+        for_role:
+          title: Роль
+          type: string
+          enum:
+            - admin
+            - student
+            - teacher
+            - survey_creator
+        password:
+          title: Пароль
+          type: string
+        headers_in_first_row:
+          title: 'Находятся ли в первой строке файла заголовки для столбцов'
+          type: boolean
+          default: true
+        last_name_col:
+          title: 'Столбец с фамилией'
+          type: string
+          default: A
+        first_name_col:
+          title: 'Столбец с именем'
+          type: string
+          default: B
+        patronymic_col:
+          title: 'Столбец с отчеством'
+          type: string
+          default: C
+        group_name_col:
+          title: 'Столбец с названием группы'
+          type: string
+          default: D
+      type: object
     GetAllUserDataDto:
       properties:
         name:
@@ -3041,6 +3116,23 @@ components:
       properties:
         updated:
           type: integer
+      type: object
+    CreatedUsersInfo:
+      required:
+        - created
+        - fetch_url
+        - export_url
+      properties:
+        created:
+          type: integer
+        fetch_url:
+          title: 'Адрес, по которому можно получить список созданных пользователей'
+          type: string
+          format: url
+        export_url:
+          title: 'Адрес, по которому можно скачать выгрузку по созданным пользователям'
+          type: string
+          format: url
       type: object
     UserData:
       required:
