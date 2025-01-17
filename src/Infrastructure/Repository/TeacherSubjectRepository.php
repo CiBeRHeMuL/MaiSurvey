@@ -8,7 +8,8 @@ use App\Domain\DataProvider\LimitOffset;
 use App\Domain\DataProvider\SortColumn;
 use App\Domain\Dto\TeacherSubject\GetAllTeacherSubjectsDto;
 use App\Domain\Dto\TeacherSubject\GetMyTeacherSubjectsDto;
-use App\Domain\Dto\TeacherSubject\GetTeacherSubjectByIndexDto;
+use App\Domain\Dto\TeacherSubject\GetTSByIndexDto;
+use App\Domain\Dto\TeacherSubject\GetTSByIndexRawDto;
 use App\Domain\Entity\MyTeacherSubject;
 use App\Domain\Entity\Subject;
 use App\Domain\Entity\TeacherSubject;
@@ -140,7 +141,7 @@ class TeacherSubjectRepository extends Common\AbstractRepository implements Teac
             ->where(new InExpr(
                 ['teacher_id', 'subject_id', 'type'],
                 array_map(
-                    fn(GetTeacherSubjectByIndexDto $dto) => [
+                    fn(GetTSByIndexDto $dto) => [
                         'teacher_id' => $dto->getTeacherId()->toRfc4122(),
                         'subject_id' => $dto->getSubjectId()->toRfc4122(),
                         'type' => $dto->getType()->value,
@@ -152,6 +153,45 @@ class TeacherSubjectRepository extends Common\AbstractRepository implements Teac
             $this->findAllByQuery(
                 $q,
                 TeacherSubject::class,
+            ),
+        );
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function findAllByRawIndexes(array $indexes): Iterator
+    {
+        if ($indexes === []) {
+            return new ArrayIterator([]);
+        }
+        $q = Query::select()
+            ->select(['ts.*'])
+            ->from(['ts' => $this->getClassTable(TeacherSubject::class)])
+            ->innerJoin(
+                ['u' => $this->getClassTable(User::class)],
+                'u.id = ts.teacher_id',
+            )
+            ->innerJoin(
+                ['s' => $this->getClassTable(Subject::class)],
+                's.id = ts.subject_id',
+            )
+            ->where(new InExpr(
+                ['u.email', 's.name', 'ts.type'],
+                array_map(
+                    fn(GetTSByIndexRawDto $dto) => [
+                        'u.email' => $dto->getTeacherEmail()->getEmail(),
+                        's.name' => $dto->getSubjectName(),
+                        'ts.type' => $dto->getType()->value,
+                    ],
+                    $indexes,
+                ),
+            ));
+        return new ArrayIterator(
+            $this->findAllByQuery(
+                $q,
+                TeacherSubject::class,
+                ['teacher', 'subject'],
             ),
         );
     }

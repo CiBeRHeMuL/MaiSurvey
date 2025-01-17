@@ -6,17 +6,28 @@ use App\Application\Dto\StudentSubject\GetAllStudentSubjectsDto;
 use App\Application\Dto\StudentSubject\GetMyStudentSubjectsDto;
 use App\Application\UseCase\StudentSubject\GetAllUseCase;
 use App\Application\UseCase\StudentSubject\GetMyUseCase;
+use App\Application\UseCase\StudentSubject\ImportUseCase;
+use App\Domain\Dto\StudentSubject\ImportDto;
 use App\Domain\Enum\PermissionEnum;
+use App\Presentation\Web\Dto\StudentSubject\ImportStudentSubjectsDto;
+use App\Presentation\Web\Enum\ErrorSlugEnum;
 use App\Presentation\Web\OpenApi\Attribute as LOA;
+use App\Presentation\Web\Response\Model\Common\Error;
 use App\Presentation\Web\Response\Model\Common\PaginatedData;
+use App\Presentation\Web\Response\Model\Common\SuccessResponse;
 use App\Presentation\Web\Response\Model\Common\SuccessWithPaginationResponse;
+use App\Presentation\Web\Response\Model\Common\ValidationResponse;
+use App\Presentation\Web\Response\Model\CreatedStudentSubjectsInfo;
 use App\Presentation\Web\Response\Model\MyStudentSubject;
 use App\Presentation\Web\Response\Model\StudentSubject;
 use App\Presentation\Web\Response\Response;
 use OpenApi\Attributes as OA;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Attribute\MapQueryString;
+use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
+use Symfony\Component\HttpKernel\Attribute\MapUploadedFile;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
@@ -78,8 +89,56 @@ class StudentSubjectController extends BaseController
         );
     }
 
-    public function import(): JsonResponse
-    {
+    /** Импорт предметов для студентов индивидуально */
+    #[Route('/student-subjects/import', 'student-subjects-import-for-student', methods: ['POST'])]
+    #[IsGranted(PermissionEnum::StudentSubjectImport->value, statusCode: 404, exceptionCode: 404)]
+    #[OA\Tag('student-subjects')]
+    #[LOA\ErrorResponse(500)]
+    #[LOA\ValidationResponse]
+    #[LOA\ErrorResponse(400)]
+    #[LOA\ErrorResponse(401)]
+    #[LOA\ErrorResponse(404)]
+    #[LOA\SuccessResponse(CreatedStudentSubjectsInfo::class)]
+    public function import(
+        LoggerInterface $logger,
+        ImportUseCase $useCase,
+        #[MapRequestPayload]
+        ImportStudentSubjectsDto $dto = new ImportStudentSubjectsDto(),
+        #[MapUploadedFile]
+        UploadedFile|array $file = [],
+    ): JsonResponse {
+        if (is_array($file)) {
+            return Response::validation(
+                new ValidationResponse([
+                    'file' => [
+                        new Error(
+                            ErrorSlugEnum::WrongField->getSlug(),
+                            'Не удалось прочитать файл',
+                        ),
+                    ],
+                ]),
+            );
+        }
 
+        $useCase->setLogger($logger);
+        $created = $useCase->execute(
+            new ImportDto(
+                $file->getPathname(),
+                $dto->headers_in_first_row,
+                $dto->student_email_col,
+                $dto->teacher_email_col,
+                $dto->subject_col,
+                $dto->type_col,
+                $dto->actual_from_col,
+                $dto->actual_to_col,
+                $dto->skip_if_exists,
+            ),
+        );
+
+        return Response::success(
+            new SuccessResponse(
+                new CreatedStudentSubjectsInfo($created),
+            ),
+        );
     }
 }

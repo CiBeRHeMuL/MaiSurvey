@@ -5,7 +5,7 @@ namespace App\Domain\Dto\StudentSubject;
 use DateTimeImmutable;
 use Symfony\Component\Uid\Uuid;
 
-readonly class GetStudentSubjectByIntersectionDto
+readonly class GetSSByIntersectionDto
 {
     public function __construct(
         private Uuid $studentId,

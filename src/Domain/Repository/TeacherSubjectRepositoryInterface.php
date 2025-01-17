@@ -5,7 +5,8 @@ namespace App\Domain\Repository;
 use App\Domain\DataProvider\DataProviderInterface;
 use App\Domain\Dto\TeacherSubject\GetAllTeacherSubjectsDto;
 use App\Domain\Dto\TeacherSubject\GetMyTeacherSubjectsDto;
-use App\Domain\Dto\TeacherSubject\GetTeacherSubjectByIndexDto;
+use App\Domain\Dto\TeacherSubject\GetTSByIndexDto;
+use App\Domain\Dto\TeacherSubject\GetTSByIndexRawDto;
 use App\Domain\Entity\MyTeacherSubject;
 use App\Domain\Entity\TeacherSubject;
 use App\Domain\Entity\User;
@@ -29,9 +30,16 @@ interface TeacherSubjectRepositoryInterface extends Common\RepositoryInterface
     public function findAll(GetAllTeacherSubjectsDto $dto): DataProviderInterface;
 
     /**
-     * @param GetTeacherSubjectByIndexDto[] $indexes
+     * @param GetTSByIndexDto[] $indexes
      *
      * @return Iterator<int, TeacherSubject>
      */
     public function findAllByIndexes(array $indexes): Iterator;
+
+    /**
+     * @param GetTSByIndexRawDto[] $indexes
+     *
+     * @return Iterator<int, TeacherSubject>
+     */
+    public function findAllByRawIndexes(array $indexes): Iterator;
 }

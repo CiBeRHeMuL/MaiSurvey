@@ -6,7 +6,8 @@ use App\Domain\DataProvider\DataProviderInterface;
 use App\Domain\Dto\StudentSubject\CreateStudentSubjectDto;
 use App\Domain\Dto\StudentSubject\GetAllStudentSubjectsDto;
 use App\Domain\Dto\StudentSubject\GetMyStudentSubjectsDto;
-use App\Domain\Dto\StudentSubject\GetStudentSubjectByIntersectionDto;
+use App\Domain\Dto\StudentSubject\GetSSByIntersectionDto;
+use App\Domain\Dto\StudentSubject\GetSSByIntersectionRawDto;
 use App\Domain\Entity\StudentSubject;
 use App\Domain\Entity\User;
 use App\Domain\Enum\ValidationErrorSlugEnum;
@@ -86,7 +87,7 @@ class StudentSubjectService
     }
 
     /**
-     * @param GetStudentSubjectByIntersectionDto[] $intersections
+     * @param GetSSByIntersectionDto[] $intersections
      *
      * @return Iterator<int, StudentSubject>
      */
@@ -185,7 +186,7 @@ class StudentSubjectService
         if ($checkExisting) {
             $existing = $this
                 ->getAllByIntersections([
-                    new GetStudentSubjectByIntersectionDto(
+                    new GetSSByIntersectionDto(
                         $dto->getStudent()->getId(),
                         $dto->getTeacherSubject()->getId(),
                         $dto->getActualFrom(),
@@ -207,6 +208,21 @@ class StudentSubjectService
                 ]);
             }
         }
+    }
+
+    /**
+     * @param GetSSByIntersectionRawDto[] $intersections
+     *
+     * @return Iterator<int, StudentSubject>
+     */
+    public function getAllByRawIntersections(array $intersections): Iterator
+    {
+        if ($intersections === []) {
+            return new ArrayIterator();
+        }
+        return $this
+            ->userSubjectRepository
+            ->findAllByRawIntersections($intersections);
     }
 
     private function entityFromCreateDto(CreateStudentSubjectDto $dto): StudentSubject

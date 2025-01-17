@@ -2,13 +2,13 @@
 
 namespace App\Infrastructure\Db\Expr;
 
-use App\Domain\Dto\StudentSubject\GetStudentSubjectByIntersectionDto;
+use App\Domain\Dto\StudentSubject\GetSSByIntersectionDto;
 use Qstart\Db\QueryBuilder\DML\Expression\ExprInterface;
 
-class StudentSubjectIntersectionExpr implements ExprInterface
+class SSIntersectionExpr implements ExprInterface
 {
     public function __construct(
-        private GetStudentSubjectByIntersectionDto $dto,
+        private GetSSByIntersectionDto $dto,
         private string|null $alias = null,
     ) {
         $this->alias = $this->alias !== null

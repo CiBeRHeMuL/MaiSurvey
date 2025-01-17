@@ -3,7 +3,7 @@
 namespace App\Domain\Service\TeacherSubject;
 
 use App\Domain\Dto\TeacherSubject\CreateTeacherSubjectDto;
-use App\Domain\Dto\TeacherSubject\GetTeacherSubjectByIndexDto;
+use App\Domain\Dto\TeacherSubject\GetTSByIndexDto;
 use App\Domain\Dto\TeacherSubject\ImportDto;
 use App\Domain\Entity\Subject;
 use App\Domain\Entity\User;
@@ -183,7 +183,7 @@ class TeacherSubjectsImporter
                 ]);
             }
 
-            $indexes[] = new GetTeacherSubjectByIndexDto(
+            $indexes[] = new GetTSByIndexDto(
                 $teacher->getId(),
                 $subject->getId(),
                 $type,

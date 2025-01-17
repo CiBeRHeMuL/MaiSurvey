@@ -13,7 +13,8 @@ use App\Domain\Entity\Subject;
 use App\Domain\Entity\TeacherSubject;
 use App\Domain\Entity\User;
 use App\Domain\Repository\StudentSubjectRepositoryInterface;
-use App\Infrastructure\Db\Expr\StudentSubjectIntersectionExpr;
+use App\Infrastructure\Db\Expr\SSIntersectionExpr;
+use App\Infrastructure\Db\Expr\SSRawIntersectionExpr;
 use ArrayIterator;
 use DateTimeImmutable;
 use Iterator;
@@ -162,12 +163,55 @@ class StudentSubjectRepository extends Common\AbstractRepository implements Stud
         $q = Query::select()
             ->from(['ss' => $this->getClassTable(StudentSubject::class)]);
         foreach ($intersections as $index) {
-            $q->andWhere(new StudentSubjectIntersectionExpr($index, 'ss'));
+            $q->andWhere(new SSIntersectionExpr($index, 'ss'));
         }
         return new ArrayIterator(
             $this->findAllByQuery(
                 $q,
                 StudentSubject::class,
+            ),
+        );
+    }
+
+    public function findAllByRawIntersections(array $intersections): Iterator
+    {
+        if ($intersections === []) {
+            return new ArrayIterator([]);
+        }
+        $q = Query::select()
+            ->select(['ss.*'])
+            ->from(['ss' => $this->getClassTable(StudentSubject::class)])
+            ->innerJoin(
+                ['ts' => $this->getClassTable(TeacherSubject::class)],
+                'ts.id = ss.teacher_subject_id',
+            )
+            ->innerJoin(
+                ['su' => $this->getClassTable(User::class)],
+                'su.id = ss.user_id',
+            )
+            ->innerJoin(
+                ['tu' => $this->getClassTable(User::class)],
+                'tu.id = ts.teacher_id',
+            )
+            ->innerJoin(
+                ['s' => $this->getClassTable(Subject::class)],
+                's.id = ts.subject_id',
+            );
+        foreach ($intersections as $index) {
+            $q->andWhere(new SSRawIntersectionExpr(
+                $index,
+                'ss',
+                'ts',
+                'su',
+                'tu',
+                's',
+            ));
+        }
+        return new ArrayIterator(
+            $this->findAllByQuery(
+                $q,
+                StudentSubject::class,
+                ['teacherSubject', 'user', 'teacherSubject.teacher', 'teacherSubject.subject']
             ),
         );
     }

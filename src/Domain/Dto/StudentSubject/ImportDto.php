@@ -13,6 +13,7 @@ readonly class ImportDto
         private string $typeCol,
         private string $actualFromCol,
         private string $actualToCol,
+        private bool $skipIfExists,
     ) {
     }
 
@@ -54,5 +55,10 @@ readonly class ImportDto
     public function getActualToCol(): string
     {
         return $this->actualToCol;
+    }
+
+    public function isSkipIfExists(): bool
+    {
+        return $this->skipIfExists;
     }
 }

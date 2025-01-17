@@ -3,10 +3,10 @@
 namespace App\Domain\Service\StudentSubject;
 
 use App\Domain\Dto\StudentSubject\CreateStudentSubjectDto;
-use App\Domain\Dto\StudentSubject\GetStudentSubjectByIntersectionDto;
+use App\Domain\Dto\StudentSubject\GetSSByIntersectionRawDto;
 use App\Domain\Dto\StudentSubject\ImportDto;
-use App\Domain\Dto\TeacherSubject\GetTeacherSubjectByIndexDto;
-use App\Domain\Entity\Subject;
+use App\Domain\Dto\TeacherSubject\GetTSByIndexRawDto;
+use App\Domain\Entity\StudentSubject;
 use App\Domain\Entity\TeacherSubject;
 use App\Domain\Entity\User;
 use App\Domain\Enum\TeacherSubjectTypeEnum;
@@ -70,11 +70,28 @@ class StudentSubjectsImporter
 
         $validationErrorTemplate = 'Некорректное содержимое файла. Ошибка в строке %d: %s';
 
+        $errorGenerator = function (int $k, string $error) use (&$validationErrorTemplate): ValidationError {
+            return new ValidationError(
+                'file',
+                ValidationErrorSlugEnum::WrongFile->getSlug(),
+                sprintf(
+                    $validationErrorTemplate,
+                    $k,
+                    $error,
+                ),
+            );
+        };
+
+        /** @var Email[] $studentEmails */
         $studentEmails = [];
-        $teacherEmails = [];
-        $subjectNames = [];
-        $indexesData = [];
+        /** @var array<string, int> $firstStudentRow */
+        $firstStudentRow = [];
+        /** @var array<string, int> $existingRows */
         $existingRows = [];
+        /** @var GetTSByIndexRawDto[] $teacherSubjectIndexes */
+        $teacherSubjectIndexes = [];
+        /** @var GetSSByIntersectionRawDto[] $studentSubjectIntersectionIndexes */
+        $studentSubjectIntersectionIndexes = [];
         foreach ($this->dataImport->getRows($firstRow, $this->dataImport->getHighestRow()) as $k => $row) {
             $studentEmail = $row[$dto->getStudentEmailCol()] ?? '';
             $teacherEmail = $row[$dto->getTeacherEmailCol()] ?? '';
@@ -83,72 +100,50 @@ class StudentSubjectsImporter
             $actualFrom = $row[$dto->getActualFromCol()] ?? '';
             $actualTo = $row[$dto->getActualToCol()] ?? '';
 
-            if (isset($existingRows[$studentEmail][$teacherEmail][$subject][$type])) {
+            $hash = md5("$studentEmail$teacherEmail$subject$type");
+            if (isset($existingRows[$hash])) {
                 throw ValidationException::new([
-                    new ValidationError(
-                        'file',
-                        ValidationErrorSlugEnum::WrongFile->getSlug(),
+                    $errorGenerator(
+                        $k,
                         sprintf(
-                            $validationErrorTemplate,
-                            $k,
-                            sprintf(
-                                'повторяющийся набор данных, такой набор уже был указан в строке %d',
-                                $existingRows[$studentEmail][$teacherEmail][$subject][$type],
-                            ),
+                            'повторяющийся набор данных, такой набор уже был указан в строке %d',
+                            $existingRows[$hash],
                         ),
                     ),
                 ]);
             }
-            $existingRows[$studentEmail][$teacherEmail][$subject][$type] = $k;
-
-            $subjectNames[$k] = $subject;
-
-            $type = TeacherSubjectTypeEnum::tryFrom($type);
-            if ($type === null) {
-                throw ValidationException::new([
-                    new ValidationError(
-                        'file',
-                        ValidationErrorSlugEnum::WrongFile->getSlug(),
-                        sprintf(
-                            $validationErrorTemplate,
-                            $k,
-                            'некорректный тип предмета',
-                        ),
-                    ),
-                ]);
-            }
-            $types[$k] = $type;
+            $existingRows[$hash] = $k;
 
             try {
                 $studentEmail = new Email($studentEmail);
-                $studentEmails[$k] = $studentEmail;
+                $studentEmails[] = $studentEmail;
+                $firstStudentRow[$studentEmail->getEmail()] ??= $k;
             } catch (Throwable $e) {
                 throw ValidationException::new([
-                    new ValidationError(
-                        'file',
-                        ValidationErrorSlugEnum::WrongFile->getSlug(),
-                        sprintf(
-                            $validationErrorTemplate,
-                            $k,
-                            'некорректный формат почты студента',
-                        ),
+                    $errorGenerator(
+                        $k,
+                        'некорректный формат почты студента',
                     ),
                 ]);
             }
 
             try {
                 $teacherEmail = new Email($teacherEmail);
-                $teacherEmails[$k] = $teacherEmail;
             } catch (Throwable $e) {
                 throw ValidationException::new([
-                    new ValidationError(
-                        'file',
-                        ValidationErrorSlugEnum::WrongFile->getSlug(),
-                        sprintf(
-                            $validationErrorTemplate,
-                            $k,
-                            'некорректный формат почты преподавателя',
-                        ),
+                    $errorGenerator(
+                        $k,
+                        'некорректный формат почты преподавателя',
+                    ),
+                ]);
+            }
+
+            $type = TeacherSubjectTypeEnum::tryFrom($type);
+            if ($type === null) {
+                throw ValidationException::new([
+                    $errorGenerator(
+                        $k,
+                        'некорректный формат почты преподавателя',
                     ),
                 ]);
             }
@@ -157,14 +152,9 @@ class StudentSubjectsImporter
                 $actualFrom = new DateTimeImmutable($actualFrom);
             } catch (Throwable $e) {
                 throw ValidationException::new([
-                    new ValidationError(
-                        'file',
-                        ValidationErrorSlugEnum::WrongFile->getSlug(),
-                        sprintf(
-                            $validationErrorTemplate,
-                            $k,
-                            'некорректный формат даты',
-                        ),
+                    $errorGenerator(
+                        $k,
+                        'некорректный формат даты начала актуальности',
                     ),
                 ]);
             }
@@ -173,216 +163,137 @@ class StudentSubjectsImporter
                 $actualTo = new DateTimeImmutable($actualTo);
             } catch (Throwable $e) {
                 throw ValidationException::new([
-                    new ValidationError(
-                        'file',
-                        ValidationErrorSlugEnum::WrongFile->getSlug(),
-                        sprintf(
-                            $validationErrorTemplate,
-                            $k,
-                            'некорректный формат даты',
-                        ),
+                    $errorGenerator(
+                        $k,
+                        'некорректный формат даты конца актуальности',
                     ),
                 ]);
             }
 
-            $indexesData[$k] = compact('studentEmail', 'teacherEmail', 'subject', 'type', 'actualFrom', 'actualTo');
+            if ($actualTo->getTimestamp() <= $actualFrom->getTimestamp()) {
+                throw ValidationException::new([
+                    $errorGenerator(
+                        $k,
+                        'дата окончания актуальности предмета должна быть больше даты начала актуальности',
+                    ),
+                ]);
+            }
+
+            $teacherSubjectIndex = new GetTSByIndexRawDto(
+                $teacherEmail,
+                $subject,
+                $type,
+            );
+            $teacherSubjectIndexes[] = $teacherSubjectIndex;
+            $studentSubjectIntersectionIndexes[] = new GetSSByIntersectionRawDto(
+                $studentEmail,
+                $teacherSubjectIndex,
+                $actualFrom,
+                $actualTo,
+            );
         }
-
-        $subjects = $this
-            ->subjectService
-            ->getByNames($subjectNames);
-        /** @var array<string, Subject> $subjects */
-        $subjects = HArray::index(
-            $subjects,
-            fn(Subject $s) => $s->getName(),
-        );
-
-        $teachers = $this
-            ->userService
-            ->getAllByEmails($teacherEmails);
-        /** @var array<string, User> $teachers */
-        $teachers = HArray::index(
-            $teachers,
-            fn(User $t) => $t->getEmail()->getEmail(),
-        );
 
         $students = $this
             ->userService
             ->getAllByEmails($studentEmails);
+        $teacherSubjects = $this
+            ->teacherSubjectService
+            ->getAllByRawIndexes($teacherSubjectIndexes);
+        $studentSubjects = $this
+            ->studentSubjectService
+            ->getAllByRawIntersections($studentSubjectIntersectionIndexes);
+
         /** @var array<string, User> $students */
         $students = HArray::index(
             $students,
-            fn(User $t) => $t->getEmail()->getEmail(),
+            fn(User $s) => $s->getEmail()->getEmail(),
         );
-
-        $teacherSubjectIndexes = [];
-        foreach ($indexesData as $k => $indexesDatum) {
-            [
-                'subject' => $subject,
-                'teacherEmail' => $teacherEmail,
-                'studentEmail' => $studentEmail,
-                'type' => $type,
-            ] = $indexesDatum;
-            $student = $students[$studentEmail->getEmail()] ?? null;
-            if (!$student) {
-                throw ValidationException::new([
-                    new ValidationError(
-                        'file',
-                        ValidationErrorSlugEnum::WrongFile->getSlug(),
-                        sprintf(
-                            $validationErrorTemplate,
-                            $k,
-                            'студент не найден',
-                        ),
-                    ),
-                ]);
-            }
-            $subject = $subjects[$subject] ?? null;
-            if (!$subject) {
-                throw ValidationException::new([
-                    new ValidationError(
-                        'file',
-                        ValidationErrorSlugEnum::WrongFile->getSlug(),
-                        sprintf(
-                            $validationErrorTemplate,
-                            $k,
-                            'предмет не найден',
-                        ),
-                    ),
-                ]);
-            }
-            $teacher = $teachers[$teacherEmail->getEmail()] ?? null;
-            if (!$teacher) {
-                throw ValidationException::new([
-                    new ValidationError(
-                        'file',
-                        ValidationErrorSlugEnum::WrongFile->getSlug(),
-                        sprintf(
-                            $validationErrorTemplate,
-                            $k,
-                            'преподаватель не найден',
-                        ),
-                    ),
-                ]);
-            }
-
-            $teacherSubjectIndexes[] = new GetTeacherSubjectByIndexDto(
-                $teacher->getId(),
-                $subject->getId(),
-                $type,
-            );
-        }
-
-        $teacherSubjects = $this
-            ->teacherSubjectService
-            ->getAllByIndexes($teacherSubjectIndexes);
-        /** @var array<string, array<string, array<string, TeacherSubject>>> $teacherSubjects */
-        $teacherSubjects = HArray::groupIndexing(
+        /** @var array<string, TeacherSubject> $teacherSubjects */
+        $teacherSubjects = HArray::index(
             $teacherSubjects,
-            [
-                fn(TeacherSubject $ts) => $ts->getSubject()->getName(),
-                fn(TeacherSubject $ts) => $ts->getTeacher()->getEmail()->getEmail(),
-            ],
-            fn(TeacherSubject $ts) => $ts->getType()->value,
+            function (TeacherSubject $ts) {
+                $teacherEmail = $ts->getTeacher()->getEmail()->getEmail();
+                $subject = $ts->getSubject()->getName();
+                $type = $ts->getType()->value;
+                return md5("$teacherEmail$subject$type");
+            },
+        );
+        /** @var array<string, StudentSubject> $studentSubjects */
+        $studentSubjects = HArray::index(
+            $studentSubjects,
+            function (StudentSubject $ss) {
+                $studentEmail = $ss->getUser()->getEmail()->getEmail();
+                $teacherEmail = $ss->getTeacher()->getEmail()->getEmail();
+                $subject = $ss->getSubject()->getName();
+                $type = $ss->getTeacherSubject()->getType()->value;
+                return md5("$studentEmail$teacherEmail$subject$type");
+            },
         );
 
+        /** @var CreateStudentSubjectDto[] $createDtos */
         $createDtos = [];
-        $indexes = [];
-        foreach ($indexesData as $k => $indexesDatum) {
-            [
-                'subject' => $subject,
-                'teacherEmail' => $teacherEmail,
-                'studentEmail' => $studentEmail,
-                'type' => $type,
-                'actualFrom' => $actualFrom,
-                'actualTo' => $actualTo,
-            ] = $indexesDatum;
+        foreach ($this->dataImport->getRows($firstRow, $this->dataImport->getHighestRow()) as $k => $row) {
+            $studentEmail = $row[$dto->getStudentEmailCol()] ?? '';
+            $teacherEmail = $row[$dto->getTeacherEmailCol()] ?? '';
+            $subject = $row[$dto->getSubjectCol()] ?? '';
+            $type = $row[$dto->getTypeCol()] ?? '';
+            $actualFrom = $row[$dto->getActualFromCol()] ?? '';
+            $actualTo = $row[$dto->getActualToCol()] ?? '';
 
-            $teacherSubject = $teacherSubjects[$subject][$teacherEmail->getEmail()][$type->value] ?? null;
-            if ($teacherSubject === null) {
+            $student = $students[$studentEmail] ?? null;
+            if ($student === null) {
                 throw ValidationException::new([
-                    new ValidationError(
-                        'file',
-                        ValidationErrorSlugEnum::WrongFile->getSlug(),
-                        sprintf(
-                            $validationErrorTemplate,
+                    $errorGenerator(
+                        $k,
+                        'студент не найден',
+                    ),
+                ]);
+            }
+
+            $ssHash = md5("$studentEmail$teacherEmail$subject$type");
+            $tsHash = md5("$teacherEmail$subject$type");
+
+            $existingSs = $studentSubjects[$ssHash] ?? null;
+            if ($existingSs) {
+                if ($dto->isSkipIfExists()) {
+                    continue;
+                } else {
+                    throw ValidationException::new([
+                        $errorGenerator(
                             $k,
-                            'этот преподаватель не ведет этот предмет не найден',
+                            sprintf(
+                                'студент уже ходит на этот предмет с %s по %s',
+                                $existingSs->getActualFrom()->format('Y-m-d'),
+                                $existingSs->getActualTo()->format('Y-m-d'),
+                            ),
+                        ),
+                    ]);
+                }
+            }
+
+            $ts = $teacherSubjects[$tsHash] ?? null;
+            if ($ts === null) {
+                throw ValidationException::new([
+                    $errorGenerator(
+                        $k,
+                        sprintf(
+                            'этот преподаватель не ведет предмет "%s"',
+                            $subject,
                         ),
                     ),
                 ]);
             }
-            $student = $students[$studentEmail->getEmail()];
 
-            $createDto = new CreateStudentSubjectDto(
+            $createDtos[] = new CreateStudentSubjectDto(
                 $student,
-                $teacherSubject,
-                $actualFrom,
-                $actualTo,
+                $ts,
+                new DateTimeImmutable($actualFrom),
+                new DateTimeImmutable($actualTo),
             );
-
-            try {
-                $this
-                    ->studentSubjectService
-                    ->validateCreateDto($createDto);
-            } catch (ValidationException $e) {
-                throw ValidationException::new(
-                    array_map(
-                        fn(ValidationError $error) => new ValidationError(
-                            'file',
-                            ValidationErrorSlugEnum::WrongFile->getSlug(),
-                            sprintf($validationErrorTemplate, $k, $error->getMessage()),
-                        ),
-                        $e->getErrors(),
-                    ),
-                );
-            } catch (Throwable $e) {
-                throw ValidationException::new([
-                    new ValidationError(
-                        'file',
-                        ValidationErrorSlugEnum::WrongFile->getSlug(),
-                        sprintf(
-                            $validationErrorTemplate,
-                            $k,
-                            'некорректные данные',
-                        ),
-                    ),
-                ]);
-            }
-
-            $indexes[$k] = new GetStudentSubjectByIntersectionDto(
-                $student->getId(),
-                $teacherSubject->getId(),
-                $actualFrom,
-                $actualTo,
-            );
-            $createDtos[] = $createDto;
         }
 
-        $existingStudentSubjects = $this
-            ->studentSubjectService
-            ->getAllByIntersections($indexes);
-        if (iterator_count($existingStudentSubjects) > 0) {
-            $student = $existingStudentSubjects->current()->getUser();
-            $teacher = $existingStudentSubjects->current()->getTeacher();
-            $subject = $existingStudentSubjects->current()->getSubject();
-            $type = $existingStudentSubjects->current()->getType();
-            $row = $existingRows[$student->getEmail()->getEmail()][$teacher->getEmail()->getEmail()][$subject->getName()][$type->value];
-            throw ValidationException::new([
-                new ValidationError(
-                    'file',
-                    ValidationErrorSlugEnum::WrongFile->getSlug(),
-                    sprintf(
-                        $validationErrorTemplate,
-                        $row - 1 + $firstRow,
-                        'этот студент уже ходит на такой предмет в этот промежуток времени',
-                    ),
-                ),
-            ]);
-        }
 
         $chunks = array_chunk($createDtos, 100, true);
-
         $this->transactionManager->beginTransaction();
         $created = 0;
         foreach ($chunks as $dtos) {

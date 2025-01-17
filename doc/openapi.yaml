@@ -687,6 +687,57 @@ paths:
                 allOf:
                   - { $ref: '#/components/schemas/SuccessWithPaginationResponse' }
                   - { properties: { data: { properties: { items: { type: array, items: { $ref: '#/components/schemas/MyStudentSubject' } } }, type: object } }, type: object }
+  /student-subjects/import:
+    post:
+      tags:
+        - student-subjects
+      summary: 'Импорт предметов для студентов индивидуально'
+      operationId: post_student-subjects-import-for-student
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImportStudentSubjectsDto'
+      responses:
+        '500':
+          description: 'Internal Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: 'Unprocessable Entity'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResponse'
+        '400':
+          description: 'Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 'Not Found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/SuccessResponse' }
+                  - { properties: { data: { $ref: '#/components/schemas/CreatedStudentSubjectsInfo' } }, type: object }
   /subjects:
     get:
       tags:
@@ -2316,6 +2367,41 @@ components:
           minimum: 0
           nullable: true
       type: object
+    ImportStudentSubjectsDto:
+      properties:
+        headers_in_first_row:
+          title: 'Находятся ли в первой строке файла заголовки для столбцов'
+          type: boolean
+          default: true
+        student_email_col:
+          title: 'Столбец с почтой студента'
+          type: string
+          default: A
+        teacher_email_col:
+          title: 'Столбец с почтой преподавателя'
+          type: string
+          default: B
+        subject_col:
+          title: 'Столбец с названием предмета'
+          type: string
+          default: C
+        type_col:
+          title: 'Столбец с типом предмета'
+          type: string
+          default: D
+        actual_from_col:
+          title: 'Столбец с датой начала актуальности предмета'
+          type: string
+          default: E
+        actual_to_col:
+          title: 'Столбец с датой окончания актуальности предмета'
+          type: string
+          default: F
+        skip_if_exists:
+          title: 'Пропускать новые предметы, которые конфликтуют с существующими'
+          type: boolean
+          default: false
+      type: object
     GetAllSubjectsDto:
       properties:
         name:
@@ -3031,6 +3117,13 @@ components:
         actual_to:
           type: string
           format: date-time
+      type: object
+    CreatedStudentSubjectsInfo:
+      required:
+        - created
+      properties:
+        created:
+          type: integer
       type: object
     Subject:
       required:

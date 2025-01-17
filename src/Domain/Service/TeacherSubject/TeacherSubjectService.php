@@ -7,7 +7,8 @@ use App\Domain\DataProvider\EmptyDataProvider;
 use App\Domain\Dto\TeacherSubject\CreateTeacherSubjectDto;
 use App\Domain\Dto\TeacherSubject\GetAllTeacherSubjectsDto;
 use App\Domain\Dto\TeacherSubject\GetMyTeacherSubjectsDto;
-use App\Domain\Dto\TeacherSubject\GetTeacherSubjectByIndexDto;
+use App\Domain\Dto\TeacherSubject\GetTSByIndexDto;
+use App\Domain\Dto\TeacherSubject\GetTSByIndexRawDto;
 use App\Domain\Entity\MyTeacherSubject;
 use App\Domain\Entity\TeacherSubject;
 use App\Domain\Entity\User;
@@ -139,7 +140,7 @@ class TeacherSubjectService
     }
 
     /**
-     * @param GetTeacherSubjectByIndexDto[] $indexes
+     * @param GetTSByIndexDto[] $indexes
      *
      * @return Iterator<int, TeacherSubject>
      */
@@ -151,6 +152,21 @@ class TeacherSubjectService
         return $this
             ->teacherSubjectRepository
             ->findAllByIndexes($indexes);
+    }
+
+    /**
+     * @param GetTSByIndexRawDto[] $indexes
+     *
+     * @return Iterator<int, TeacherSubject>
+     */
+    public function getAllByRawIndexes(array $indexes): Iterator
+    {
+        if ($indexes === []) {
+            return new ArrayIterator([]);
+        }
+        return $this
+            ->teacherSubjectRepository
+            ->findAllByRawIndexes($indexes);
     }
 
     private function entityFromCreateDto(CreateTeacherSubjectDto $dto): TeacherSubject
@@ -191,7 +207,7 @@ class TeacherSubjectService
             $existing = $this
                 ->teacherSubjectRepository
                 ->findAllByIndexes([
-                    new GetTeacherSubjectByIndexDto(
+                    new GetTSByIndexDto(
                         $dto->getTeacher()->getId(),
                         $dto->getSubject()->getId(),
                         $dto->getType(),
