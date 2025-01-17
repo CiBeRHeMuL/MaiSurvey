@@ -140,7 +140,7 @@ class UserRepository extends AbstractRepository implements UserRepositoryInterfa
             ->from($this->getClassTable(User::class))
             ->where(
                 new InExpr(
-                    'email',
+                    new Expr('lower(email)'),
                     array_map(
                         fn(Email $e) => strtolower($e->getEmail()),
                         $emails,

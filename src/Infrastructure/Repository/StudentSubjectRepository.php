@@ -197,16 +197,21 @@ class StudentSubjectRepository extends Common\AbstractRepository implements Stud
                 ['s' => $this->getClassTable(Subject::class)],
                 's.id = ts.subject_id',
             );
+        $conditions = [];
         foreach ($intersections as $index) {
-            $q->andWhere(new SSRawIntersectionExpr(
+            $conditions[] = new SSRawIntersectionExpr(
                 $index,
                 'ss',
                 'ts',
                 'su',
                 'tu',
                 's',
-            ));
+            );
         }
+        $q->andWhere([
+            'OR',
+            ...$conditions,
+        ]);
         return new ArrayIterator(
             $this->findAllByQuery(
                 $q,
