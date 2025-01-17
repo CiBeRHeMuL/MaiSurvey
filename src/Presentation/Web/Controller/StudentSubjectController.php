@@ -6,9 +6,12 @@ use App\Application\Dto\StudentSubject\GetAllStudentSubjectsDto;
 use App\Application\Dto\StudentSubject\GetMyStudentSubjectsDto;
 use App\Application\UseCase\StudentSubject\GetAllUseCase;
 use App\Application\UseCase\StudentSubject\GetMyUseCase;
+use App\Application\UseCase\StudentSubject\ImportByGroupsUseCase;
 use App\Application\UseCase\StudentSubject\ImportUseCase;
+use App\Domain\Dto\StudentSubject\ImportByGroupsDto;
 use App\Domain\Dto\StudentSubject\ImportDto;
 use App\Domain\Enum\PermissionEnum;
+use App\Presentation\Web\Dto\StudentSubject\ImportSSByGroupsDto;
 use App\Presentation\Web\Dto\StudentSubject\ImportStudentSubjectsDto;
 use App\Presentation\Web\Enum\ErrorSlugEnum;
 use App\Presentation\Web\OpenApi\Attribute as LOA;
@@ -121,7 +124,7 @@ class StudentSubjectController extends BaseController
         }
 
         $useCase->setLogger($logger);
-        $created = $useCase->execute(
+        $result = $useCase->execute(
             new ImportDto(
                 $file->getPathname(),
                 $dto->headers_in_first_row,
@@ -137,7 +140,10 @@ class StudentSubjectController extends BaseController
 
         return Response::success(
             new SuccessResponse(
-                new CreatedStudentSubjectsInfo($created),
+                new CreatedStudentSubjectsInfo(
+                    $result->getCreated(),
+                    $result->getSkipped(),
+                ),
             ),
         );
     }
@@ -152,8 +158,11 @@ class StudentSubjectController extends BaseController
     #[LOA\ErrorResponse(401)]
     #[LOA\ErrorResponse(404)]
     #[LOA\SuccessResponse(CreatedStudentSubjectsInfo::class)]
-    public function importForGroups(
+    public function importByGroups(
         LoggerInterface $logger,
+        ImportByGroupsUseCase $useCase,
+        #[MapRequestPayload]
+        ImportSSByGroupsDto $dto = new ImportSSByGroupsDto(),
         #[MapUploadedFile]
         UploadedFile|array $file = [],
     ): JsonResponse {
@@ -169,5 +178,29 @@ class StudentSubjectController extends BaseController
                 ]),
             );
         }
+
+        $useCase->setLogger($logger);
+        $result = $useCase->execute(
+            new ImportByGroupsDto(
+                $file->getPathname(),
+                $dto->headers_in_first_row,
+                $dto->group_name_col,
+                $dto->teacher_email_col,
+                $dto->subject_col,
+                $dto->type_col,
+                $dto->actual_from_col,
+                $dto->actual_to_col,
+                $dto->skip_if_exists,
+            ),
+        );
+
+        return Response::success(
+            new SuccessResponse(
+                new CreatedStudentSubjectsInfo(
+                    $result->getCreated(),
+                    $result->getSkipped(),
+                ),
+            ),
+        );
     }
 }

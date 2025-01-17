@@ -2,6 +2,7 @@
 
 namespace App\Domain\Service\StudentSubject;
 
+use App\Domain\Dto\StudentSubject\CreatedStudentSubjectsInfo;
 use App\Domain\Dto\StudentSubject\CreateStudentSubjectDto;
 use App\Domain\Dto\StudentSubject\GetSSByIntersectionRawDto;
 use App\Domain\Dto\StudentSubject\ImportDto;
@@ -23,6 +24,7 @@ use App\Domain\Validation\ValidationError;
 use App\Domain\ValueObject\Email;
 use DateTimeImmutable;
 use InvalidArgumentException;
+use Iterator;
 use Psr\Log\LoggerInterface;
 use Throwable;
 
@@ -52,7 +54,7 @@ class StudentSubjectsImporter
         return $this;
     }
 
-    public function import(ImportDto $dto): int
+    public function import(ImportDto $dto): CreatedStudentSubjectsInfo
     {
         try {
             $this->dataImport->openFile($dto->getFile());
@@ -68,6 +70,14 @@ class StudentSubjectsImporter
         }
         $firstRow = $dto->isHeadersInFirstRow() ? 2 : 1;
 
+        return $this->importFromIterator(
+            $dto,
+            $this->dataImport->getRows($firstRow, $this->dataImport->getHighestRow()),
+        );
+    }
+
+    public function importFromIterator(ImportDto $dto, Iterator $data): CreatedStudentSubjectsInfo
+    {
         $validationErrorTemplate = 'Некорректное содержимое файла. Ошибка в строке %d: %s';
 
         $errorGenerator = function (int $k, string $error) use (&$validationErrorTemplate): ValidationError {
@@ -92,7 +102,7 @@ class StudentSubjectsImporter
         $teacherSubjectIndexes = [];
         /** @var GetSSByIntersectionRawDto[] $studentSubjectIntersectionIndexes */
         $studentSubjectIntersectionIndexes = [];
-        foreach ($this->dataImport->getRows($firstRow, $this->dataImport->getHighestRow()) as $k => $row) {
+        foreach ($data as $k => $row) {
             $studentEmail = $row[$dto->getStudentEmailCol()] ?? '';
             $teacherEmail = $row[$dto->getTeacherEmailCol()] ?? '';
             $subject = $row[$dto->getSubjectCol()] ?? '';
@@ -232,16 +242,17 @@ class StudentSubjectsImporter
 
         /** @var CreateStudentSubjectDto[] $createDtos */
         $createDtos = [];
-        foreach ($this->dataImport->getRows($firstRow, $this->dataImport->getHighestRow()) as $k => $row) {
-            $studentEmail = $row[$dto->getStudentEmailCol()] ?? '';
-            $teacherEmail = $row[$dto->getTeacherEmailCol()] ?? '';
-            $subject = $row[$dto->getSubjectCol()] ?? '';
-            $type = $row[$dto->getTypeCol()] ?? '';
-            $actualFrom = $row[$dto->getActualFromCol()] ?? '';
-            $actualTo = $row[$dto->getActualToCol()] ?? '';
+        $skipped = 0;
+        foreach ($data as $k => $row) {
+            $studentEmail = $row[$dto->getStudentEmailCol()];
+            $teacherEmail = $row[$dto->getTeacherEmailCol()];
+            $subject = $row[$dto->getSubjectCol()];
+            $type = $row[$dto->getTypeCol()];
+            $actualFrom = $row[$dto->getActualFromCol()];
+            $actualTo = $row[$dto->getActualToCol()];
 
             $student = $students[$studentEmail] ?? null;
-            if ($student === null) {
+            if ($student === null || $student->isStudent() === false) {
                 throw ValidationException::new([
                     $errorGenerator(
                         $k,
@@ -256,6 +267,7 @@ class StudentSubjectsImporter
             $existingSs = $studentSubjects[$ssHash] ?? null;
             if ($existingSs) {
                 if ($dto->isSkipIfExists()) {
+                    $skipped++;
                     continue;
                 } else {
                     throw ValidationException::new([
@@ -292,7 +304,6 @@ class StudentSubjectsImporter
             );
         }
 
-
         $chunks = array_chunk($createDtos, 100, true);
         $this->transactionManager->beginTransaction();
         $created = 0;
@@ -306,6 +317,9 @@ class StudentSubjectsImporter
             }
         }
         $this->transactionManager->commit();
-        return $created;
+        return new CreatedStudentSubjectsInfo(
+            $created,
+            $skipped,
+        );
     }
 }

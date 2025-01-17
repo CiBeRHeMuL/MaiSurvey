@@ -738,6 +738,57 @@ paths:
                 allOf:
                   - { $ref: '#/components/schemas/SuccessResponse' }
                   - { properties: { data: { $ref: '#/components/schemas/CreatedStudentSubjectsInfo' } }, type: object }
+  /student-subjects/import/groups:
+    post:
+      tags:
+        - student-subjects
+      summary: 'Импорт предметов для студентов по группам'
+      operationId: post_student-subjects-import-for-groups
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImportSSByGroupsDto'
+      responses:
+        '500':
+          description: 'Internal Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: 'Unprocessable Entity'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResponse'
+        '400':
+          description: 'Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 'Not Found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/SuccessResponse' }
+                  - { properties: { data: { $ref: '#/components/schemas/CreatedStudentSubjectsInfo' } }, type: object }
   /subjects:
     get:
       tags:
@@ -2402,6 +2453,41 @@ components:
           type: boolean
           default: false
       type: object
+    ImportSSByGroupsDto:
+      properties:
+        headers_in_first_row:
+          title: 'Находятся ли в первой строке файла заголовки для столбцов'
+          type: boolean
+          default: true
+        group_name_col:
+          title: 'Столбец с названием группы'
+          type: string
+          default: A
+        teacher_email_col:
+          title: 'Столбец с почтой преподавателя'
+          type: string
+          default: B
+        subject_col:
+          title: 'Столбец с названием предмета'
+          type: string
+          default: C
+        type_col:
+          title: 'Столбец с типом предмета'
+          type: string
+          default: D
+        actual_from_col:
+          title: 'Столбец с датой начала актуальности предмета'
+          type: string
+          default: E
+        actual_to_col:
+          title: 'Столбец с датой окончания актуальности предмета'
+          type: string
+          default: F
+        skip_if_exists:
+          title: 'Пропускать новые предметы, которые конфликтуют с существующими'
+          type: boolean
+          default: false
+      type: object
     GetAllSubjectsDto:
       properties:
         name:
@@ -3121,8 +3207,11 @@ components:
     CreatedStudentSubjectsInfo:
       required:
         - created
+        - skipped
       properties:
         created:
+          type: integer
+        skipped:
           type: integer
       type: object
     Subject:

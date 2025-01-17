@@ -3,29 +3,29 @@
 namespace App\Application\UseCase\StudentSubject;
 
 use App\Domain\Dto\StudentSubject\CreatedStudentSubjectsInfo;
-use App\Domain\Dto\StudentSubject\ImportDto;
-use App\Domain\Service\StudentSubject\StudentSubjectsImporter;
+use App\Domain\Dto\StudentSubject\ImportByGroupsDto;
+use App\Domain\Service\StudentSubject\StudentSubjectsByGroupsImporter;
 use Psr\Log\LoggerInterface;
 
-class ImportUseCase
+class ImportByGroupsUseCase
 {
     private LoggerInterface $logger;
 
     public function __construct(
         LoggerInterface $logger,
-        private StudentSubjectsImporter $studentSubjectsImporter,
+        private StudentSubjectsByGroupsImporter $studentSubjectsImporter,
     ) {
         $this->setLogger($logger);
     }
 
-    public function setLogger(LoggerInterface $logger): ImportUseCase
+    public function setLogger(LoggerInterface $logger): ImportByGroupsUseCase
     {
         $this->logger = $logger;
         $this->studentSubjectsImporter->setLogger($logger);
         return $this;
     }
 
-    public function execute(ImportDto $dto): CreatedStudentSubjectsInfo
+    public function execute(ImportByGroupsDto $dto): CreatedStudentSubjectsInfo
     {
         return $this
             ->studentSubjectsImporter
