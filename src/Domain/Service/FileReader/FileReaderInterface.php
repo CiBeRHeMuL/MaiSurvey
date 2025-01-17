@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Domain\Service\DataImport;
+namespace App\Domain\Service\FileReader;
 
 use InvalidArgumentException;
 use Iterator;
 use RuntimeException;
 
-interface DataImportInterface
+interface FileReaderInterface
 {
     /**
      * Открывает файл для чтения

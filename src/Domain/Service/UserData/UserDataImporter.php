@@ -9,8 +9,8 @@ use App\Domain\Enum\ValidationErrorSlugEnum;
 use App\Domain\Exception\ErrorException;
 use App\Domain\Exception\ValidationException;
 use App\Domain\Helper\HArray;
-use App\Domain\Service\DataImport\DataImportInterface;
 use App\Domain\Service\Db\TransactionManagerInterface;
+use App\Domain\Service\FileReader\FileReaderInterface;
 use App\Domain\Service\Group\GroupService;
 use App\Domain\Validation\ValidationError;
 use InvalidArgumentException;
@@ -22,7 +22,7 @@ class UserDataImporter
     private LoggerInterface $logger;
 
     public function __construct(
-        private DataImportInterface $dataImport,
+        private FileReaderInterface $dataImport,
         private UserDataService $userDataService,
         private GroupService $groupService,
         private TransactionManagerInterface $transactionManager,

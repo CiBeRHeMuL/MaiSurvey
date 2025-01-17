@@ -12,8 +12,8 @@ use App\Domain\Enum\ValidationErrorSlugEnum;
 use App\Domain\Exception\ErrorException;
 use App\Domain\Exception\ValidationException;
 use App\Domain\Helper\HArray;
-use App\Domain\Service\DataImport\DataImportInterface;
 use App\Domain\Service\Db\TransactionManagerInterface;
+use App\Domain\Service\FileReader\FileReaderInterface;
 use App\Domain\Service\Subject\SubjectService;
 use App\Domain\Service\User\UserService;
 use App\Domain\Validation\ValidationError;
@@ -29,7 +29,7 @@ class TeacherSubjectsImporter
     public function __construct(
         private TeacherSubjectService $teacherSubjectService,
         private TransactionManagerInterface $transactionManager,
-        private DataImportInterface $dataImport,
+        private FileReaderInterface $dataImport,
         private SubjectService $subjectService,
         private UserService $userService,
         LoggerInterface $logger,

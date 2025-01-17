@@ -141,4 +141,33 @@ class StudentSubjectController extends BaseController
             ),
         );
     }
+
+    /** Импорт предметов для студентов по группам */
+    #[Route('/student-subjects/import/groups', 'student-subjects-import-for-groups', methods: ['POST'])]
+    #[IsGranted(PermissionEnum::StudentSubjectImport->value, statusCode: 404, exceptionCode: 404)]
+    #[OA\Tag('student-subjects')]
+    #[LOA\ErrorResponse(500)]
+    #[LOA\ValidationResponse]
+    #[LOA\ErrorResponse(400)]
+    #[LOA\ErrorResponse(401)]
+    #[LOA\ErrorResponse(404)]
+    #[LOA\SuccessResponse(CreatedStudentSubjectsInfo::class)]
+    public function importForGroups(
+        LoggerInterface $logger,
+        #[MapUploadedFile]
+        UploadedFile|array $file = [],
+    ): JsonResponse {
+        if (is_array($file)) {
+            return Response::validation(
+                new ValidationResponse([
+                    'file' => [
+                        new Error(
+                            ErrorSlugEnum::WrongField->getSlug(),
+                            'Не удалось прочитать файл',
+                        ),
+                    ],
+                ]),
+            );
+        }
+    }
 }

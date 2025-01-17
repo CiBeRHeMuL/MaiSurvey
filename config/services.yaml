@@ -42,8 +42,8 @@ services:
     class: App\Presentation\Web\Service\DataExport\FileDataExportFactory
     calls:
       - setLogger: ['@logger']
-  App\Domain\Service\DataImport\DataImportInterface:
-    class: App\Infrastructure\Service\DataImport\XlsxDataImport
+  App\Domain\Service\FileReader\FileReaderInterface:
+    class: App\Infrastructure\Service\FileReader\XlsxFileReader
 
   App\Domain\Service\User\UserImporter:
     arguments:

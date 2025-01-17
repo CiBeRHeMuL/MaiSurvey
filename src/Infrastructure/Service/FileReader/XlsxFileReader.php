@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Infrastructure\Service\DataImport;
+namespace App\Infrastructure\Service\FileReader;
 
-use App\Domain\Service\DataImport\DataImportInterface;
+use App\Domain\Service\FileReader\FileReaderInterface;
 use InvalidArgumentException;
 use Iterator;
 use PhpOffice\PhpSpreadsheet\Reader\BaseReader;
@@ -10,7 +10,7 @@ use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class XlsxDataImport implements DataImportInterface
+class XlsxFileReader implements FileReaderInterface
 {
     private Spreadsheet $spreadsheet;
     private Worksheet $worksheet;

@@ -14,8 +14,8 @@ use App\Domain\Enum\ValidationErrorSlugEnum;
 use App\Domain\Exception\ErrorException;
 use App\Domain\Exception\ValidationException;
 use App\Domain\Helper\HArray;
-use App\Domain\Service\DataImport\DataImportInterface;
 use App\Domain\Service\Db\TransactionManagerInterface;
+use App\Domain\Service\FileReader\FileReaderInterface;
 use App\Domain\Service\Subject\SubjectService;
 use App\Domain\Service\TeacherSubject\TeacherSubjectService;
 use App\Domain\Service\User\UserService;
@@ -35,7 +35,7 @@ class StudentSubjectsImporter
         private SubjectService $subjectService,
         private TeacherSubjectService $teacherSubjectService,
         private UserService $userService,
-        private DataImportInterface $dataImport,
+        private FileReaderInterface $dataImport,
         private TransactionManagerInterface $transactionManager,
         LoggerInterface $logger,
     ) {
