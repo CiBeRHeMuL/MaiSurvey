@@ -2,8 +2,8 @@
 
 namespace App\Application\UseCase\Survey;
 
-use App\Application\Dto\Survey\CompleteSurveyDto;
-use App\Application\Dto\Survey\CompleteSurveyItemDto;
+use App\Application\Dto\Survey\Complete\CompleteSurveyDto;
+use App\Application\Dto\Survey\Complete\CompleteSurveyItemDto;
 use App\Application\Mapper\Survey\AnswerDataMapper;
 use App\Domain\Dto\Survey\Complete\CompleteSurveyDto as DomainCompleteSurveyDto;
 use App\Domain\Dto\Survey\Complete\CompleteSurveyItemDto as DomainCompleteSurveyItemDto;

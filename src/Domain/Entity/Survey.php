@@ -116,4 +116,10 @@ class Survey
         $this->items = $items;
         return $this;
     }
+
+    public function addItem(SurveyItem $item): Survey
+    {
+        $this->items->add($item);
+        return $this;
+    }
 }

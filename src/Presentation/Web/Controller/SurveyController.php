@@ -2,10 +2,12 @@
 
 namespace App\Presentation\Web\Controller;
 
-use App\Application\Dto\Survey\CompleteSurveyDto;
-use App\Application\Dto\Survey\CompleteSurveyItemDto;
+use App\Application\Dto\Survey\Complete\CompleteSurveyDto;
+use App\Application\Dto\Survey\Complete\CompleteSurveyItemDto;
+use App\Application\Dto\Survey\Create\CreateSurveyDto;
 use App\Application\Dto\Survey\GetMySurveysDto;
 use App\Application\UseCase\Survey\CompleteSurveyUseCase;
+use App\Application\UseCase\Survey\CreateSurveyUseCase;
 use App\Application\UseCase\Survey\GetMySurveyByIdUseCase;
 use App\Application\UseCase\Survey\GetMySurveysUseCase;
 use App\Domain\Dto\Survey\GetMySurveyByIdDto as DomainGetMySurveyByIdDto;
@@ -17,6 +19,7 @@ use App\Presentation\Web\Response\Model\Common\SuccessResponse;
 use App\Presentation\Web\Response\Model\Common\SuccessWithPaginationResponse;
 use App\Presentation\Web\Response\Model\LiteMySurvey;
 use App\Presentation\Web\Response\Model\MySurvey;
+use App\Presentation\Web\Response\Model\Survey;
 use App\Presentation\Web\Response\Response;
 use OpenApi\Attributes as OA;
 use Psr\Log\LoggerInterface;
@@ -112,5 +115,28 @@ class SurveyController extends BaseController
             ),
         );
         return Response::success();
+    }
+
+    /** Создать опрос */
+    #[Route('/survey', 'create-survey', methods: ['POST'])]
+    #[IsGranted(PermissionEnum::SurveyCreate->value, statusCode: 404, exceptionCode: 404)]
+    #[OA\Tag('surveys')]
+    #[LOA\SuccessResponse(Survey::class)]
+    #[LOA\ErrorResponse(401)]
+    #[LOA\ErrorResponse(404)]
+    #[LOA\ValidationResponse]
+    public function create(
+        LoggerInterface $logger,
+        #[MapRequestPayload]
+        CreateSurveyDto $dto,
+        CreateSurveyUseCase $useCase,
+    ): JsonResponse {
+        $useCase->setLogger($logger);
+        $survey = $useCase->execute($dto);
+        return Response::success(
+            new SuccessResponse(
+                Survey::fromSurvey($survey),
+            ),
+        );
     }
 }

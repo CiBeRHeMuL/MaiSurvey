@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Application\Dto\Survey;
+namespace App\Application\Dto\Survey\Complete;
 
 use Symfony\Component\Validator\Constraints as Assert;
 

@@ -2,7 +2,7 @@
 
 namespace App\Application\Mapper\Survey;
 
-use App\Application\Dto\Survey as Root;
+use App\Application\Dto\Survey\Complete as Root;
 use App\Domain\Dto\SurveyItemAnswer as Dest;
 use App\Domain\Enum\SurveyItemTypeEnum;
 

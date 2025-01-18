@@ -1164,6 +1164,45 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationResponse'
+  /survey:
+    post:
+      tags:
+        - surveys
+      summary: 'Создать опрос'
+      operationId: post_create-survey
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSurveyDto'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/SuccessResponse' }
+                  - { properties: { data: { $ref: '#/components/schemas/Survey' } }, type: object }
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 'Not Found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: 'Unprocessable Entity'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResponse'
   /teacher-subjects:
     get:
       tags:
@@ -2601,6 +2640,29 @@ components:
             -
               $ref: '#/components/schemas/AnswerDataDtoInterface'
       type: object
+    CreateSurveyDto:
+      required:
+        - title
+        - subject_id
+        - actual_to
+        - items
+      properties:
+        title:
+          title: Заголовок
+          type: string
+          maxLength: 255
+        subject_id:
+          title: 'ID предмета'
+          type: string
+        actual_to:
+          title: 'Актуален до'
+          type: string
+        items:
+          title: Вопросы
+          type: array
+          items:
+            $ref: '#/components/schemas/CreateItemDto'
+      type: object
     GetAllTeacherSubjectsDto:
       properties:
         teacher_ids:
@@ -3259,6 +3321,24 @@ components:
           format: date-time
           nullable: true
       type: object
+    Survey:
+      required:
+        - id
+        - title
+        - subject
+        - items
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        subject:
+          $ref: '#/components/schemas/Subject'
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/SurveyItem'
+      type: object
     TeacherSubject:
       required:
         - subject
@@ -3367,6 +3447,31 @@ components:
           $ref: '#/components/schemas/MultiChoiceAnswerDataDto'
         -
           $ref: '#/components/schemas/RatingAnswerDataDto'
+    CreateItemDto:
+      required:
+        - answer_required
+        - type
+        - text
+        - position
+        - data
+        - subject_type
+      properties:
+        answer_required:
+          title: 'Обязательность ответа'
+          type: boolean
+        type:
+          $ref: '#/components/schemas/SurveyItemTypeEnum'
+        text:
+          title: 'Текст вопроса'
+          type: string
+        position:
+          title: Позиция
+          type: integer
+        data:
+          $ref: '#/components/schemas/ItemDataInterface'
+        subject_type:
+          $ref: '#/components/schemas/TeacherSubjectTypeEnum'
+      type: object
     Meta:
       required:
         - mode
@@ -3480,23 +3585,30 @@ components:
         subject:
           $ref: '#/components/schemas/Subject'
       type: object
-    Survey:
+    SurveyItem:
       required:
         - id
-        - title
-        - subject
-        - items
+        - survey_id
+        - answer_required
+        - type
+        - text
+        - position
+        - data
       properties:
         id:
           type: string
-        title:
+        survey_id:
           type: string
-        subject:
-          $ref: '#/components/schemas/Subject'
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/SurveyItem'
+        answer_required:
+          type: boolean
+        type:
+          $ref: '#/components/schemas/SurveyItemTypeEnum'
+        text:
+          type: string
+        position:
+          type: integer
+        data:
+          $ref: '#/components/schemas/ItemDataInterface2'
       type: object
     TeacherSubjectTypeEnum:
       type: string
@@ -3554,31 +3666,6 @@ components:
         - multi_choice
         - comment
         - rating
-    SurveyItem:
-      required:
-        - id
-        - survey_id
-        - answer_required
-        - type
-        - text
-        - position
-        - data
-      properties:
-        id:
-          type: string
-        survey_id:
-          type: string
-        answer_required:
-          type: boolean
-        type:
-          $ref: '#/components/schemas/SurveyItemTypeEnum'
-        text:
-          type: string
-        position:
-          type: integer
-        data:
-          $ref: '#/components/schemas/ItemDataInterface'
-      type: object
     ItemDataInterface:
       required:
         - type
@@ -3602,6 +3689,29 @@ components:
           $ref: '#/components/schemas/MultiChoiceItemData'
         -
           $ref: '#/components/schemas/RatingItemData'
+    ItemDataInterface2:
+      required:
+        - type
+      properties:
+        type:
+          $ref: '#/components/schemas/SurveyItemTypeEnum'
+      type: object
+      discriminator:
+        propertyName: type
+        mapping:
+          comment: '#/components/schemas/CommentItemData2'
+          choice: '#/components/schemas/ChoiceItemData2'
+          multi_choice: '#/components/schemas/MultiChoiceItemData2'
+          rating: '#/components/schemas/RatingItemData2'
+      oneOf:
+        -
+          $ref: '#/components/schemas/CommentItemData2'
+        -
+          $ref: '#/components/schemas/ChoiceItemData2'
+        -
+          $ref: '#/components/schemas/MultiChoiceItemData2'
+        -
+          $ref: '#/components/schemas/RatingItemData2'
     CommentItemData:
       required:
         - type
@@ -3649,7 +3759,66 @@ components:
         max:
           type: integer
       type: object
+    CommentItemData2:
+      required:
+        - type
+      properties:
+        type:
+          $ref: '#/components/schemas/SurveyItemTypeEnum'
+        placeholder:
+          type: string
+          nullable: true
+      type: object
+    ChoiceItemData2:
+      required:
+        - type
+        - choices
+      properties:
+        type:
+          $ref: '#/components/schemas/SurveyItemTypeEnum'
+        choices:
+          type: array
+          items:
+            $ref: '#/components/schemas/Choice2'
+      type: object
+    MultiChoiceItemData2:
+      required:
+        - type
+        - choices
+      properties:
+        type:
+          $ref: '#/components/schemas/SurveyItemTypeEnum'
+        choices:
+          type: array
+          items:
+            $ref: '#/components/schemas/Choice2'
+      type: object
+    RatingItemData2:
+      required:
+        - type
+        - min
+        - max
+      properties:
+        type:
+          $ref: '#/components/schemas/SurveyItemTypeEnum'
+        min:
+          type: integer
+        max:
+          type: integer
+      type: object
     Choice:
+      required:
+        - text
+        - value
+      properties:
+        text:
+          title: Описание
+          type: string
+        value:
+          title: Значение
+          type: string
+      type: object
+    Choice2:
       required:
         - text
         - value

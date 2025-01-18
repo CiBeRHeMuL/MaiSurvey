@@ -69,6 +69,8 @@ services:
     class: App\Infrastructure\Repository\SurveyItemAnswerRepository
   App\Domain\Repository\CompletedSurveyRepositoryInterface:
     class: App\Infrastructure\Repository\CompletedSurveyRepository
+  App\Domain\Repository\SurveyItemRepositoryInterface:
+    class: App\Infrastructure\Repository\SurveyItemRepository
   # --- end repositories
 
   # --- start serializer
