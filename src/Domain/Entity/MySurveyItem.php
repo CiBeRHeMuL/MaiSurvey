@@ -27,6 +27,7 @@ readonly class MySurveyItem
         private SurveyItem $surveyItem,
         #[ORM\ManyToOne(targetEntity: MySurvey::class)]
         #[ORM\JoinColumn(name: 'survey_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
+        #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'user_id', nullable: false, onDelete: 'CASCADE')]
         private MySurvey $mySurvey,
         #[ORM\ManyToOne(targetEntity: TeacherSubject::class)]
         #[ORM\JoinColumn(name: 'teacher_subject_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
