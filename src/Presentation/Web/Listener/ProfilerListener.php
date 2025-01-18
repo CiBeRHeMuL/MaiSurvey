@@ -70,6 +70,7 @@ class ProfilerListener
                         new Profile(
                             new DbInfo(
                                 $databaseCollector->getQueryCount(),
+                                $databaseCollector->getTime(),
                                 $collected,
                             ),
                         ),
