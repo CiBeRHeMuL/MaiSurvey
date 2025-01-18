@@ -5,6 +5,7 @@ namespace App\Application\UseCase\Subject;
 use App\Application\Dto\Subject\GetAllSubjectsDto;
 use App\Domain\DataProvider\DataProviderInterface;
 use App\Domain\Dto\Subject\GetAllSubjectsDto as DomainGetAllSubjectsDto;
+use App\Domain\Entity\Subject;
 use App\Domain\Enum\SortTypeEnum;
 use App\Domain\Service\Subject\SubjectService;
 use Psr\Log\LoggerInterface;
@@ -27,6 +28,11 @@ class GetAllUseCase
         return $this;
     }
 
+    /**
+     * @param GetAllSubjectsDto $dto
+     *
+     * @return DataProviderInterface<Subject>
+     */
     public function execute(GetAllSubjectsDto $dto): DataProviderInterface
     {
         return $this
