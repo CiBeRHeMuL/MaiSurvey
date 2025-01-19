@@ -21,7 +21,7 @@ readonly class GetMySurveysDto
         private int|null $limit = 100,
         private int $offset = 0,
         private string $sortBy = 'created_at',
-        private SortTypeEnum $sortType = SortTypeEnum::Asc,
+        private SortTypeEnum $sortType = SortTypeEnum::Desc,
     ) {
     }
 

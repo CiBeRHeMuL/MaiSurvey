@@ -25,7 +25,8 @@ class SurveyRepository extends Common\AbstractRepository implements SurveyReposi
      */
     public function findMy(User $user, GetMySurveysDto $dto): DataProviderInterface
     {
-        $q = $this->getMyQuery($user)
+        $q = $this
+            ->getMyQuery($user)
             ->andFilterWhere([
                 'ms.completed' => $dto->getCompleted(),
             ]);

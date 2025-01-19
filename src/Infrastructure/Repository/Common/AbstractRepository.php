@@ -9,6 +9,7 @@ use App\Domain\DataProvider\DataSort;
 use App\Domain\DataProvider\DataSortInterface;
 use App\Domain\DataProvider\LimitOffset;
 use App\Domain\DataProvider\SortColumnInterface;
+use App\Domain\Helper\HArray;
 use App\Domain\Repository\Common\RepositoryInterface;
 use App\Infrastructure\DataProvider\LazyBatchedDataProvider;
 use ArrayIterator;
@@ -491,7 +492,8 @@ abstract class AbstractRepository implements RepositoryInterface
      */
     protected function findWithRelations(SelectQuery $query, string $class, array $relations, bool $one = false): array|object|null
     {
-        $metadata = $this->getEntityManager()->getClassMetadata($class);
+        $em = $this->getEntityManager();
+        $metadata = $em->getClassMetadata($class);
 
         $idColumns = $metadata->getIdentifierColumnNames();
 
@@ -507,7 +509,7 @@ abstract class AbstractRepository implements RepositoryInterface
         }
 
         // Формируем DQL-запрос для подгрузки ассоциаций с учетом сложных ключей
-        $qb = $this->getEntityManager()->createQueryBuilder()->select('e')->from("$class", 'e');
+        $qb = $em->createQueryBuilder()->select('e')->from("$class", 'e');
 
         // Добавляем условия для каждого идентификатора
         $orX = $qb->expr()->orX();
@@ -555,7 +557,25 @@ abstract class AbstractRepository implements RepositoryInterface
             return $qb->getQuery()->getOneOrNullResult();
         }
         // Выполняем запрос и получаем сущности с подгруженными ассоциациями
-        return $qb->getQuery()->getResult();
+        $result = $qb->getQuery()->getResult();
+
+        // Теперь надо отсортировать полученные сущности в соответствие с порядком строк в ids
+        // Сначала находим номер для каждого идентификатора сущностей по $ids, чтобы отсортировать $result
+        $idsOrder = array_flip(array_map(
+            $em->getUnitOfWork()::getIdHashByIdentifier(...),
+            $ids,
+        ));
+
+        // Находим текущий порядок сущностей в $result
+        $result = HArray::index(
+            $result,
+            fn(object $o) => $idsOrder[$em->getUnitOfWork()->getIdHashByEntity($o)],
+        );
+
+        // Сортируем в соответствие с порядком $ids
+        ksort($result, SORT_ASC);
+
+        return $result;
     }
 
     /**

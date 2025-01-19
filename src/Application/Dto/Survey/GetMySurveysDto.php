@@ -27,7 +27,7 @@ readonly class GetMySurveysDto
         /** Тип сортировки */
         #[Assert\Type('string', message: 'Значение должно быть строкой')]
         #[LAssert\EnumChoice(enum: SortTypeEnum::class, message: 'Значение должно входить в список допустимых')]
-        public string $sort_type = SortTypeEnum::Asc->value,
+        public string $sort_type = SortTypeEnum::Desc->value,
         #[Assert\Type('integer', message: 'Значение должно быть целым числом')]
         #[Assert\GreaterThanOrEqual(0, message: 'Значение должно быть больше или равно 0')]
         public int $offset = 0,
