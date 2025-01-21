@@ -93,6 +93,9 @@ class UserDataImporter
             $firstName = $row[$dto->getFirstNameCol()] ?? '';
             $lastName = $row[$dto->getLastNameCol()] ?? '';
             $patronymic = $row[$dto->getPatronymicCol()] ?? null;
+            $firstName = trim($firstName);
+            $lastName = trim($lastName);
+            $patronymic = $patronymic !== null ? trim($patronymic) : null;
 
             if ($groupName && !isset($groups[$groupName])) {
                 throw ValidationException::new([

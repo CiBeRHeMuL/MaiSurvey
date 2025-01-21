@@ -141,7 +141,7 @@ class SurveyItemService
             ->setSurveyId($dto->getSurvey()->getId())
             ->setAnswerRequired($dto->isAnswerRequired())
             ->setType($dto->getType())
-            ->setText($dto->getText())
+            ->setText(trim($dto->getText()))
             ->setPosition($dto->getPosition())
             ->setData($dto->getData())
             ->setSubjectType($dto->getSubjectType())

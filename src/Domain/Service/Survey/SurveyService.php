@@ -143,7 +143,7 @@ class SurveyService
     {
         $entity = new Survey();
         $entity
-            ->setTitle($dto->getTitle())
+            ->setTitle(trim($dto->getTitle()))
             ->setSubjectId($dto->getSubjectId())
             ->setActualTo($dto->getActualTo())
             ->setCreatedAt(new DateTimeImmutable())

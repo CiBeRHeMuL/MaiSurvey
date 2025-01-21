@@ -109,6 +109,12 @@ class StudentSubjectsImporter
             $type = $row[$dto->getTypeCol()] ?? '';
             $actualFrom = $row[$dto->getActualFromCol()] ?? '';
             $actualTo = $row[$dto->getActualToCol()] ?? '';
+            $studentEmail = trim($studentEmail);
+            $teacherEmail = trim($teacherEmail);
+            $subject = trim($subject);
+            $type = trim($type);
+            $actualFrom = trim($actualFrom);
+            $actualTo = trim($actualTo);
 
             $hash = md5("$studentEmail$teacherEmail$subject$type");
             if (isset($existingRows[$hash])) {

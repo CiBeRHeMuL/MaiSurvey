@@ -422,9 +422,9 @@ class UserDataService
     {
         $userData = new UserData();
         $userData
-            ->setFirstName($dto->getFirstName())
-            ->setLastName($dto->getLastName())
-            ->setPatronymic($dto->getPatronymic())
+            ->setFirstName(trim($dto->getFirstName()))
+            ->setLastName(trim($dto->getLastName()))
+            ->setPatronymic($dto->getPatronymic() !== null ? trim($dto->getPatronymic()) : null)
             ->setForRole($dto->getRole())
             ->setCreatedAt(new DateTimeImmutable())
             ->setUpdatedAt(new DateTimeImmutable());

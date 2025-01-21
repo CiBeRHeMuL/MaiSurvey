@@ -62,6 +62,7 @@ class GroupsImporter
         $names = [];
         foreach ($this->dataImport->getRows($firstRow, $this->dataImport->getHighestRow()) as $k => $row) {
             $name = $row[$dto->getNameCol()] ?? '';
+            $name = trim($name);
             if (isset($nameToRow[$name])) {
                 throw ValidationException::new([
                     new ValidationError(

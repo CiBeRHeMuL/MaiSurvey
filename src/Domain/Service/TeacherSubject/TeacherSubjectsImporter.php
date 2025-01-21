@@ -75,6 +75,9 @@ class TeacherSubjectsImporter
             $subject = $row[$dto->getSubjectCol()] ?? '';
             $email = $row[$dto->getEmailCol()] ?? '';
             $type = $row[$dto->getTypeCol()] ?? '';
+            $subject = trim($subject);
+            $email = trim($email);
+            $type = trim($type);
 
             if (isset($existingRows[$subject][$email][$type])) {
                 throw ValidationException::new([
