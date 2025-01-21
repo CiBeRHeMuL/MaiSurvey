@@ -10,7 +10,7 @@ readonly class CreateSurveyItemAnswerDto
     public function __construct(
         private SurveyItem $surveyItem,
         private TeacherSubject $teacherSubject,
-        private AnswerDataInterface $data,
+        private AnswerDataInterface $answer,
     ) {
     }
 
@@ -24,8 +24,8 @@ readonly class CreateSurveyItemAnswerDto
         return $this->teacherSubject;
     }
 
-    public function getData(): AnswerDataInterface
+    public function getAnswer(): AnswerDataInterface
     {
-        return $this->data;
+        return $this->answer;
     }
 }

@@ -33,6 +33,7 @@ class SurveyItemDataFactory
             SurveyItemTypeEnum::Comment => new CommentItemData(
                 $data->getType()->value,
                 $data->getPlaceholder(),
+                $data->getMaxLength(),
             ),
             SurveyItemTypeEnum::Rating => new RatingItemData(
                 $data->getType()->value,

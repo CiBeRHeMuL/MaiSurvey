@@ -11,6 +11,7 @@ readonly class CommentItemData implements ItemDataInterface
     /**
      * @param value-of<SurveyItemTypeEnum> $type
      * @param string|null $placeholder
+     * @param int $max_length
      */
     public function __construct(
         #[Assert\Type('string', message: 'Значение должно быть строкой')]
@@ -18,6 +19,8 @@ readonly class CommentItemData implements ItemDataInterface
         public string $type,
         #[Assert\Type(['string', 'null'], message: 'Значение должно быть строкой')]
         public string|null $placeholder,
+        #[Assert\Type('integer', message: 'Значение должно быть целым числом')]
+        public int $max_length,
     ) {
     }
 

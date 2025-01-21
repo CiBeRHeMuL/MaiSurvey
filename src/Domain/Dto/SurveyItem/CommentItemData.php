@@ -12,10 +12,12 @@ readonly class CommentItemData implements ItemDataInterface
     /**
      * @param SurveyItemTypeEnum $type
      * @param string|null $placeholder
+     * @param int $max_length
      */
     public function __construct(
         public SurveyItemTypeEnum $type,
-        public string|null $placeholder
+        public string|null $placeholder,
+        public int $max_length,
     ) {
     }
 
@@ -27,5 +29,10 @@ readonly class CommentItemData implements ItemDataInterface
     public function getPlaceholder(): string|null
     {
         return $this->placeholder;
+    }
+
+    public function getMaxLength(): int
+    {
+        return $this->max_length;
     }
 }

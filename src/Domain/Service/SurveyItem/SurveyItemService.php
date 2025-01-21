@@ -3,7 +3,11 @@
 namespace App\Domain\Service\SurveyItem;
 
 use App\Domain\Dto\SurveyItem\Choice;
+use App\Domain\Dto\SurveyItem\ChoiceItemData;
+use App\Domain\Dto\SurveyItem\CommentItemData;
 use App\Domain\Dto\SurveyItem\CreateSurveyItemDto;
+use App\Domain\Dto\SurveyItem\MultiChoiceItemData;
+use App\Domain\Dto\SurveyItem\RatingItemData;
 use App\Domain\Entity\SurveyItem;
 use App\Domain\Enum\SurveyItemTypeEnum;
 use App\Domain\Enum\ValidationErrorSlugEnum;
@@ -58,9 +62,11 @@ class SurveyItemService
             ]);
         }
 
-        switch ($dto->getData()->getType()) {
+        $data = $dto->getData();
+        switch ($data->getType()) {
             case SurveyItemTypeEnum::Rating:
-                if ($dto->getData()->getMin() >= $dto->getData()->getMax()) {
+                /** @var RatingItemData $data */
+                if ($data->getMin() >= $data->getMax()) {
                     throw ValidationException::new([
                         new ValidationError(
                             'data.min',
@@ -71,9 +77,10 @@ class SurveyItemService
                 }
                 break;
             case SurveyItemTypeEnum::Comment:
+                /** @var CommentItemData $data */
                 if (
-                    $dto->getData()->getPlaceholder() !== null
-                    && mb_strlen($dto->getData()->getPlaceholder()) > 255
+                    $data->getPlaceholder() !== null
+                    && mb_strlen($data->getPlaceholder()) > 255
                 ) {
                     throw ValidationException::new([
                         new ValidationError(
@@ -83,14 +90,27 @@ class SurveyItemService
                         ),
                     ]);
                 }
+                if (
+                    $data->getMaxLength() <= 0
+                    || $data->getMaxLength() > 1000
+                ) {
+                    throw ValidationException::new([
+                        new ValidationError(
+                            'data.placeholder',
+                            ValidationErrorSlugEnum::WrongField->getSlug(),
+                            'Максимальная длина должна быть больше 0 и меньше либо равна 1000',
+                        ),
+                    ]);
+                }
                 break;
             case SurveyItemTypeEnum::Choice:
             case SurveyItemTypeEnum::MultiChoice:
                 /**
+                 * @var MultiChoiceItemData|ChoiceItemData $data
                  * @var int $k
                  * @var Choice $choice
                  */
-                foreach ($dto->getData()->getChoices() as $k => $choice) {
+                foreach ($data->getChoices() as $k => $choice) {
                     if (mb_strlen($choice->text) > 255) {
                         throw ValidationException::new([
                             new ValidationError(

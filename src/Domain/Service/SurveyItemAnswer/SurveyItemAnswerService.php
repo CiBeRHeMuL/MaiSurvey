@@ -3,7 +3,15 @@
 namespace App\Domain\Service\SurveyItemAnswer;
 
 use App\Domain\Dto\SurveyItem\Choice;
+use App\Domain\Dto\SurveyItem\ChoiceItemData;
+use App\Domain\Dto\SurveyItem\CommentItemData;
+use App\Domain\Dto\SurveyItem\MultiChoiceItemData;
+use App\Domain\Dto\SurveyItem\RatingItemData;
+use App\Domain\Dto\SurveyItemAnswer\ChoiceAnswerData;
+use App\Domain\Dto\SurveyItemAnswer\CommentAnswerData;
 use App\Domain\Dto\SurveyItemAnswer\CreateSurveyItemAnswerDto;
+use App\Domain\Dto\SurveyItemAnswer\MultiChoiceAnswerData;
+use App\Domain\Dto\SurveyItemAnswer\RatingAnswerData;
 use App\Domain\Entity\SurveyItemAnswer;
 use App\Domain\Enum\SurveyItemTypeEnum;
 use App\Domain\Enum\ValidationErrorSlugEnum;
@@ -35,7 +43,7 @@ class SurveyItemAnswerService
 
     public function validateCreateDto(CreateSurveyItemAnswerDto $dto): void
     {
-        if ($dto->getSurveyItem()->getType() !== $dto->getData()->getType()) {
+        if ($dto->getSurveyItem()->getType() !== $dto->getAnswer()->getType()) {
             throw ValidationException::new([
                 new ValidationError(
                     'answer.type',
@@ -45,13 +53,19 @@ class SurveyItemAnswerService
             ]);
         }
 
+        $data = $dto->getAnswer();
+        $itemData = $dto->getSurveyItem()->getData();
         switch ($dto->getSurveyItem()->getType()) {
             case SurveyItemTypeEnum::Choice:
-                $choices = $dto->getSurveyItem()->getData()->getChoices();
+                /**
+                 * @var ChoiceAnswerData $data
+                 * @var ChoiceItemData $itemData
+                 */
+                $choices = $itemData->getChoices();
                 $checked = false;
                 /** @var Choice $choice */
                 foreach ($choices as $choice) {
-                    if ($choice->value === $dto->getData()->getChoice()) {
+                    if ($choice->value === $data->getChoice()) {
                         $checked = true;
                     }
                 }
@@ -66,8 +80,12 @@ class SurveyItemAnswerService
                 }
                 break;
             case SurveyItemTypeEnum::MultiChoice:
-                $choices = $dto->getSurveyItem()->getData()->getChoices();
-                foreach ($dto->getData()->getChoices() as $k => $checkingChoice) {
+                /**
+                 * @var MultiChoiceAnswerData $data
+                 * @var MultiChoiceItemData $itemData
+                 */
+                $choices = $itemData->getChoices();
+                foreach ($data->getChoices() as $k => $checkingChoice) {
                     $checked = false;
                     /** @var Choice $choice */
                     foreach ($choices as $choice) {
@@ -87,15 +105,34 @@ class SurveyItemAnswerService
                 }
                 break;
             case SurveyItemTypeEnum::Rating:
+                /**
+                 * @var RatingAnswerData $data
+                 * @var RatingItemData $itemData
+                 */
                 if (
-                    $dto->getData()->getRating() < $dto->getSurveyItem()->getData()->getMin()
-                    || $dto->getData()->getRating() > $dto->getSurveyItem()->getData()->getMax()
+                    $data->getRating() < $itemData->getMin()
+                    || $data->getRating() > $itemData->getMax()
                 ) {
                     throw ValidationException::new([
                         new ValidationError(
                             'answer.rating',
                             ValidationErrorSlugEnum::WrongField->getSlug(),
                             'Выбран несуществующий вариант ответа',
+                        ),
+                    ]);
+                }
+                break;
+            case SurveyItemTypeEnum::Comment:
+                /**
+                 * @var CommentAnswerData $data
+                 * @var CommentItemData $itemData
+                 */
+                if (mb_strlen($data->getComment()) > $itemData->getMaxLength()) {
+                    throw ValidationException::new([
+                        new ValidationError(
+                            'answer.comment',
+                            ValidationErrorSlugEnum::WrongField->getSlug(),
+                            'Слишком длинный комментарий',
                         ),
                     ]);
                 }
@@ -111,7 +148,7 @@ class SurveyItemAnswerService
         $entity
             ->setSurveyItemId($dto->getSurveyItem()->getId())
             ->setTeacherSubjectId($dto->getTeacherSubject()->getId())
-            ->setAnswer($dto->getData())
+            ->setAnswer($dto->getAnswer())
             ->setCreatedAt(new DateTimeImmutable())
             ->setType($dto->getSurveyItem()->getType())
             ->setItem($dto->getSurveyItem())

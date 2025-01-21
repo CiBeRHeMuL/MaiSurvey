@@ -22,6 +22,7 @@ class ItemDataMapper
             SurveyItemTypeEnum::Comment->value => new Dest\CommentItemData(
                 SurveyItemTypeEnum::Comment,
                 $data->placeholder,
+                $data->max_length,
             ),
             SurveyItemTypeEnum::Rating->value => new Dest\RatingItemData(
                 SurveyItemTypeEnum::Rating,

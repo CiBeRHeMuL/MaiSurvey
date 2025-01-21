@@ -11,6 +11,7 @@ use App\Application\UseCase\Subject\GetAllUseCase;
 use App\Application\UseCase\Survey\CreateSurveysUseCase;
 use App\Domain\DataProvider\ProjectionAwareDataProvider;
 use App\Domain\Entity\Subject;
+use App\Domain\Entity\Survey;
 use App\Domain\Enum\SurveyItemTypeEnum;
 use App\Domain\Enum\TeacherSubjectTypeEnum;
 use DateTimeImmutable;
@@ -47,7 +48,7 @@ class SurveysGenerateDefaultCommand extends AbstractCommand
             new CreateItemDto(
                 true,
                 SurveyItemTypeEnum::Rating->value,
-                'Увлекательность материала и его подача на лекциях',
+                'Оцени, на сколько {teacher.name} увлекательно подает материал на лекции',
                 1,
                 new RatingItemData(SurveyItemTypeEnum::Rating->value, 1, 5),
                 TeacherSubjectTypeEnum::Lecture->value,
@@ -55,7 +56,7 @@ class SurveysGenerateDefaultCommand extends AbstractCommand
             new CreateItemDto(
                 true,
                 SurveyItemTypeEnum::Rating->value,
-                'Увлекательность материала и его подача на пз',
+                'Оцени, на сколько {teacher.name} увлекательно подает материал на пз',
                 2,
                 new RatingItemData(SurveyItemTypeEnum::Rating->value, 1, 5),
                 TeacherSubjectTypeEnum::PracticalLesson->value,
@@ -63,7 +64,7 @@ class SurveysGenerateDefaultCommand extends AbstractCommand
             new CreateItemDto(
                 true,
                 SurveyItemTypeEnum::Rating->value,
-                'Использование примеров на лекциях',
+                'Оцени, на сколько {teacher.name} использует примеры на лекции',
                 3,
                 new RatingItemData(SurveyItemTypeEnum::Rating->value, 1, 5),
                 TeacherSubjectTypeEnum::Lecture->value,
@@ -71,7 +72,7 @@ class SurveysGenerateDefaultCommand extends AbstractCommand
             new CreateItemDto(
                 true,
                 SurveyItemTypeEnum::Rating->value,
-                'Использование примеров на пз',
+                'Оцени, на сколько {teacher.name} использует примеры на пз',
                 4,
                 new RatingItemData(SurveyItemTypeEnum::Rating->value, 1, 5),
                 TeacherSubjectTypeEnum::PracticalLesson->value,
@@ -79,7 +80,7 @@ class SurveysGenerateDefaultCommand extends AbstractCommand
             new CreateItemDto(
                 true,
                 SurveyItemTypeEnum::Rating->value,
-                'Понятность изложения на лекциях',
+                'Оцени, на сколько {teacher.name} понятно подает материал на лекции',
                 5,
                 new RatingItemData(SurveyItemTypeEnum::Rating->value, 1, 5),
                 TeacherSubjectTypeEnum::Lecture->value,
@@ -87,7 +88,7 @@ class SurveysGenerateDefaultCommand extends AbstractCommand
             new CreateItemDto(
                 true,
                 SurveyItemTypeEnum::Rating->value,
-                'Понятность изложения на пз',
+                'Оцени, на сколько {teacher.name} понятно подает материал на пз',
                 6,
                 new RatingItemData(SurveyItemTypeEnum::Rating->value, 1, 5),
                 TeacherSubjectTypeEnum::PracticalLesson->value,
@@ -95,7 +96,7 @@ class SurveysGenerateDefaultCommand extends AbstractCommand
             new CreateItemDto(
                 true,
                 SurveyItemTypeEnum::Rating->value,
-                'Доброжелательность преподавателя на лекциях',
+                'Оцени, на сколько {teacher.name} доброжелательно общается на лекциях',
                 7,
                 new RatingItemData(SurveyItemTypeEnum::Rating->value, 1, 5),
                 TeacherSubjectTypeEnum::Lecture->value,
@@ -103,7 +104,7 @@ class SurveysGenerateDefaultCommand extends AbstractCommand
             new CreateItemDto(
                 true,
                 SurveyItemTypeEnum::Rating->value,
-                'Доброжелательность преподавателя на пз',
+                'Оцени, на сколько {teacher.name} доброжелательно общается на пз',
                 8,
                 new RatingItemData(SurveyItemTypeEnum::Rating->value, 1, 5),
                 TeacherSubjectTypeEnum::PracticalLesson->value,
@@ -111,7 +112,7 @@ class SurveysGenerateDefaultCommand extends AbstractCommand
             new CreateItemDto(
                 true,
                 SurveyItemTypeEnum::Rating->value,
-                'Оцените свои остаточные знания по предмету на лекциях',
+                'Оцени свои остаточные знания по предмету на лекциях',
                 9,
                 new RatingItemData(SurveyItemTypeEnum::Rating->value, 1, 5),
                 TeacherSubjectTypeEnum::Lecture->value,
@@ -119,7 +120,7 @@ class SurveysGenerateDefaultCommand extends AbstractCommand
             new CreateItemDto(
                 true,
                 SurveyItemTypeEnum::Rating->value,
-                'Оцените свои остаточные знания по предмету на пз',
+                'Оцени свои остаточные знания по предмету на пз',
                 10,
                 new RatingItemData(SurveyItemTypeEnum::Rating->value, 1, 5),
                 TeacherSubjectTypeEnum::PracticalLesson->value,
@@ -159,17 +160,17 @@ class SurveysGenerateDefaultCommand extends AbstractCommand
             new CreateItemDto(
                 false,
                 SurveyItemTypeEnum::Comment->value,
-                'Чем запомнился лектор?',
+                'Чем запомнился лектор {teacher.name}?',
                 15,
-                new CommentItemData(SurveyItemTypeEnum::Comment->value, null),
+                new CommentItemData(SurveyItemTypeEnum::Comment->value, null, 255),
                 TeacherSubjectTypeEnum::Lecture->value,
             ),
             new CreateItemDto(
                 true,
                 SurveyItemTypeEnum::Comment->value,
-                'Чем запомнился семинарист?',
+                'Чем запомнился семинарист {teacher.name}?',
                 16,
-                new CommentItemData(SurveyItemTypeEnum::Comment->value, null),
+                new CommentItemData(SurveyItemTypeEnum::Comment->value, null, 255),
                 TeacherSubjectTypeEnum::PracticalLesson->value,
             ),
             new CreateItemDto(
@@ -177,7 +178,7 @@ class SurveysGenerateDefaultCommand extends AbstractCommand
                 SurveyItemTypeEnum::Comment->value,
                 'Чего, на твой взгляд, не хватает на лекциях?',
                 17,
-                new CommentItemData(SurveyItemTypeEnum::Comment->value, null),
+                new CommentItemData(SurveyItemTypeEnum::Comment->value, null, 255),
                 TeacherSubjectTypeEnum::Lecture->value,
             ),
             new CreateItemDto(
@@ -185,7 +186,7 @@ class SurveysGenerateDefaultCommand extends AbstractCommand
                 SurveyItemTypeEnum::Comment->value,
                 'Чего, на твой взгляд, не хватает на пз?',
                 18,
-                new CommentItemData(SurveyItemTypeEnum::Comment->value, null),
+                new CommentItemData(SurveyItemTypeEnum::Comment->value, null, 255),
                 TeacherSubjectTypeEnum::PracticalLesson->value,
             ),
         ];
@@ -205,7 +206,7 @@ class SurveysGenerateDefaultCommand extends AbstractCommand
             $subjects,
             function (Subject $subject) use (&$createItemDtos): CreateSurveyDto {
                 return new CreateSurveyDto(
-                    sprintf('Опрос по предмету "%s"', $subject->getName()),
+                    sprintf('Выскажи свое мнение о курсе'),
                     $subject->getId()->toRfc4122(),
                     (new DateTimeImmutable())->modify('+1 month')->format(DATE_RFC3339),
                     $createItemDtos,
@@ -219,8 +220,15 @@ class SurveysGenerateDefaultCommand extends AbstractCommand
             ->execute(iterator_to_array($dtos->getItems()));
         $this->io->success(
             sprintf(
-                'Создано %d опросов',
+                "Создано %d опросов для предметов\n%s",
                 count($surveys),
+                implode(
+                    "\n",
+                    array_map(
+                        fn(Survey $s) => $s->getSubject()->getName(),
+                        $surveys,
+                    ),
+                ),
             ),
         );
         return self::SUCCESS;
