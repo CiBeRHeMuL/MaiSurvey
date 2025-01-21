@@ -27,6 +27,7 @@ services:
         target: /var/run
     networks:
       - caddy
+    restart: always
   mai-survey-nginx:
     image: nginx
     container_name: mai-survey-nginx-container
