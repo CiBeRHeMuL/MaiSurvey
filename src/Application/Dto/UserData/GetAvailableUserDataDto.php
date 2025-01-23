@@ -24,6 +24,7 @@ readonly class GetAvailableUserDataDto
         /** Имя для фильтрации */
         #[Assert\Type('string', message: 'Значение должно быть строкой')]
         #[Assert\Length(min: 1, max: 255, minMessage: 'Имя должно быть длиннее 1 символа', maxMessage: 'Имя должно быть короче 255 символов')]
+        #[Assert\NotBlank(message: 'Значение не должно быть пустым', allowNull: true)]
         public string|null $name = null,
         /** Учитывать только данные с группой */
         #[Assert\Type('boolean', message: 'Значение должно быть булевым значением')]
@@ -31,6 +32,7 @@ readonly class GetAvailableUserDataDto
         /** Группы для фильтрации */
         #[Assert\All([
             new Assert\Type('string', message: 'Значение должно быть строкой'),
+            new Assert\NotBlank(message: 'Значение не должно быть пустым'),
             new Assert\Uuid(message: 'Значение должно быть uuid'),
         ])]
         #[Assert\Count(max: 50, maxMessage: 'Поиск по более чем 50 значениям не поддерживается')]
@@ -38,10 +40,12 @@ readonly class GetAvailableUserDataDto
         /** Сортировка по */
         #[Assert\Type('string', message: 'Значение должно быть строкой')]
         #[Assert\Choice(choices: UserDataService::GET_ALL_SORT, message: 'Значение должно входить в список допустимых')]
+        #[Assert\NotBlank(message: 'Значение не должно быть пустым')]
         public string $sort_by = 'name',
         /** Тип сортировки */
         #[Assert\Type('string', message: 'Значение должно быть строкой')]
         #[LAssert\EnumChoice(enum: SortTypeEnum::class, message: 'Значение должно входить в список допустимых')]
+        #[Assert\NotBlank(message: 'Значение не должно быть пустым')]
         public string $sort_type = SortTypeEnum::Asc->value,
         #[Assert\Type('integer', message: 'Значение должно быть целым числом')]
         #[Assert\GreaterThanOrEqual(0, message: 'Значение должно быть больше или равно 0')]

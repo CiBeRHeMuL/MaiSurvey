@@ -15,10 +15,12 @@ readonly class SignInDto
         /** Почта */
         #[Assert\Type('string', message: 'Значение должно быть строкой')]
         #[Assert\Email(message: 'Неверный формат почты')]
+        #[Assert\NotBlank(message: 'Значение не должно быть пустым')]
         public string $email,
         /** Пароль */
         #[SensitiveParameter]
         #[Assert\Type('string', message: 'Значение должно быть строкой')]
+        #[Assert\NotBlank(message: 'Значение не должно быть пустым')]
         public string $password,
     ) {
     }

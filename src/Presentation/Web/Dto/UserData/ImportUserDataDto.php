@@ -19,18 +19,22 @@ readonly class ImportUserDataDto
         /** Столбец с фамилией */
         #[Assert\Type('string', message: 'Значение должно быть строкой')]
         #[Assert\Regex('/^[A-Z]+$/u', message: 'Значение должно быть названием столбца excel')]
+        #[Assert\NotBlank(message: 'Значение не должно быть пустым')]
         public string $last_name_col = 'A',
         /** Столбец с именем */
         #[Assert\Type('string', message: 'Значение должно быть строкой')]
         #[Assert\Regex('/^[A-Z]+$/u', message: 'Значение должно быть названием столбца excel')]
+        #[Assert\NotBlank(message: 'Значение не должно быть пустым')]
         public string $first_name_col = 'B',
         /** Столбец с отчеством */
         #[Assert\Type('string', message: 'Значение должно быть строкой')]
         #[Assert\Regex('/^[A-Z]+$/u', message: 'Значение должно быть названием столбца excel')]
+        #[Assert\NotBlank(message: 'Значение не должно быть пустым')]
         public string $patronymic_col = 'C',
         /** Столбец с названием группы */
         #[Assert\Type('string', message: 'Значение должно быть строкой')]
         #[Assert\Regex('/^[A-Z]+$/u', message: 'Значение должно быть названием столбца excel')]
+        #[Assert\NotBlank(message: 'Значение не должно быть пустым')]
         public string $group_name_col = 'D',
     ) {
     }

@@ -14,6 +14,7 @@ readonly class MultiChoiceItemData implements ItemDataInterface
      */
     public function __construct(
         #[LOA\Enum(SurveyItemTypeEnum::class)]
+        #[Assert\NotBlank(message: 'Значение не должно быть пустым')]
         #[Assert\Type('string', message: 'Значение должно быть строкой')]
         public string $type,
         #[Assert\Type('array', message: 'Значение должно быть массивом')]

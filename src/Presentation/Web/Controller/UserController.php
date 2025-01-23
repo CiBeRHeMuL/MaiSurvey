@@ -249,6 +249,7 @@ class UserController extends BaseController
                 $dto->patronymic_col,
                 $dto->group_name_col,
                 $dto->password,
+                $dto->email_col,
             ),
         );
         $allDto = $createdInfo->getGetAllUsersDto();

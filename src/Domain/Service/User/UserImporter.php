@@ -14,15 +14,20 @@ use App\Domain\Entity\User;
 use App\Domain\Entity\UserData;
 use App\Domain\Enum\SortTypeEnum;
 use App\Domain\Enum\UserStatusEnum;
+use App\Domain\Enum\ValidationErrorSlugEnum;
 use App\Domain\Exception\ErrorException;
 use App\Domain\Exception\ValidationException;
 use App\Domain\Helper\HString;
 use App\Domain\Service\Db\TransactionManagerInterface;
+use App\Domain\Service\FileReader\FileReaderInterface;
+use App\Domain\Service\Security\PasswordCheckerServiceInterface;
 use App\Domain\Service\UserData\UserDataImporter;
 use App\Domain\Service\UserData\UserDataService;
+use App\Domain\Validation\ValidationError;
 use App\Domain\ValueObject\Email;
 use DateTimeImmutable;
 use Exception;
+use Iterator;
 use Psr\Log\LoggerInterface;
 use Throwable;
 
@@ -36,6 +41,8 @@ class UserImporter
         private TransactionManagerInterface $transactionManager,
         private UserService $userService,
         private UserDataService $userDataService,
+        private FileReaderInterface $fileReader,
+        private PasswordCheckerServiceInterface $passwordCheckerService,
         private string $appHost,
     ) {
         $this->setLogger($logger);
@@ -52,6 +59,8 @@ class UserImporter
 
     public function import(ImportDto $dto): CreatedUsersInfo
     {
+        $this->passwordCheckerService->checkPasswordStrength($dto->getPassword());
+
         $importUserDataDto = new UserDataImportDto(
             $dto->getFile(),
             $dto->getForRole(),
@@ -69,6 +78,14 @@ class UserImporter
             if ($userDataCount === 0) {
                 return new CreatedUsersInfo(0);
             }
+
+            $validationErrorTemplate = 'Некорректное содержимое файла. Ошибка в строке %d: %s';
+
+            /** @var Iterator<int, array<string, string>> $presetData */
+            $presetData = $this->fileReader->getRows(
+                $dto->isHeadersInFirstRow() ? 2 : 1,
+                $this->fileReader->getHighestRow(),
+            );
 
             $allUserData = $this
                 ->userDataService
@@ -100,23 +117,69 @@ class UserImporter
 
             $userDtos = new ProjectionAwareDataProvider(
                 $allUserData,
-                function (UserData $userData) use (&$dto, &$existingEmails, &$userDataByEmail, &$emailDomain): CreateUserDto {
-                    $emailUser = HString::rusToEnd(
-                        $userData->getLastName()
-                        . mb_substr($userData->getFirstName(), 0, 1)
-                        . mb_substr($userData->getPatronymic() ?? '', 0, 1),
-                    );
-                    $k = 1;
-                    $tempEmail = $emailUser;
-                    while (in_array("$tempEmail$emailDomain", $existingEmails)) {
-                        $tempEmail = "$emailUser$k";
-                        $k++;
+                function (UserData $userData) use (
+                    &$dto,
+                    &$existingEmails,
+                    &$userDataByEmail,
+                    &$emailDomain,
+                    &$presetData,
+                    $validationErrorTemplate,
+                ): CreateUserDto {
+                    /** @var string|null $presetEmail */
+                    $presetEmail = $presetData->current()[$dto->getEmailCol()] ?? null ?: null;
+                    if ($presetEmail !== null) {
+                        try {
+                            $presetEmail = new Email($presetEmail);
+                        } catch (Throwable) {
+                            throw ValidationException::new([
+                                new ValidationError(
+                                    'file',
+                                    ValidationErrorSlugEnum::WrongFile->getSlug(),
+                                    sprintf(
+                                        $validationErrorTemplate,
+                                        $presetData->key(),
+                                        'некорректный формат почты',
+                                    ),
+                                ),
+                            ]);
+                        }
                     }
-                    $email = "$tempEmail$emailDomain";
-                    $existingEmails[] = $email;
-                    $userDataByEmail[$email] = $userData;
+                    $email = null;
+                    if ($presetEmail === null) {
+                        $emailUser = HString::rusToEnd(
+                            $userData->getLastName()
+                            . mb_substr($userData->getFirstName(), 0, 1)
+                            . mb_substr($userData->getPatronymic() ?? '', 0, 1),
+                        );
+                        $k = 1;
+                        $tempEmail = $emailUser;
+                        while (in_array("$tempEmail$emailDomain", $existingEmails)) {
+                            $tempEmail = "$emailUser$k";
+                            $k++;
+                        }
+                        $email = new Email("$tempEmail$emailDomain");
+                    } else {
+                        if (in_array($presetEmail, $existingEmails)) {
+                            throw ValidationException::new([
+                                new ValidationError(
+                                    'file',
+                                    ValidationErrorSlugEnum::WrongFile->getSlug(),
+                                    sprintf(
+                                        $validationErrorTemplate,
+                                        $presetData->key(),
+                                       'пользователь с такой почтой уже существует',
+                                    ),
+                                ),
+                            ]);
+                        }
+                        $email = $presetEmail;
+                    }
+
+                    $existingEmails[] = $email->getEmail();
+                    $userDataByEmail[$email->getEmail()] = $userData;
+                    $presetData->next();
                     return new CreateUserDto(
-                        new Email($email),
+                        $email,
                         UserStatusEnum::Active,
                         $dto->getForRole(),
                         $dto->getPassword(),

@@ -13,6 +13,7 @@ readonly class SignUpStep2Dto
         /** ID данных пользователя */
         #[Assert\Type('string', message: 'Значение должно быть строкой')]
         #[Assert\Uuid(message: 'Значение должно быть корректным uuid')]
+        #[Assert\NotBlank(message: 'Значение не должно быть пустым')]
         public string $user_data_id,
     ) {
     }

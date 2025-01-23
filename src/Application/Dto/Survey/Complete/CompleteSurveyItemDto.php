@@ -12,6 +12,7 @@ readonly class CompleteSurveyItemDto
      */
     public function __construct(
         #[Assert\Uuid(message: 'Значение должно быть uuid')]
+        #[Assert\NotBlank(message: 'Значение не должно быть пустым')]
         public string $id,
         public AnswerDataDtoInterface|null $data,
     ) {

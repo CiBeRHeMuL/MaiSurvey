@@ -13,6 +13,7 @@ readonly class ImportSubjectsDto
         /** Столбец с названием */
         #[Assert\Type('string', message: 'Значение должно быть строкой')]
         #[Assert\Regex('/^[A-Z]+$/u', message: 'Значение должно быть названием столбца excel')]
+        #[Assert\NotBlank(message: 'Значение не должно быть пустым')]
         public string $name_col = 'A',
     ) {
     }

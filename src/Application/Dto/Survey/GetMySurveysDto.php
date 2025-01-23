@@ -14,6 +14,7 @@ readonly class GetMySurveysDto
         #[Assert\All([
             new Assert\Type('string', message: 'Значение должно быть строкой'),
             new Assert\Uuid(message: 'Значение должно быть uuid'),
+            new Assert\NotBlank(message: 'Значение не должно быть пустым'),
         ])]
         #[Assert\Count(max: 50, maxMessage: 'Поиск по более чем 50 значениям не поддерживается')]
         public array|null $subject_ids = null,

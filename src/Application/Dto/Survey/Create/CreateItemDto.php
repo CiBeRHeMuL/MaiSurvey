@@ -17,10 +17,12 @@ readonly class CreateItemDto
         /** Тип вопроса */
         #[LOA\Enum(SurveyItemTypeEnum::class)]
         #[Assert\Type('string', message: 'Значение должно быть строкой')]
+        #[Assert\NotBlank(message: 'Значение не должно быть пустым')]
         #[LAssert\EnumChoice(SurveyItemTypeEnum::class)]
         public string $type,
         /** Текст вопроса */
         #[Assert\Type('string', message: 'Значение должно быть строкой')]
+        #[Assert\NotBlank(message: 'Значение не должно быть пустым')]
         public string $text,
         /** Позиция */
         #[Assert\Type('integer', message: 'Значение должно быть целым числом')]
@@ -30,6 +32,7 @@ readonly class CreateItemDto
         /** Тип предмета */
         #[LOA\Enum(TeacherSubjectTypeEnum::class)]
         #[Assert\Type('string', message: 'Значение должно быть строкой')]
+        #[Assert\NotBlank(message: 'Значение не должно быть пустым')]
         #[LAssert\EnumChoice(TeacherSubjectTypeEnum::class)]
         public string $subject_type,
     ) {

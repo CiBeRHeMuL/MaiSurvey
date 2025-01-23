@@ -16,14 +16,17 @@ readonly class CreateSurveyDto
     public function __construct(
         /** Заголовок */
         #[Assert\Type('string', message: 'Значение должно быть строкой')]
+        #[Assert\NotBlank(message: 'Значение не должно быть пустым')]
         #[Assert\Length(max: 255, maxMessage: 'Значение должно быть короче 255 символов')]
         public string $title,
         /** ID предмета */
         #[Assert\Type('string', message: 'Значение должно быть строкой')]
+        #[Assert\NotBlank(message: 'Значение не должно быть пустым')]
         #[Assert\Uuid(message: 'Значение должно быть корректным uuid')]
         public string $subject_id,
         /** Актуален до */
         #[Assert\Type('string', message: 'Значение должно быть строкой')]
+        #[Assert\NotBlank(message: 'Значение не должно быть пустым')]
         #[LAssert\DateTime]
         public string $actual_to,
         /** Вопросы */

@@ -13,14 +13,17 @@ readonly class ImportTeacherSubjectsDto
         /** Столбец с фамилией */
         #[Assert\Type('string', message: 'Значение должно быть строкой')]
         #[Assert\Regex('/^[A-Z]+$/u', message: 'Значение должно быть названием столбца excel')]
+        #[Assert\NotBlank(message: 'Значение не должно быть пустым')]
         public string $subject_col = 'A',
         /** Столбец с именем */
         #[Assert\Type('string', message: 'Значение должно быть строкой')]
         #[Assert\Regex('/^[A-Z]+$/u', message: 'Значение должно быть названием столбца excel')]
+        #[Assert\NotBlank(message: 'Значение не должно быть пустым')]
         public string $email_col = 'B',
         /** Столбец с отчеством */
         #[Assert\Type('string', message: 'Значение должно быть строкой')]
         #[Assert\Regex('/^[A-Z]+$/u', message: 'Значение должно быть названием столбца excel')]
+        #[Assert\NotBlank(message: 'Значение не должно быть пустым')]
         public string $type_col = 'C',
     ) {
     }

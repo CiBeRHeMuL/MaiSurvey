@@ -17,6 +17,7 @@ readonly class ImportDto
         private string $groupNameCol,
         #[SensitiveParameter]
         private string $password,
+        private string $emailCol,
     ) {
     }
 
@@ -58,5 +59,10 @@ readonly class ImportDto
     public function getPassword(): string
     {
         return $this->password;
+    }
+
+    public function getEmailCol(): string
+    {
+        return $this->emailCol;
     }
 }

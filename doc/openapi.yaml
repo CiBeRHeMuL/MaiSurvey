@@ -2945,6 +2945,10 @@ components:
           title: 'Столбец с названием группы'
           type: string
           default: D
+        email_col:
+          title: 'Столбец с почтой (необязательной, только если для пользователя хочется установить свою почту)'
+          type: string
+          default: E
       type: object
     GetAllUserDataDto:
       properties:
