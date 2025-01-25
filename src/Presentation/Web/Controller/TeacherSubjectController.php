@@ -103,7 +103,7 @@ class TeacherSubjectController extends BaseController
         ImportTeacherSubjectsUseCase $useCase,
         LoggerInterface $logger,
         #[MapRequestPayload]
-        ImportTeacherSubjectsDto $dto,
+        ImportTeacherSubjectsDto $dto = new ImportTeacherSubjectsDto(),
         #[MapUploadedFile]
         UploadedFile|array $file = [],
     ): JsonResponse {
