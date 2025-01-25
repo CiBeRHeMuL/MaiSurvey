@@ -278,7 +278,6 @@ class UserImporter
                     createdTo: $createdTo,
                     sortBy: 'created_at',
                     sortType: SortTypeEnum::Desc,
-                    limit: $created,
                 ),
             );
         } catch (ValidationException|ErrorException $e) {
