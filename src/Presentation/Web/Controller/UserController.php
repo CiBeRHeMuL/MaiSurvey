@@ -125,6 +125,7 @@ class UserController extends BaseController
             $fullExportFileName = "$projectDir/export/$exportType/$exportFileName";
             $dataExport->setFile($fullExportFileName);
         } catch (Throwable $e) {
+            $logger->error($e);
             return Response::notFound();
         }
 
