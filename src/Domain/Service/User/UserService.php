@@ -140,7 +140,7 @@ class UserService
         if (
             $dto->getCreatedFrom() !== null
             && $dto->getCreatedTo() !== null
-            && $dto->getCreatedTo()->diff($dto->getCreatedFrom())->invert === 1
+            && $dto->getCreatedTo()->getTimestamp() < $dto->getCreatedFrom()->getTimestamp()
         ) {
             throw ValidationException::new([
                 new ValidationError(
