@@ -128,7 +128,7 @@ class UserController extends BaseController
             return Response::notFound();
         }
 
-        $dataProvider = $useCase->execute($dto);
+        $dataProvider = $useCase->execute($dto, true);
         if ($dataProvider->getTotal() === 0) {
             return Response::notFound();
         }

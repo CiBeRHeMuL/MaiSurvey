@@ -37,7 +37,7 @@ class GetAllUseCase
      *
      * @return DataProviderInterface<User>
      */
-    public function execute(GetAllUsersDto $dto): DataProviderInterface
+    public function execute(GetAllUsersDto $dto, bool $forExport = false): DataProviderInterface
     {
         return $this
             ->userService
@@ -54,8 +54,8 @@ class GetAllUseCase
                     $dto->created_to !== null ? new DateTimeImmutable($dto->created_to) : null,
                     $dto->sort_by,
                     SortTypeEnum::from($dto->sort_type),
-                    $dto->offset,
-                    $dto->limit,
+                    $forExport ? 0 :$dto->offset,
+                    $forExport ? null : $dto->limit,
                 ),
             );
     }
