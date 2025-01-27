@@ -54,7 +54,7 @@ class GetAllUseCase
                     $dto->created_to !== null ? new DateTimeImmutable($dto->created_to) : null,
                     $dto->sort_by,
                     SortTypeEnum::from($dto->sort_type),
-                    $forExport ? 0 :$dto->offset,
+                    $forExport ? 0 : $dto->offset,
                     $forExport ? null : $dto->limit,
                 ),
             );

@@ -448,7 +448,7 @@ abstract class AbstractRepository implements RepositoryInterface
             return new LazyBatchedDataProvider(
                 $fetcher,
                 $batchSize,
-                max(0, min($total - $limit->getOffset(), $limit->getLimit())),
+                max(0, min($total - $limit->getOffset(), $limit->getLimit() ?? $total)),
                 $total,
                 $limit,
                 $sort,
