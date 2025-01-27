@@ -22,6 +22,7 @@ use App\Domain\Service\TeacherSubject\TeacherSubjectService;
 use App\Domain\Service\User\UserService;
 use App\Domain\Validation\ValidationError;
 use App\Domain\ValueObject\Email;
+use ArrayIterator;
 use DateTimeImmutable;
 use InvalidArgumentException;
 use Iterator;
@@ -78,6 +79,29 @@ class StudentSubjectsImporter
 
     public function importFromIterator(ImportDto $dto, Iterator $data): CreatedStudentSubjectsInfo
     {
+        $data = iterator_to_array($data);
+        if (count($data) > 100) {
+            $this->transactionManager->beginTransaction();
+            $chunks = array_chunk($data, 100, true);
+            $allCreated = 0;
+            $allSkipped = 0;
+            foreach ($chunks as $chunk) {
+                try {
+                    $createdInfo = $this->importFromIterator($dto, new ArrayIterator($chunk));
+                    $allCreated += $createdInfo->getCreated();
+                    $allSkipped += $createdInfo->getSkipped();
+                } catch (ValidationException|ErrorException $e) {
+                    $this->transactionManager->rollback();
+                    throw $e;
+                } catch (Throwable $e) {
+                    $this->transactionManager->rollback();
+                    throw ErrorException::new('Не удалось сохранить предметы для студентов, обратитесь в поддержку');
+                }
+            }
+            $this->transactionManager->commit();
+            return new CreatedStudentSubjectsInfo($allCreated, $allSkipped);
+        }
+
         $validationErrorTemplate = 'Некорректное содержимое файла. Ошибка в строке %d: %s';
 
         $errorGenerator = function (int $k, string $error) use (&$validationErrorTemplate): ValidationError {
@@ -165,7 +189,13 @@ class StudentSubjectsImporter
             }
 
             try {
-                $actualFrom = new DateTimeImmutable($actualFrom);
+                $actualFromObj = DateTimeImmutable::createFromFormat('d/m/Y', $actualFrom);
+                if ($actualFromObj === false) {
+                    $actualFromObj = new DateTimeImmutable($actualFrom);
+                } else {
+                    $actualFromObj->setTime(0, 0, 0);
+                }
+                $actualFrom = $actualFromObj;
             } catch (Throwable $e) {
                 throw ValidationException::new([
                     $errorGenerator(
@@ -176,7 +206,13 @@ class StudentSubjectsImporter
             }
 
             try {
-                $actualTo = new DateTimeImmutable($actualTo);
+                $actualToObj = DateTimeImmutable::createFromFormat('d/m/Y', $actualTo);
+                if ($actualToObj === false) {
+                    $actualToObj = new DateTimeImmutable($actualTo);
+                } else {
+                    $actualToObj->setTime(0, 0, 0);
+                }
+                $actualTo = $actualToObj;
             } catch (Throwable $e) {
                 throw ValidationException::new([
                     $errorGenerator(
