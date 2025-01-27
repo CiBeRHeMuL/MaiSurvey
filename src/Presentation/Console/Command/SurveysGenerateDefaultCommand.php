@@ -166,7 +166,7 @@ class SurveysGenerateDefaultCommand extends AbstractCommand
                 TeacherSubjectTypeEnum::Lecture->value,
             ),
             new CreateItemDto(
-                true,
+                false,
                 SurveyItemTypeEnum::Comment->value,
                 'Чем запомнился семинарист {teacher.name}?',
                 16,
@@ -182,7 +182,7 @@ class SurveysGenerateDefaultCommand extends AbstractCommand
                 TeacherSubjectTypeEnum::Lecture->value,
             ),
             new CreateItemDto(
-                true,
+                false,
                 SurveyItemTypeEnum::Comment->value,
                 'Чего, на твой взгляд, не хватает на пз?',
                 18,
