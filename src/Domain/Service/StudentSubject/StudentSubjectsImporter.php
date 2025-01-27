@@ -127,18 +127,12 @@ class StudentSubjectsImporter
         /** @var GetSSByIntersectionRawDto[] $studentSubjectIntersectionIndexes */
         $studentSubjectIntersectionIndexes = [];
         foreach ($data as $k => $row) {
-            $studentEmail = $row[$dto->getStudentEmailCol()] ?? '';
-            $teacherEmail = $row[$dto->getTeacherEmailCol()] ?? '';
-            $subject = $row[$dto->getSubjectCol()] ?? '';
-            $type = $row[$dto->getTypeCol()] ?? '';
-            $actualFrom = $row[$dto->getActualFromCol()] ?? '';
-            $actualTo = $row[$dto->getActualToCol()] ?? '';
-            $studentEmail = trim($studentEmail);
-            $teacherEmail = trim($teacherEmail);
-            $subject = trim($subject);
-            $type = trim($type);
-            $actualFrom = trim($actualFrom);
-            $actualTo = trim($actualTo);
+            $studentEmail = trim($row[$dto->getStudentEmailCol()] ?? '');
+            $teacherEmail = trim($row[$dto->getTeacherEmailCol()] ?? '');
+            $subject = trim($row[$dto->getSubjectCol()] ?? '');
+            $type = trim($row[$dto->getTypeCol()] ?? '');
+            $actualFrom = trim($row[$dto->getActualFromCol()] ?? '');
+            $actualTo = trim($row[$dto->getActualToCol()] ?? '');
 
             $hash = md5("$studentEmail$teacherEmail$subject$type");
             if (isset($existingRows[$hash])) {
@@ -286,12 +280,12 @@ class StudentSubjectsImporter
         $createDtos = [];
         $skipped = 0;
         foreach ($data as $k => $row) {
-            $studentEmail = $row[$dto->getStudentEmailCol()];
-            $teacherEmail = $row[$dto->getTeacherEmailCol()];
-            $subject = $row[$dto->getSubjectCol()];
-            $type = $row[$dto->getTypeCol()];
-            $actualFrom = $row[$dto->getActualFromCol()];
-            $actualTo = $row[$dto->getActualToCol()];
+            $studentEmail = trim($row[$dto->getStudentEmailCol()]);
+            $teacherEmail = trim($row[$dto->getTeacherEmailCol()]);
+            $subject = trim($row[$dto->getSubjectCol()]);
+            $type = trim($row[$dto->getTypeCol()]);
+            $actualFrom = trim($row[$dto->getActualFromCol()]);
+            $actualTo = trim($row[$dto->getActualToCol()]);
 
             $student = $students[$studentEmail] ?? null;
             if ($student === null || $student->isStudent() === false) {
