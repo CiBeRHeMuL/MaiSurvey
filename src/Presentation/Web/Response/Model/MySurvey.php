@@ -11,7 +11,7 @@ readonly class MySurvey
      * @param LiteSurvey $survey
      * @param bool $completed
      * @param string|null $completed_at
-     * @param array $items
+     * @param MySurveyItem[] $items
      */
     public function __construct(
         public LiteSurvey $survey,

@@ -1415,7 +1415,7 @@ paths:
       summary: 'Импорт предметов для преподавателей'
       operationId: post_import-teacher-subjects
       requestBody:
-        required: true
+        required: false
         content:
           multipart/form-data:
             schema:
@@ -3315,15 +3315,20 @@ components:
       required:
         - survey
         - completed
+        - items
       properties:
         survey:
-          $ref: '#/components/schemas/Survey'
+          $ref: '#/components/schemas/LiteSurvey'
         completed:
           type: boolean
         completed_at:
           type: string
           format: date-time
           nullable: true
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/MySurveyItem'
       type: object
     Survey:
       required:
@@ -3589,6 +3594,18 @@ components:
         subject:
           $ref: '#/components/schemas/Subject'
       type: object
+    MySurveyItem:
+      required:
+        - item
+      properties:
+        item:
+          $ref: '#/components/schemas/SurveyItem'
+        teacher_subject:
+          nullable: true
+          oneOf:
+            -
+              $ref: '#/components/schemas/TeacherSubject'
+      type: object
     SurveyItem:
       required:
         - id
@@ -3598,6 +3615,7 @@ components:
         - text
         - position
         - data
+        - subject_type
       properties:
         id:
           type: string
@@ -3613,6 +3631,8 @@ components:
           type: integer
         data:
           $ref: '#/components/schemas/ItemDataInterface2'
+        subject_type:
+          $ref: '#/components/schemas/TeacherSubjectTypeEnum'
       type: object
     TeacherSubjectTypeEnum:
       type: string
