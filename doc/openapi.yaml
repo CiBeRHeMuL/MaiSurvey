@@ -3301,6 +3301,7 @@ components:
       required:
         - survey
         - completed
+        - teacher_subjects
       properties:
         survey:
           $ref: '#/components/schemas/LiteSurvey'
@@ -3310,25 +3311,29 @@ components:
           type: string
           format: date-time
           nullable: true
+        teacher_subjects:
+          type: array
+          items:
+            $ref: '#/components/schemas/TeacherSubject'
       type: object
     MySurvey:
       required:
         - survey
         - completed
-        - items
+        - teacher_subjects
       properties:
         survey:
-          $ref: '#/components/schemas/LiteSurvey'
+          $ref: '#/components/schemas/Survey'
         completed:
           type: boolean
         completed_at:
           type: string
           format: date-time
           nullable: true
-        items:
+        teacher_subjects:
           type: array
           items:
-            $ref: '#/components/schemas/MySurveyItem'
+            $ref: '#/components/schemas/TeacherSubject'
       type: object
     Survey:
       required:
@@ -3593,18 +3598,6 @@ components:
           type: string
         subject:
           $ref: '#/components/schemas/Subject'
-      type: object
-    MySurveyItem:
-      required:
-        - item
-      properties:
-        item:
-          $ref: '#/components/schemas/SurveyItem'
-        teacher_subject:
-          nullable: true
-          oneOf:
-            -
-              $ref: '#/components/schemas/TeacherSubject'
       type: object
     SurveyItem:
       required:
