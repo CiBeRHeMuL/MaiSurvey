@@ -55,7 +55,6 @@ final class Version20250118072758 extends AbstractMigration
 
     public function down(Schema $schema): void
     {
-
         $this->addSql('DROP VIEW my_survey_item');
         $this->addSql(<<<SQL
         CREATE OR REPLACE VIEW my_survey AS (

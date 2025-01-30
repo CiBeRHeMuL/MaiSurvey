@@ -24,8 +24,8 @@ class SurveyItemAnswer
     private AnswerDataInterface|null $answer;
     #[ORM\Column(name: 'created_at', type: 'datetime_immutable', nullable: false, options: ['default' => 'CURRENT_TIMESTAMP'])]
     private DateTimeImmutable $createdAt;
-    #[ORM\Column(name: 'teacher_subject_id', type: 'uuid', nullable: false)]
-    private Uuid $teacherSubjectId;
+    #[ORM\Column(name: 'teacher_subject_id', type: 'uuid', nullable: true)]
+    private Uuid|null $teacherSubjectId = null;
     #[ORM\Column(type: 'string', length: 255, nullable: false, enumType: SurveyItemTypeEnum::class)]
     private SurveyItemTypeEnum $type;
 
@@ -33,8 +33,8 @@ class SurveyItemAnswer
     #[ORM\JoinColumn(name: 'survey_item_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
     private SurveyItem $item;
     #[ORM\ManyToOne(targetEntity: TeacherSubject::class)]
-    #[ORM\JoinColumn(name: 'teacher_subject_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
-    private TeacherSubject $teacherSubject;
+    #[ORM\JoinColumn(name: 'teacher_subject_id', referencedColumnName: 'id', nullable: true, onDelete: 'CASCADE')]
+    private TeacherSubject|null $teacherSubject = null;
 
     public function getId(): Uuid
     {
@@ -69,12 +69,12 @@ class SurveyItemAnswer
         return $this;
     }
 
-    public function getTeacherSubjectId(): Uuid
+    public function getTeacherSubjectId(): Uuid|null
     {
         return $this->teacherSubjectId;
     }
 
-    public function setTeacherSubjectId(Uuid $teacherSubjectId): SurveyItemAnswer
+    public function setTeacherSubjectId(Uuid|null $teacherSubjectId): SurveyItemAnswer
     {
         $this->teacherSubjectId = $teacherSubjectId;
         return $this;
@@ -113,12 +113,12 @@ class SurveyItemAnswer
         return $this;
     }
 
-    public function getTeacherSubject(): TeacherSubject
+    public function getTeacherSubject(): TeacherSubject|null
     {
         return $this->teacherSubject;
     }
 
-    public function setTeacherSubject(TeacherSubject $teacherSubject): SurveyItemAnswer
+    public function setTeacherSubject(TeacherSubject|null $teacherSubject): SurveyItemAnswer
     {
         $this->teacherSubject = $teacherSubject;
         return $this;

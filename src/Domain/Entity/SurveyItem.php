@@ -33,8 +33,8 @@ class SurveyItem
     private ItemDataInterface $data;
     #[ORM\Column(name: 'created_at', type: 'datetime_immutable', nullable: false, options: ['default' => 'CURRENT_TIMESTAMP'])]
     private DateTimeImmutable $createdAt;
-    #[ORM\Column(name: 'subject_type', type: 'string', length: 255, nullable: false, enumType: TeacherSubjectTypeEnum::class)]
-    private TeacherSubjectTypeEnum $subjectType;
+    #[ORM\Column(name: 'subject_type', type: 'string', length: 255, nullable: true, enumType: TeacherSubjectTypeEnum::class)]
+    private TeacherSubjectTypeEnum|null $subjectType;
 
     #[ORM\ManyToOne(targetEntity: Survey::class, inversedBy: 'items')]
     #[ORM\JoinColumn(name: 'survey_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
@@ -128,12 +128,12 @@ class SurveyItem
         return $this;
     }
 
-    public function getSubjectType(): TeacherSubjectTypeEnum
+    public function getSubjectType(): TeacherSubjectTypeEnum|null
     {
         return $this->subjectType;
     }
 
-    public function setSubjectType(TeacherSubjectTypeEnum $subjectType): SurveyItem
+    public function setSubjectType(TeacherSubjectTypeEnum|null $subjectType): SurveyItem
     {
         $this->subjectType = $subjectType;
         return $this;

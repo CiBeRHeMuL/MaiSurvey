@@ -14,7 +14,7 @@ readonly class CreateItemDto
         private string $text,
         private int $position,
         private ItemDataInterface $data,
-        private TeacherSubjectTypeEnum $subjectType,
+        private TeacherSubjectTypeEnum|null $subjectType,
     ) {
     }
 
@@ -43,7 +43,7 @@ readonly class CreateItemDto
         return $this->data;
     }
 
-    public function getSubjectType(): TeacherSubjectTypeEnum
+    public function getSubjectType(): TeacherSubjectTypeEnum|null
     {
         return $this->subjectType;
     }

@@ -19,7 +19,7 @@ class TemplateService
     public function getMySurveyItemTValue(string $value, MySurveyItem $surveyItem): mixed
     {
         return match ($value) {
-            'teacher.name' => $surveyItem->getTeacherSubject()->getTeacher()->getData()->getFullName(),
+            'teacher.name' => $surveyItem->getTeacherSubject()?->getTeacher()->getData()->getFullName(),
             default => throw new InvalidArgumentException("Unknown template '$value'"),
         };
     }

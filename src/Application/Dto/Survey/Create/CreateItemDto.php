@@ -31,10 +31,9 @@ readonly class CreateItemDto
         public ItemDataInterface $data,
         /** Тип предмета */
         #[LOA\Enum(TeacherSubjectTypeEnum::class)]
-        #[Assert\Type('string', message: 'Значение должно быть строкой')]
-        #[Assert\NotBlank(message: 'Значение не должно быть пустым')]
+        #[Assert\Type(['string', 'null'], message: 'Значение должно быть строкой')]
         #[LAssert\EnumChoice(TeacherSubjectTypeEnum::class)]
-        public string $subject_type,
+        public string|null $subject_type,
     ) {
     }
 }

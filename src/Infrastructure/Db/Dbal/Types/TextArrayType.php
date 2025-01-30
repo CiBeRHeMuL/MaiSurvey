@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domain\Db\Dbal\Types;
+namespace App\Infrastructure\Db\Dbal\Types;
 
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Platforms\PostgreSQLPlatform;

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domain\Db\Dbal\Types;
+namespace App\Infrastructure\Db\Dbal\Types;
 
 use App\Domain\ValueObject\Email;
 use Doctrine\DBAL\Platforms\AbstractPlatform;

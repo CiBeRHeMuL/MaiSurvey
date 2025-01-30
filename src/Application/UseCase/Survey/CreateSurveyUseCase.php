@@ -49,7 +49,9 @@ class CreateSurveyUseCase
                             $item->text,
                             $item->position,
                             ItemDataMapper::map($item->data),
-                            TeacherSubjectTypeEnum::from($item->subject_type),
+                            $item->subject_type !== null
+                                ? TeacherSubjectTypeEnum::from($item->subject_type)
+                                : null,
                         ),
                         $dto->items,
                     ),

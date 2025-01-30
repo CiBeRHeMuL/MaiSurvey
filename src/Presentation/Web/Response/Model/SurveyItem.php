@@ -5,6 +5,7 @@ namespace App\Presentation\Web\Response\Model;
 use App\Domain\Entity\MySurveyItem;
 use App\Domain\Entity\SurveyItem as DomainSurveyItem;
 use App\Domain\Enum\SurveyItemTypeEnum;
+use App\Domain\Enum\TeacherSubjectTypeEnum;
 use App\Presentation\Web\OpenApi\Attribute as LOA;
 use App\Presentation\Web\Response\Model\SurveyItemData\Factory\SurveyItemDataFactory;
 use App\Presentation\Web\Response\Model\SurveyItemData\ItemDataInterface;
@@ -29,6 +30,8 @@ readonly class SurveyItem
         public string $text,
         public int $position,
         public ItemDataInterface $data,
+        #[LOA\Enum(TeacherSubjectTypeEnum::class)]
+        public string|null $subject_type,
     ) {
     }
 
@@ -42,6 +45,7 @@ readonly class SurveyItem
             $item->getText(),
             $item->getPosition(),
             SurveyItemDataFactory::fromItemData($item->getData()),
+            $item->getSubjectType()?->value,
         );
     }
 
