@@ -51,6 +51,7 @@ class SurveyRepository extends Common\AbstractRepository implements SurveyReposi
                 new SortColumn(
                     match ($dto->getSortBy()) {
                         'created_at' => 's.created_at',
+                        'name' => 'ss.name',
                         default => "ms.{$dto->getSortBy()}",
                     },
                     $dto->getSortBy(),
