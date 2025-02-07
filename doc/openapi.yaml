@@ -433,6 +433,128 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+  /semester:
+    post:
+      tags:
+        - semesters
+      operationId: post_create-semester
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSemesterDto'
+      responses:
+        '500':
+          description: 'Internal Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: 'Unprocessable Entity'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResponse'
+        '400':
+          description: 'Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/SuccessResponse' }
+                  - { properties: { data: { $ref: '#/components/schemas/Semester' } }, type: object }
+  /semesters:
+    get:
+      tags:
+        - semesters
+      operationId: get_create-semester-multi
+      parameters:
+        -
+          name: sort_by
+          in: query
+          required: false
+          schema:
+            title: 'Сортировка по'
+            type: string
+            default: year
+            enum:
+              - year
+        -
+          name: sort_type
+          in: query
+          required: false
+          schema:
+            title: 'Тип сортировки'
+            type: string
+            default: asc
+            enum:
+              - asc
+              - desc
+        -
+          name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+        -
+          name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 100
+            maximum: 100
+            minimum: 0
+            nullable: true
+      responses:
+        '500':
+          description: 'Internal Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: 'Unprocessable Entity'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResponse'
+        '400':
+          description: 'Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/SuccessWithPaginationResponse' }
+                  - { properties: { data: { properties: { items: { type: array, items: { $ref: '#/components/schemas/Semester' } } }, type: object } }, type: object }
   /student-subjects:
     get:
       tags:
@@ -796,6 +918,17 @@ paths:
       summary: 'Получить список предметов с фильтрацией и пагинацией.'
       operationId: get_get-all-subjects
       parameters:
+        -
+          name: 'semester_ids[]'
+          in: query
+          required: false
+          schema:
+            title: 'ID семестра'
+            type: array
+            items:
+              type: string
+            default: null
+            nullable: true
         -
           name: name
           in: query
@@ -2353,6 +2486,44 @@ components:
           type: string
           default: A
       type: object
+    CreateSemesterDto:
+      required:
+        - year
+        - spring
+      properties:
+        year:
+          type: integer
+          maximum: 2100
+          minimum: 2000
+        spring:
+          type: boolean
+      type: object
+    GetAllSemestersDto:
+      properties:
+        sort_by:
+          title: 'Сортировка по'
+          type: string
+          default: year
+          enum:
+            - year
+        sort_type:
+          title: 'Тип сортировки'
+          type: string
+          default: asc
+          enum:
+            - asc
+            - desc
+        offset:
+          type: integer
+          default: 0
+          minimum: 0
+        limit:
+          type: integer
+          default: 100
+          maximum: 100
+          minimum: 0
+          nullable: true
+      type: object
     GetAllStudentSubjectsDto:
       properties:
         user_ids:
@@ -2529,6 +2700,13 @@ components:
       type: object
     GetAllSubjectsDto:
       properties:
+        semester_ids:
+          title: 'ID семестра'
+          type: array
+          items:
+            type: string
+          default: null
+          nullable: true
         name:
           title: 'Название для фильтрации'
           type: string
@@ -2563,11 +2741,15 @@ components:
     CreateSubjectDto:
       required:
         - name
+        - semester_id
       properties:
         name:
           title: 'Название предмета'
           type: string
           maxLength: 255
+        semester_id:
+          title: 'ID семестра'
+          type: string
       type: object
     ImportSubjectsDto:
       properties:
@@ -2579,6 +2761,14 @@ components:
           title: 'Столбец с названием'
           type: string
           default: A
+        year_col:
+          title: 'Столбец с годом'
+          type: string
+          default: B
+        semester_col:
+          title: 'Столбец с семестром'
+          type: string
+          default: C
       type: object
     GetMySurveysDto:
       properties:
@@ -3231,13 +3421,19 @@ components:
         import_enabled:
           type: boolean
       type: object
+    Semester:
+      required:
+        - name
+      properties:
+        name:
+          type: string
+      type: object
     StudentSubject:
       required:
         - subject
         - teacher
         - user
-        - actual_from
-        - actual_to
+        - semester
       properties:
         subject:
           $ref: '#/components/schemas/Subject'
@@ -3245,30 +3441,21 @@ components:
           $ref: '#/components/schemas/LiteUser'
         user:
           $ref: '#/components/schemas/LiteUser'
-        actual_from:
-          type: string
-          format: date-time
-        actual_to:
-          type: string
-          format: date-time
+        semester:
+          $ref: '#/components/schemas/Semester'
       type: object
     MyStudentSubject:
       required:
         - subject
         - teacher
-        - actual_from
-        - actual_to
+        - semester
       properties:
         subject:
           $ref: '#/components/schemas/Subject'
         teacher:
           $ref: '#/components/schemas/LiteUser'
-        actual_from:
-          type: string
-          format: date-time
-        actual_to:
-          type: string
-          format: date-time
+        semester:
+          $ref: '#/components/schemas/Semester'
       type: object
     CreatedStudentSubjectsInfo:
       required:
@@ -3284,11 +3471,14 @@ components:
       required:
         - id
         - name
+        - semester
       properties:
         id:
           type: string
         name:
           type: string
+        semester:
+          $ref: '#/components/schemas/Semester'
       type: object
     CreatedSubjectsInfo:
       required:
@@ -3302,8 +3492,6 @@ components:
         - survey
         - completed
         - teacher_subjects
-        - studying_from
-        - studying_to
       properties:
         survey:
           $ref: '#/components/schemas/LiteSurvey'
@@ -3317,20 +3505,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/TeacherSubject'
-        studying_from:
-          type: string
-          format: date
-        studying_to:
-          type: string
-          format: date
       type: object
     MySurvey:
       required:
         - survey
         - completed
         - teacher_subjects
-        - studying_from
-        - studying_to
       properties:
         survey:
           $ref: '#/components/schemas/Survey'
@@ -3344,12 +3524,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/TeacherSubject'
-        studying_from:
-          type: string
-          format: date
-        studying_to:
-          type: string
-          format: date
       type: object
     Survey:
       required:
@@ -3552,6 +3726,7 @@ components:
         - teacher_subject.view_all
         - teacher_subject.view_my
         - teacher_subject.import
+        - semester.create
     PaginatedData:
       properties:
         items:
@@ -3909,4 +4084,7 @@ tags:
   -
     name: surveys
     description: 'Ручки для работы с опросами'
+  -
+    name: semesters
+    description: 'Ручки для работы с семестрами'
 
