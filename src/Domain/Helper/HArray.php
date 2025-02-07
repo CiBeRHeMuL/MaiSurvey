@@ -14,7 +14,7 @@ class HArray
      * @param iterable<T> $array
      * @param string|int|(callable(T): Key) $key if callable, then must have signature: callable(array-element-type): string|int
      *
-     * @return array<Key, T>
+     * @return T[]
      */
     public static function index(iterable $array, string|int|callable $key): array
     {

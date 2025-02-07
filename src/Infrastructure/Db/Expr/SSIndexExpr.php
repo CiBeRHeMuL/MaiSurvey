@@ -2,13 +2,13 @@
 
 namespace App\Infrastructure\Db\Expr;
 
-use App\Domain\Dto\StudentSubject\GetSSByIntersectionDto;
+use App\Domain\Dto\StudentSubject\GetSSByIndexDto;
 use Qstart\Db\QueryBuilder\DML\Expression\ExprInterface;
 
-class SSIntersectionExpr implements ExprInterface
+class SSIndexExpr implements ExprInterface
 {
     public function __construct(
-        private GetSSByIntersectionDto $dto,
+        private GetSSByIndexDto $dto,
         private string|null $alias = null,
     ) {
         $this->alias = $this->alias !== null
@@ -22,8 +22,7 @@ class SSIntersectionExpr implements ExprInterface
     public function getExpression($dialect = null): string
     {
         return "{$this->alias}user_id = :uid "
-            . "AND {$this->alias}teacher_subject_id = :tsid "
-            . "AND tsrange({$this->alias}actual_from, {$this->alias}actual_to, '[]') && tsrange(:acfrom, :acto)";
+            . "AND {$this->alias}teacher_subject_id = :tsid";
     }
 
     /**
@@ -34,8 +33,6 @@ class SSIntersectionExpr implements ExprInterface
         return [
             'uid' => $this->dto->getStudentId()->toRfc4122(),
             'tsid' => $this->dto->getTeacherSubjectId()->toRfc4122(),
-            'acfrom' => $this->dto->getActualFrom()->format(DATE_RFC3339),
-            'acto' => $this->dto->getActualTo()->format(DATE_RFC3339),
         ];
     }
 

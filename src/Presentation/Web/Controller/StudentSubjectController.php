@@ -132,8 +132,8 @@ class StudentSubjectController extends BaseController
                 $dto->teacher_email_col,
                 $dto->subject_col,
                 $dto->type_col,
-                $dto->actual_from_col,
-                $dto->actual_to_col,
+                $dto->year_col,
+                $dto->semester_col,
                 $dto->skip_if_exists,
             ),
         );
@@ -188,8 +188,8 @@ class StudentSubjectController extends BaseController
                 $dto->teacher_email_col,
                 $dto->subject_col,
                 $dto->type_col,
-                $dto->actual_from_col,
-                $dto->actual_to_col,
+                $dto->year_col,
+                $dto->semester_col,
                 $dto->skip_if_exists,
             ),
         );

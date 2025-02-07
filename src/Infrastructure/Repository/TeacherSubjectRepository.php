@@ -11,6 +11,7 @@ use App\Domain\Dto\TeacherSubject\GetMyTeacherSubjectsDto;
 use App\Domain\Dto\TeacherSubject\GetTSByIndexDto;
 use App\Domain\Dto\TeacherSubject\GetTSByIndexRawDto;
 use App\Domain\Entity\MyTeacherSubject;
+use App\Domain\Entity\Semester;
 use App\Domain\Entity\Subject;
 use App\Domain\Entity\TeacherSubject;
 use App\Domain\Entity\User;
@@ -176,6 +177,10 @@ class TeacherSubjectRepository extends Common\AbstractRepository implements Teac
                 ['s' => $this->getClassTable(Subject::class)],
                 's.id = ts.subject_id',
             )
+            ->innerJoin(
+                ['sem' => $this->getClassTable(Semester::class)],
+                'sem.id = s.semester_id'
+            )
             ->where(new InExpr(
                 ['u.email', 's.name', 'ts.type'],
                 array_map(
@@ -183,6 +188,8 @@ class TeacherSubjectRepository extends Common\AbstractRepository implements Teac
                         'u.email' => $dto->getTeacherEmail()->getEmail(),
                         's.name' => $dto->getSubjectName(),
                         'ts.type' => $dto->getType()->value,
+                        'sem.year' => $dto->getSemesterDto()->getYear(),
+                        'sem.spring' => $dto->getSemesterDto()->isSpring(),
                     ],
                     $indexes,
                 ),

@@ -11,8 +11,8 @@ readonly class ImportDto
         private string $teacherEmailCol,
         private string $subjectCol,
         private string $typeCol,
-        private string $actualFromCol,
-        private string $actualToCol,
+        private string $yearCol,
+        private string $semesterCol,
         private bool $skipIfExists,
     ) {
     }
@@ -47,14 +47,14 @@ readonly class ImportDto
         return $this->typeCol;
     }
 
-    public function getActualFromCol(): string
+    public function getYearCol(): string
     {
-        return $this->actualFromCol;
+        return $this->yearCol;
     }
 
-    public function getActualToCol(): string
+    public function getSemesterCol(): string
     {
-        return $this->actualToCol;
+        return $this->semesterCol;
     }
 
     public function isSkipIfExists(): bool

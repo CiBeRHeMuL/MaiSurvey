@@ -12,6 +12,11 @@ readonly class CreateSubjectDto
         #[Assert\Length(max: 255, maxMessage: 'Значение должно быть короче 255 символов')]
         #[Assert\NotBlank(message: 'Значение не должно быть пустым')]
         public string $name,
+        /** ID семестра */
+        #[Assert\Type('string', message: 'Значение должно быть строкой')]
+        #[Assert\NotBlank(message: 'Значение не должно быть пустым')]
+        #[Assert\Uuid(message: 'Значение должно быть корректным uuid')]
+        public string $semester_id,
     ) {
     }
 }

@@ -17,6 +17,7 @@ use App\Domain\Enum\TeacherSubjectTypeEnum;
 use DateTimeImmutable;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -40,6 +41,15 @@ class SurveysGenerateDefaultCommand extends AbstractCommand
         $this->subjectsUseCase->setLogger($logger);
         $this->createSurveysUseCase->setLogger($logger);
         return $this;
+    }
+
+    protected function configure(): void
+    {
+        $this
+            ->addArgument(
+                'semester_ids',
+                InputArgument::REQUIRED | InputArgument::IS_ARRAY,
+            );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -129,7 +139,7 @@ class SurveysGenerateDefaultCommand extends AbstractCommand
 
         $subjects = $this
             ->subjectsUseCase
-            ->execute(new GetAllSubjectsDto());
+            ->execute(new GetAllSubjectsDto($input->getArgument('semester_ids')));
 
         $this->io->info(
             sprintf(

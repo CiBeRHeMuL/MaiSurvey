@@ -10,6 +10,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 readonly class GetAllSubjectsDto
 {
     /**
+     * @param string[]|null $semester_ids
      * @param string|null $name название для фильтрации
      * @param string $sort_by сортировка по
      * @param string $sort_type тип сортировки
@@ -17,6 +18,14 @@ readonly class GetAllSubjectsDto
      * @param int|null $limit
      */
     public function __construct(
+        /** ID семестра */
+        #[Assert\Type('array', message: 'Значение должно быть массивом')]
+        #[Assert\All([
+            new Assert\Type('string', message: 'Значение должно быть строкой'),
+            new Assert\NotBlank(message: 'Значение не должно быть пустым'),
+            new Assert\Uuid(message: 'Значение должно быть валидным uuid'),
+        ])]
+        public array|null $semester_ids = null,
         /** Название для фильтрации */
         #[Assert\Type('string', message: 'Значение должно быть строкой')]
         #[Assert\Length(min: 1, max: 255, minMessage: 'Имя должно быть длиннее 1 символа', maxMessage: 'Имя должно быть короче 255 символов')]

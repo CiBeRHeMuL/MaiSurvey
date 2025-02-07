@@ -9,14 +9,16 @@ readonly class Subject
     public function __construct(
         public string $id,
         public string $name,
+        public Semester $semester,
     ) {
     }
 
-    public static function fromSubject(DomainSubject $group): self
+    public static function fromSubject(DomainSubject $subject): self
     {
         return new self(
-            $group->getId()->toRfc4122(),
-            $group->getName(),
+            $subject->getId()->toRfc4122(),
+            $subject->getName(),
+            Semester::fromSemester($subject->getSemester()),
         );
     }
 }

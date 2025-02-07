@@ -2,17 +2,15 @@
 
 namespace App\Domain\Dto\StudentSubject;
 
+use App\Domain\Entity\Semester;
 use App\Domain\Entity\TeacherSubject;
 use App\Domain\Entity\User;
-use DateTimeImmutable;
 
 readonly class CreateStudentSubjectDto
 {
     public function __construct(
         private User $student,
         private TeacherSubject $teacherSubject,
-        private DateTimeImmutable $actualFrom,
-        private DateTimeImmutable $actualTo,
     ) {
     }
 
@@ -26,13 +24,8 @@ readonly class CreateStudentSubjectDto
         return $this->teacherSubject;
     }
 
-    public function getActualFrom(): DateTimeImmutable
+    public function getSemester(): Semester
     {
-        return $this->actualFrom;
-    }
-
-    public function getActualTo(): DateTimeImmutable
-    {
-        return $this->actualTo;
+        return $this->semester;
     }
 }

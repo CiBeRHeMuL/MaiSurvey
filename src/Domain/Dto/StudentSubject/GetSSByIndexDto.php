@@ -2,16 +2,13 @@
 
 namespace App\Domain\Dto\StudentSubject;
 
-use DateTimeImmutable;
 use Symfony\Component\Uid\Uuid;
 
-readonly class GetSSByIntersectionDto
+readonly class GetSSByIndexDto
 {
     public function __construct(
         private Uuid $studentId,
         private Uuid $teacherSubjectId,
-        private DateTimeImmutable $actualFrom,
-        private DateTimeImmutable $actualTo,
     ) {
     }
 
@@ -23,15 +20,5 @@ readonly class GetSSByIntersectionDto
     public function getTeacherSubjectId(): Uuid
     {
         return $this->teacherSubjectId;
-    }
-
-    public function getActualFrom(): DateTimeImmutable
-    {
-        return $this->actualFrom;
-    }
-
-    public function getActualTo(): DateTimeImmutable
-    {
-        return $this->actualTo;
     }
 }

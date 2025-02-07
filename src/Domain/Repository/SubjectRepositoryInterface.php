@@ -4,6 +4,7 @@ namespace App\Domain\Repository;
 
 use App\Domain\DataProvider\DataProviderInterface;
 use App\Domain\Dto\Subject\GetAllSubjectsDto;
+use App\Domain\Dto\Subject\GetByRawIndexDto;
 use App\Domain\Entity\Subject;
 use App\Domain\Repository\Common\RepositoryInterface;
 use Iterator;
@@ -22,10 +23,11 @@ interface SubjectRepositoryInterface extends RepositoryInterface
      * Поиск по имени.
      *
      * @param string $name
+     * @param Uuid $semesterId
      *
      * @return Subject|null
      */
-    public function findByName(string $name): Subject|null;
+    public function findByIndex(string $name, Uuid $semesterId): Subject|null;
 
     /**
      * Поиск по id
@@ -37,11 +39,11 @@ interface SubjectRepositoryInterface extends RepositoryInterface
     public function findById(Uuid $id): Subject|null;
 
     /**
-     * Список групп по списку называний
+     * Список предметов
      *
-     * @param string[] $groupNames
+     * @param GetByRawIndexDto[] $indexes
      *
      * @return Iterator<int, Subject>
      */
-    public function findByNames(array $groupNames): Iterator;
+    public function findByRawIndexes(array $indexes): Iterator;
 }

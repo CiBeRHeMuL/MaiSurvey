@@ -137,7 +137,7 @@ class TeacherSubjectsImporter
 
         $subjects = $this
             ->subjectService
-            ->getByNames($subjectNames);
+            ->getByIndexes($subjectNames);
         /** @var array<string, Subject> $subjects */
         $subjects = HArray::index(
             $subjects,

@@ -26,10 +26,11 @@ readonly class LiteMySurvey
 
     public static function fromMySurvey(DomainMySurvey $survey): self
     {
+        $items = $survey->getMyItems()->toArray();
         $teacherSubjects = array_values(
             array_filter(
                 HArray::indexExtended(
-                    $survey->getMyItems()->toArray(),
+                    $items,
                     fn(MySurveyItem $i) => $i->getTeacherSubjectId()?->toRfc4122(),
                     fn(MySurveyItem $i) => $i->getTeacherSubject(),
                 ),

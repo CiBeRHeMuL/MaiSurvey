@@ -2,6 +2,7 @@
 
 namespace App\Domain\Dto\TeacherSubject;
 
+use App\Domain\Dto\Semester\GetSemesterByIndexDto;
 use App\Domain\Enum\TeacherSubjectTypeEnum;
 use App\Domain\ValueObject\Email;
 
@@ -11,6 +12,7 @@ readonly class GetTSByIndexRawDto
         private Email $teacherEmail,
         private string $subjectName,
         private TeacherSubjectTypeEnum $type,
+        private GetSemesterByIndexDto $semesterDto,
     ) {
     }
 
@@ -27,5 +29,10 @@ readonly class GetTSByIndexRawDto
     public function getType(): TeacherSubjectTypeEnum
     {
         return $this->type;
+    }
+
+    public function getSemesterDto(): GetSemesterByIndexDto
+    {
+        return $this->semesterDto;
     }
 }

@@ -30,16 +30,16 @@ readonly class ImportStudentSubjectsDto
         #[Assert\Regex('/^[A-Z]+$/u', message: 'Значение должно быть названием столбца excel')]
         #[Assert\NotBlank(message: 'Значение не должно быть пустым')]
         public string $type_col = 'D',
-        /** Столбец с датой начала актуальности предмета */
+        /** Столбец с годом */
         #[Assert\Type('string', message: 'Значение должно быть строкой')]
         #[Assert\Regex('/^[A-Z]+$/u', message: 'Значение должно быть названием столбца excel')]
         #[Assert\NotBlank(message: 'Значение не должно быть пустым')]
-        public string $actual_from_col = 'E',
-        /** Столбец с датой окончания актуальности предмета */
+        public string $year_col = 'E',
+        /** Столбец с номером семестра (1 - весенний, 2 - осенний) */
         #[Assert\Type('string', message: 'Значение должно быть строкой')]
         #[Assert\Regex('/^[A-Z]+$/u', message: 'Значение должно быть названием столбца excel')]
         #[Assert\NotBlank(message: 'Значение не должно быть пустым')]
-        public string $actual_to_col = 'F',
+        public string $semester_col = 'F',
         /** Пропускать новые предметы, которые конфликтуют с существующими */
         #[Assert\Type('boolean', message: 'Значение должно быть булевым значением')]
         public bool $skip_if_exists = false,

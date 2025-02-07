@@ -5,6 +5,7 @@ namespace App\Domain\Service\Subject;
 use App\Domain\DataProvider\DataProviderInterface;
 use App\Domain\Dto\Subject\CreateSubjectDto;
 use App\Domain\Dto\Subject\GetAllSubjectsDto;
+use App\Domain\Dto\Subject\GetByRawIndexDto;
 use App\Domain\Entity\Subject;
 use App\Domain\Enum\ValidationErrorSlugEnum;
 use App\Domain\Exception\ErrorException;
@@ -60,7 +61,7 @@ class SubjectService
         if (!in_array($dto->getSortBy(), self::GET_ALL_SORT, true)) {
             throw ValidationException::new([
                 new ValidationError(
-                    'name',
+                    'sort_by',
                     ValidationErrorSlugEnum::WrongField->getSlug(),
                     sprintf('Сортировка доступна по полям: %s', implode(', ', self::GET_ALL_SORT)),
                 ),
@@ -68,13 +69,6 @@ class SubjectService
         }
 
         return $this->subjectRepository->findAll($dto);
-    }
-
-    public function getByName(string $name): Subject|null
-    {
-        return $this
-            ->subjectRepository
-            ->findByName($name);
     }
 
     public function create(CreateSubjectDto $dto): Subject
@@ -101,15 +95,15 @@ class SubjectService
     /**
      * Получить предметы по списку названий
      *
-     * @param string[] $subjectNames
+     * @param GetByRawIndexDto[] $indexes
      *
      * @return Iterator<int, Subject>
      */
-    public function getByNames(array $subjectNames): Iterator
+    public function getByIndexes(array $indexes): Iterator
     {
         return $this
             ->subjectRepository
-            ->findByNames($subjectNames);
+            ->findByRawIndexes($indexes);
     }
 
     /**
@@ -174,7 +168,7 @@ class SubjectService
         if ($checkExisting) {
             $existing = $this
                 ->subjectRepository
-                ->findByName($dto->getName());
+                ->findByIndex($dto->getName(), $dto->getSemester()->getId());
             if ($existing !== null) {
                 throw ValidationException::new([
                     new ValidationError(
@@ -192,6 +186,8 @@ class SubjectService
         $subject = new Subject();
         $subject
             ->setName(trim($dto->getName()))
+            ->setSemesterId($dto->getSemester()->getId())
+            ->setSemester($dto->getSemester())
             ->setCreatedAt(new DateTimeImmutable())
             ->setUpdatedAt(new DateTimeImmutable());
         return $subject;

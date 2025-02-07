@@ -8,13 +8,15 @@ use App\Domain\DataProvider\LimitOffset;
 use App\Domain\DataProvider\SortColumn;
 use App\Domain\Dto\StudentSubject\GetAllStudentSubjectsDto;
 use App\Domain\Dto\StudentSubject\GetMyStudentSubjectsDto;
+use App\Domain\Dto\StudentSubject\GetSSByIndexDto;
+use App\Domain\Entity\Semester;
 use App\Domain\Entity\StudentSubject;
 use App\Domain\Entity\Subject;
 use App\Domain\Entity\TeacherSubject;
 use App\Domain\Entity\User;
 use App\Domain\Repository\StudentSubjectRepositoryInterface;
-use App\Infrastructure\Db\Expr\SSIntersectionExpr;
-use App\Infrastructure\Db\Expr\SSRawIntersectionExpr;
+use App\Infrastructure\Db\Expr\SSIndexExpr;
+use App\Infrastructure\Db\Expr\SSRawIndexExpr;
 use ArrayIterator;
 use DateTimeImmutable;
 use Iterator;
@@ -155,25 +157,18 @@ class StudentSubjectRepository extends Common\AbstractRepository implements Stud
             );
     }
 
-    public function findAllByIntersections(array $intersections): Iterator
+    public function findByIndex(GetSSByIndexDto $index): StudentSubject|null
     {
-        if ($intersections === []) {
-            return new ArrayIterator([]);
-        }
         $q = Query::select()
-            ->from(['ss' => $this->getClassTable(StudentSubject::class)]);
-        foreach ($intersections as $index) {
-            $q->andWhere(new SSIntersectionExpr($index, 'ss'));
-        }
-        return new ArrayIterator(
-            $this->findAllByQuery(
-                $q,
-                StudentSubject::class,
-            ),
+            ->from(['ss' => $this->getClassTable(StudentSubject::class)])
+            ->where(new SSIndexExpr($index, 'ss'));
+        return $this->findOneByQuery(
+            $q,
+            StudentSubject::class,
         );
     }
 
-    public function findAllByRawIntersections(array $intersections): Iterator
+    public function findAllByRawIndexes(array $intersections): Iterator
     {
         if ($intersections === []) {
             return new ArrayIterator([]);
@@ -196,16 +191,21 @@ class StudentSubjectRepository extends Common\AbstractRepository implements Stud
             ->innerJoin(
                 ['s' => $this->getClassTable(Subject::class)],
                 's.id = ts.subject_id',
+            )
+            ->innerJoin(
+                ['sem' => $this->getClassTable(Semester::class)],
+                'sem.id = s.semester_id',
             );
         $conditions = [];
         foreach ($intersections as $index) {
-            $conditions[] = new SSRawIntersectionExpr(
+            $conditions[] = new SSRawIndexExpr(
                 $index,
                 'ss',
                 'ts',
                 'su',
                 'tu',
                 's',
+                'sem',
             );
         }
         $q->andWhere([

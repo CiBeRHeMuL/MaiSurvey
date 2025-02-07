@@ -20,6 +20,8 @@ readonly class MySurveyItem
         private Uuid $userId,
         #[ORM\Column(name: 'teacher_subject_id', type: 'uuid', nullable: true)]
         private Uuid|null $teacherSubjectId,
+        #[ORM\Column(name: 'student_subject_id', type: 'uuid', nullable: true)]
+        private Uuid|null $studentSubjectId,
         #[ORM\Column(type: 'integer', nullable: false)]
         private int $position,
         #[ORM\ManyToOne(targetEntity: SurveyItem::class)]
@@ -32,6 +34,9 @@ readonly class MySurveyItem
         #[ORM\ManyToOne(targetEntity: TeacherSubject::class)]
         #[ORM\JoinColumn(name: 'teacher_subject_id', referencedColumnName: 'id', nullable: true, onDelete: 'CASCADE')]
         private TeacherSubject|null $teacherSubject,
+        #[ORM\ManyToOne(targetEntity: StudentSubject::class)]
+        #[ORM\JoinColumn(name: 'student_subject_id', referencedColumnName: 'id', nullable: true, onDelete: 'CASCADE')]
+        private StudentSubject|null $studentSubject,
         #[ORM\ManyToOne(targetEntity: User::class)]
         #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
         private User $user,
@@ -58,6 +63,11 @@ readonly class MySurveyItem
         return $this->teacherSubjectId;
     }
 
+    public function getStudentSubjectId(): Uuid|null
+    {
+        return $this->studentSubjectId;
+    }
+
     public function getPosition(): int
     {
         return $this->position;
@@ -76,6 +86,11 @@ readonly class MySurveyItem
     public function getTeacherSubject(): TeacherSubject|null
     {
         return $this->teacherSubject;
+    }
+
+    public function getStudentSubject(): StudentSubject|null
+    {
+        return $this->studentSubject;
     }
 
     public function getUser(): User

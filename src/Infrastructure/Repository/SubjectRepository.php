@@ -44,7 +44,7 @@ class SubjectRepository extends AbstractRepository implements SubjectRepositoryI
         );
     }
 
-    public function findByName(string $name): Subject|null
+    public function findByIndex(string $name, Uuid $semesterId): Subject|null
     {
         $q = Query::select()
             ->select(['*'])
@@ -54,7 +54,8 @@ class SubjectRepository extends AbstractRepository implements SubjectRepositoryI
                     'lower(name) = :name',
                     ['name' => mb_strtolower($name)],
                 ),
-            );
+            )
+            ->andWhere(['semester_id' => $semesterId->toRfc4122()]);
         return $this->findOneByQuery($q, Subject::class);
     }
 
@@ -67,15 +68,15 @@ class SubjectRepository extends AbstractRepository implements SubjectRepositoryI
         return $this->findOneByQuery($q, Subject::class);
     }
 
-    public function findByNames(array $groupNames): Iterator
+    public function findByRawIndexes(array $indexes): Iterator
     {
         $q = Query::select()
             ->select(['*'])
             ->from($this->getClassTable(Subject::class))
             ->where(
                 new InExpr(
-                    'lower(name)',
-                    array_map(mb_strtolower(...), $groupNames),
+                    ['lower(name)'],
+                    array_map(mb_strtolower(...), $indexes),
                 )
             );
         yield from $this->findAllByQuery($q, Subject::class);

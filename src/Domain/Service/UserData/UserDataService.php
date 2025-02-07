@@ -82,7 +82,7 @@ class UserDataService
         if (!in_array($dto->getSortBy(), self::GET_ALL_SORT, true)) {
             throw ValidationException::new([
                 new ValidationError(
-                    'name',
+                    'sort_by',
                     ValidationErrorSlugEnum::WrongField->getSlug(),
                     sprintf('Сортировка доступна по полям: %s', implode(', ', self::GET_ALL_SORT)),
                 ),

@@ -48,6 +48,7 @@ enum RoleEnum: string
                 PermissionEnum::TeacherSubjectViewAll,
                 PermissionEnum::TeacherSubjectImport,
                 PermissionEnum::StudentSubjectImport,
+                PermissionEnum::SemesterCreate,
             ],
             self::Student => [
                 PermissionEnum::SurveyComplete,

@@ -27,6 +27,8 @@ nelmio_api_doc:
         description: Ручки для получения ролей
       - name: surveys
         description: Ручки для работы с опросами
+      - name: semesters
+        description: Ручки для работы с семестрами
     servers:
       - url: https://mai-survey.net
       - url: http://mai-survey.loc

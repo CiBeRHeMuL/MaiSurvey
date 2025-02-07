@@ -6,8 +6,8 @@ use App\Domain\DataProvider\DataProviderInterface;
 use App\Domain\Dto\StudentSubject\CreateStudentSubjectDto;
 use App\Domain\Dto\StudentSubject\GetAllStudentSubjectsDto;
 use App\Domain\Dto\StudentSubject\GetMyStudentSubjectsDto;
-use App\Domain\Dto\StudentSubject\GetSSByIntersectionDto;
-use App\Domain\Dto\StudentSubject\GetSSByIntersectionRawDto;
+use App\Domain\Dto\StudentSubject\GetSSByIndexDto;
+use App\Domain\Dto\StudentSubject\GetSSByIndexRawDto;
 use App\Domain\Entity\StudentSubject;
 use App\Domain\Entity\User;
 use App\Domain\Enum\ValidationErrorSlugEnum;
@@ -74,7 +74,7 @@ class StudentSubjectService
         if (!in_array($dto->getSortBy(), self::GET_ALL_SORT, true)) {
             throw ValidationException::new([
                 new ValidationError(
-                    'name',
+                    'sort_by',
                     ValidationErrorSlugEnum::WrongField->getSlug(),
                     sprintf('Сортировка доступна по полям: %s', implode(', ', self::GET_ALL_SORT)),
                 ),
@@ -87,18 +87,15 @@ class StudentSubjectService
     }
 
     /**
-     * @param GetSSByIntersectionDto[] $intersections
+     * @param GetSSByIndexDto $index
      *
-     * @return Iterator<int, StudentSubject>
+     * @return StudentSubject|null
      */
-    public function getAllByIntersections(array $intersections): Iterator
+    public function getByIndex(GetSSByIndexDto $index): StudentSubject|null
     {
-        if ($intersections === []) {
-            return new ArrayIterator();
-        }
         return $this
             ->userSubjectRepository
-            ->findAllByIntersections($intersections);
+            ->findByIndex($index);
     }
 
     /**
@@ -168,32 +165,16 @@ class StudentSubjectService
                 ),
             ]);
         }
-        if ($dto->getActualTo()->getTimestamp() <= $dto->getActualFrom()->getTimestamp()) {
-            throw ValidationException::new([
-                new ValidationError(
-                    'actual_from',
-                    ValidationErrorSlugEnum::WrongField->getSlug(),
-                    'Временной промежуток действия предмета должен быть корректным',
-                ),
-                new ValidationError(
-                    'actual_to',
-                    ValidationErrorSlugEnum::WrongField->getSlug(),
-                    'Временной промежуток действия предмета должен быть корректным',
-                ),
-            ]);
-        }
 
         if ($checkExisting) {
             $existing = $this
-                ->getAllByIntersections([
-                    new GetSSByIntersectionDto(
+                ->getByIndex(
+                    new GetSSByIndexDto(
                         $dto->getStudent()->getId(),
                         $dto->getTeacherSubject()->getId(),
-                        $dto->getActualFrom(),
-                        $dto->getActualTo(),
                     ),
-                ]);
-            if (iterator_count($existing)) {
+                );
+            if ($existing !== null) {
                 throw ValidationException::new([
                     new ValidationError(
                         'user_id',
@@ -211,18 +192,18 @@ class StudentSubjectService
     }
 
     /**
-     * @param GetSSByIntersectionRawDto[] $intersections
+     * @param GetSSByIndexRawDto[] $indexes
      *
      * @return Iterator<int, StudentSubject>
      */
-    public function getAllByRawIntersections(array $intersections): Iterator
+    public function getAllByRawIndexes(array $indexes): Iterator
     {
-        if ($intersections === []) {
+        if ($indexes === []) {
             return new ArrayIterator();
         }
         return $this
             ->userSubjectRepository
-            ->findAllByRawIntersections($intersections);
+            ->findAllByRawIndexes($indexes);
     }
 
     private function entityFromCreateDto(CreateStudentSubjectDto $dto): StudentSubject
@@ -231,8 +212,6 @@ class StudentSubjectService
         return $studentSubject
             ->setUserId($dto->getStudent()->getId())
             ->setTeacherSubjectId($dto->getTeacherSubject()->getId())
-            ->setActualFrom($dto->getActualFrom())
-            ->setActualTo($dto->getActualTo())
             ->setCreatedAt(new DateTimeImmutable())
             ->setUpdatedAt(new DateTimeImmutable())
             ->setUser($dto->getStudent())

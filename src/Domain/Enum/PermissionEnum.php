@@ -44,4 +44,7 @@ enum PermissionEnum: string
     case TeacherSubjectViewAll = 'teacher_subject.view_all';
     case TeacherSubjectViewMy = 'teacher_subject.view_my';
     case TeacherSubjectImport = 'teacher_subject.import';
+
+    // Semester
+    case SemesterCreate = 'semester.create';
 }

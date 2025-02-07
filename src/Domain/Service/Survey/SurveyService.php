@@ -60,7 +60,7 @@ class SurveyService
         if (!in_array($dto->getSortBy(), self::GET_MY_SORT, true)) {
             throw ValidationException::new([
                 new ValidationError(
-                    'name',
+                    'sort_by',
                     ValidationErrorSlugEnum::WrongField->getSlug(),
                     sprintf('Сортировка доступна по полям: %s', implode(', ', self::GET_MY_SORT)),
                 ),
@@ -144,14 +144,10 @@ class SurveyService
         $entity = new Survey();
         $entity
             ->setTitle(trim($dto->getTitle()))
-            ->setSubjectId($dto->getSubjectId())
+            ->setSubjectId($dto->getSubject()->getId())
             ->setActualTo($dto->getActualTo())
             ->setCreatedAt(new DateTimeImmutable())
-            ->setSubject(
-                $this
-                    ->subjectService
-                    ->getById($dto->getSubjectId()),
-            );
+            ->setSubject($dto->getSubject());
         return $entity;
     }
 
@@ -166,15 +162,13 @@ class SurveyService
                 ),
             ]);
         }
-        $subject = $this
-            ->subjectService
-            ->getById($dto->getSubjectId());
-        if ($subject === null) {
+
+        if ($dto->getActualTo()->getTimestamp() <= $dto->getSubject()->getSemester()->getDateEnd()) {
             throw ValidationException::new([
                 new ValidationError(
-                    'subject_id',
-                    ValidationErrorSlugEnum::NotFound->getSlug(),
-                    'Предмет не найден',
+                    'actual_to',
+                    ValidationErrorSlugEnum::WrongField->getSlug(),
+                    'Дата окончания актуальности опроса должна быть больше даты окончания семестра',
                 ),
             ]);
         }

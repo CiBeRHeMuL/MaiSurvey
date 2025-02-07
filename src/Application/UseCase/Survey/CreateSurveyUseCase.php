@@ -10,7 +10,12 @@ use App\Domain\Dto\Survey\CreateSurveyDto as DomainCreateSurveyDto;
 use App\Domain\Entity\Survey;
 use App\Domain\Enum\SurveyItemTypeEnum;
 use App\Domain\Enum\TeacherSubjectTypeEnum;
+use App\Domain\Enum\ValidationErrorSlugEnum;
+use App\Domain\Exception\ValidationException;
+use App\Domain\Service\Semester\SemesterService;
+use App\Domain\Service\Subject\SubjectService;
 use App\Domain\Service\Survey\SurveyService;
+use App\Domain\Validation\ValidationError;
 use DateTimeImmutable;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Uid\Uuid;
@@ -22,6 +27,8 @@ class CreateSurveyUseCase
     public function __construct(
         LoggerInterface $logger,
         private SurveyService $surveyService,
+        private SubjectService $subjectService,
+        private SemesterService $semesterService,
     ) {
         $this->setLogger($logger);
     }
@@ -30,17 +37,31 @@ class CreateSurveyUseCase
     {
         $this->logger = $logger;
         $this->surveyService->setLogger($logger);
+        $this->semesterService->setLogger($logger);
+        $this->subjectService->setLogger($logger);
         return $this;
     }
 
     public function execute(CreateSurveyDto $dto): Survey
     {
+        $subjectId = new Uuid($dto->subject_id);
+
+        $subject = $this->subjectService->getById($subjectId);
+        if ($subject === null) {
+            throw ValidationException::new([
+                new ValidationError(
+                    'subject_id',
+                    ValidationErrorSlugEnum::NotFound->getSlug(),
+                    'Предмет не найден',
+                ),
+            ]);
+        }
+
         return $this
             ->surveyService
             ->create(
                 new DomainCreateSurveyDto(
                     $dto->title,
-                    new Uuid($dto->subject_id),
                     new DateTimeImmutable($dto->actual_to),
                     array_map(
                         fn(CreateItemDto $item) => new DomainCreateItemDto(
@@ -55,6 +76,7 @@ class CreateSurveyUseCase
                         ),
                         $dto->items,
                     ),
+                    $subject,
                 ),
             );
     }

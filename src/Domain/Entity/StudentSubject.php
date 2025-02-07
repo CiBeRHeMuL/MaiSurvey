@@ -9,6 +9,7 @@ use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity]
 #[ORM\Table('student_subject')]
+#[ORM\UniqueConstraint(columns: ['user_id', 'teacher_subject_id', 'semester_id'])]
 class StudentSubject
 {
     #[ORM\Id]
@@ -20,10 +21,8 @@ class StudentSubject
     private Uuid $userId;
     #[ORM\Column(name: 'teacher_subject_id', type: 'uuid', nullable: false)]
     private Uuid $teacherSubjectId;
-    #[ORM\Column(name: 'actual_from', type: 'datetime_immutable', nullable: false)]
-    private DateTimeImmutable $actualFrom;
-    #[ORM\Column(name: 'actual_to', type: 'datetime_immutable', nullable: false)]
-    private DateTimeImmutable $actualTo;
+    #[ORM\Column(name: 'semester_id', type: 'uuid', nullable: false)]
+    private Uuid $semesterId;
     #[ORM\Column(name: 'created_at', type: 'datetime_immutable', nullable: false, options: ['default' => 'CURRENT_TIMESTAMP'])]
     private DateTimeImmutable $createdAt;
     #[ORM\Column(name: 'updated_at', type: 'datetime_immutable', nullable: false, options: ['default' => 'CURRENT_TIMESTAMP'])]
@@ -35,6 +34,9 @@ class StudentSubject
     #[ORM\ManyToOne(targetEntity: TeacherSubject::class, inversedBy: 'students')]
     #[ORM\JoinColumn(name: 'teacher_subject_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
     private TeacherSubject $teacherSubject;
+    #[ORM\ManyToOne(targetEntity: Semester::class)]
+    #[ORM\JoinColumn(name: 'semester_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
+    private Semester $semester;
 
     public function getId(): Uuid
     {
@@ -69,25 +71,9 @@ class StudentSubject
         return $this;
     }
 
-    public function getActualFrom(): DateTimeImmutable
+    public function setSemesterId(Uuid $semesterId): StudentSubject
     {
-        return $this->actualFrom;
-    }
-
-    public function setActualFrom(DateTimeImmutable $actualFrom): StudentSubject
-    {
-        $this->actualFrom = $actualFrom;
-        return $this;
-    }
-
-    public function getActualTo(): DateTimeImmutable
-    {
-        return $this->actualTo;
-    }
-
-    public function setActualTo(DateTimeImmutable $actualTo): StudentSubject
-    {
-        $this->actualTo = $actualTo;
+        $this->semesterId = $semesterId;
         return $this;
     }
 
@@ -142,6 +128,12 @@ class StudentSubject
     public function setTeacherSubject(TeacherSubject $teacherSubject): StudentSubject
     {
         $this->teacherSubject = $teacherSubject;
+        return $this;
+    }
+
+    public function setSemester(Semester $semester): StudentSubject
+    {
+        $this->semester = $semester;
         return $this;
     }
 }

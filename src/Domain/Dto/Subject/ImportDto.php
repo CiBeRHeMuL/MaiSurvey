@@ -8,6 +8,8 @@ readonly class ImportDto
         private string $file,
         private bool $headersInFirstRow,
         private string $nameCol,
+        private string $yearCol,
+        private string $semesterCol,
     ) {
     }
 
@@ -24,5 +26,15 @@ readonly class ImportDto
     public function getNameCol(): string
     {
         return $this->nameCol;
+    }
+
+    public function getSemesterCol(): string
+    {
+        return $this->semesterCol;
+    }
+
+    public function getYearCol(): string
+    {
+        return $this->yearCol;
     }
 }

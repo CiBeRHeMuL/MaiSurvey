@@ -34,6 +34,7 @@ class SubjectController extends BaseController
 {
     /** Получить список предметов с фильтрацией и пагинацией. */
     #[Route('/subjects', name: 'get-all-subjects', methods: ['GET'])]
+    #[IsGranted('IS_AUTHENTICATED', statusCode: 404, exceptionCode: 404)]
     #[OA\Tag('subjects')]
     #[LOA\ErrorResponse(500)]
     #[LOA\ValidationResponse]
@@ -119,6 +120,8 @@ class SubjectController extends BaseController
                 $file->getPathname(),
                 $dto->headers_in_first_row,
                 $dto->name_col,
+                $dto->year_col,
+                $dto->semester_col,
             ),
         );
         return Response::success(

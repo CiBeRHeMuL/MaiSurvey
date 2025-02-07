@@ -2,8 +2,11 @@
 
 namespace App\Domain\Service\Subject;
 
+use App\Domain\Dto\Semester\GetSemesterByIndexDto;
 use App\Domain\Dto\Subject\CreateSubjectDto;
+use App\Domain\Dto\Subject\GetByRawIndexDto;
 use App\Domain\Dto\Subject\ImportDto;
+use App\Domain\Entity\Semester;
 use App\Domain\Entity\Subject;
 use App\Domain\Enum\ValidationErrorSlugEnum;
 use App\Domain\Exception\ErrorException;
@@ -11,6 +14,7 @@ use App\Domain\Exception\ValidationException;
 use App\Domain\Helper\HArray;
 use App\Domain\Service\Db\TransactionManagerInterface;
 use App\Domain\Service\FileReader\FileReaderInterface;
+use App\Domain\Service\Semester\SemesterService;
 use App\Domain\Validation\ValidationError;
 use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
@@ -25,6 +29,7 @@ class SubjectsImporter
         private TransactionManagerInterface $transactionManager,
         private SubjectService $subjectService,
         private FileReaderInterface $dataImport,
+        private SemesterService $semesterService,
     ) {
         $this->setLogger($logger);
     }
@@ -33,6 +38,7 @@ class SubjectsImporter
     {
         $this->logger = $logger;
         $this->subjectService->setLogger($logger);
+        $this->semesterService->setLogger($logger);
         return $this;
     }
 
@@ -54,15 +60,113 @@ class SubjectsImporter
 
         $validationErrorTemplate = 'Некорректное содержимое файла. Ошибка в строке %d: %s';
 
+        $errorGenerator = function (int $k, string $error) use (&$validationErrorTemplate): ValidationError {
+            return new ValidationError(
+                'file',
+                ValidationErrorSlugEnum::WrongFile->getSlug(),
+                sprintf(
+                    $validationErrorTemplate,
+                    $k,
+                    $error,
+                ),
+            );
+        };
+
         /** @var array<string, CreateSubjectDto> $createDtos */
         $createDtos = [];
         // Мапа название -> номер строки. Для вывода ошибки
-        $nameToRow = [];
+        $existingRows = [];
         $names = [];
+        /** @var GetSemesterByIndexDto[] $semesterIndexes */
+        $semesterIndexes = [];
+        /** @var GetByRawIndexDto[] $indexes */
+        $indexes = [];
         foreach ($this->dataImport->getRows($firstRow, $this->dataImport->getHighestRow()) as $k => $row) {
-            $name = $row[$dto->getNameCol()] ?? '';
-            $name = trim($name);
-            if (isset($nameToRow[$name])) {
+            $name = trim($row[$dto->getNameCol()] ?? '');
+            $year = trim($row[$dto->getYearCol()] ?? '');
+            $semesterNumber = trim($row[$dto->getSemesterCol()] ?? '');
+
+            $hash = md5("$name$year$semesterNumber");
+            if (isset($existingRows[$hash])) {
+                throw ValidationException::new([
+                    $errorGenerator(
+                        $k,
+                        sprintf(
+                            'повторяющийся набор данных, такой набор уже был указан в строке %d',
+                            $existingRows[$hash],
+                        ),
+                    ),
+                ]);
+            }
+
+            if (!ctype_digit($year) && strlen($year) !== 4) {
+                throw ValidationException::new([
+                    $errorGenerator(
+                        $k,
+                        'год указан неверно. Укажите год 4-мя цифрами',
+                    ),
+                ]);
+            }
+            $year = (int)$year;
+
+            if (!ctype_digit($semesterNumber) && !in_array($semesterNumber, ['1', '2'])) {
+                throw ValidationException::new([
+                    $errorGenerator(
+                        $k,
+                        'семестр указан неверно. Укажите его одной цифрой (1 - весенний семестр, 2 - осенний семестр)',
+                    ),
+                ]);
+            }
+            $semesterNumber = (int)$semesterNumber;
+            $isSpringSemester = (bool)($semesterNumber % 2);
+
+            $existingRows[$hash] = $k;
+            $names[$k] = $name;
+            $semesterIndex = new GetSemesterByIndexDto(
+                $year,
+                $isSpringSemester,
+            );
+            $indexes[] = new GetByRawIndexDto(
+                $name,
+                $semesterIndex,
+            );
+            $semesterIndexes[] = $semesterIndex;
+        }
+
+        $semesters = $this
+            ->semesterService
+            ->getByIndexes($semesterIndexes);
+        $semesters = HArray::index(
+            $semesters,
+            function (Semester $s) {
+                $year = $s->getYear();
+                $isSpring = (int)$s->isSpring();
+                return md5("$year$isSpring");
+            },
+        );
+
+        $existingSubjects = $this
+            ->subjectService
+            ->getByIndexes($indexes);
+        $existingSubjects = HArray::index(
+            $existingSubjects,
+            function (Subject $s) {
+                $name = $s->getName();
+                $year = $s->getSemester()->getYear();
+                $isSpring = (int)$s->getSemester()->isSpring();
+                return md5("$name$year$isSpring");
+            },
+        );
+
+        foreach ($this->dataImport->getRows($firstRow, $this->dataImport->getHighestRow()) as $k => $row) {
+            $name = trim($row[$dto->getNameCol()] ?? '');
+            $year = trim($row[$dto->getYearCol()] ?? '');
+            $semesterNumber = ((int)trim($row[$dto->getSemesterCol()] ?? '') % 2);
+
+            $semHash = md5("$year$semesterNumber");
+
+            $semester = $semesters[$semHash] ?? null;
+            if ($semester === null) {
                 throw ValidationException::new([
                     new ValidationError(
                         'file',
@@ -70,28 +174,14 @@ class SubjectsImporter
                         sprintf(
                             $validationErrorTemplate,
                             $k - 1 + $firstRow,
-                            sprintf(
-                                'повторяющееся название предмета, такой предмет уже был указан в строке %d',
-                                $nameToRow[$name] - 1 + $firstRow,
-                            ),
+                            'семестр не найден',
                         ),
                     ),
                 ]);
             }
-            $nameToRow[$name] = $k;
-            $names[$k] = $name;
-        }
 
-        $existingSubjects = $this
-            ->subjectService
-            ->getByNames($names);
-        $existingSubjects = HArray::index(
-            $existingSubjects,
-            fn(Subject $s) => $s->getName(),
-        );
-
-        foreach ($names as $k => $name) {
-            if (isset($existingSubjects[$name])) {
+            $hash = md5("$name$year$semesterNumber");
+            if (isset($existingSubjects[$hash])) {
                 throw ValidationException::new([
                     new ValidationError(
                         'file',
@@ -107,6 +197,7 @@ class SubjectsImporter
 
             $createDto = new CreateSubjectDto(
                 $name,
+                $semester,
             );
 
             try {

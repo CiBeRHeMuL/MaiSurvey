@@ -2,17 +2,16 @@
 
 namespace App\Domain\Dto\StudentSubject;
 
+use App\Domain\Dto\Semester\GetSemesterByIndexDto;
 use App\Domain\Dto\TeacherSubject\GetTSByIndexRawDto;
 use App\Domain\ValueObject\Email;
-use DateTimeImmutable;
 
-readonly class GetSSByIntersectionRawDto
+readonly class GetSSByIndexRawDto
 {
     public function __construct(
         private Email $studentEmail,
         private GetTSByIndexRawDto $teacherSubjectDto,
-        private DateTimeImmutable $actualFrom,
-        private DateTimeImmutable $actualTo,
+        private GetSemesterByIndexDto $semesterDto,
     ) {
     }
 
@@ -26,13 +25,8 @@ readonly class GetSSByIntersectionRawDto
         return $this->teacherSubjectDto;
     }
 
-    public function getActualFrom(): DateTimeImmutable
+    public function getSemesterDto(): GetSemesterByIndexDto
     {
-        return $this->actualFrom;
-    }
-
-    public function getActualTo(): DateTimeImmutable
-    {
-        return $this->actualTo;
+        return $this->semesterDto;
     }
 }

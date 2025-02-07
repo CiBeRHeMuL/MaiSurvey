@@ -2,11 +2,13 @@
 
 namespace App\Domain\Service\StudentSubject;
 
+use App\Domain\Dto\Semester\GetSemesterByIndexDto;
 use App\Domain\Dto\StudentSubject\CreatedStudentSubjectsInfo;
 use App\Domain\Dto\StudentSubject\CreateStudentSubjectDto;
-use App\Domain\Dto\StudentSubject\GetSSByIntersectionRawDto;
+use App\Domain\Dto\StudentSubject\GetSSByIndexRawDto;
 use App\Domain\Dto\StudentSubject\ImportDto;
 use App\Domain\Dto\TeacherSubject\GetTSByIndexRawDto;
+use App\Domain\Entity\Semester;
 use App\Domain\Entity\StudentSubject;
 use App\Domain\Entity\TeacherSubject;
 use App\Domain\Entity\User;
@@ -15,6 +17,7 @@ use App\Domain\Enum\ValidationErrorSlugEnum;
 use App\Domain\Exception\ErrorException;
 use App\Domain\Exception\ValidationException;
 use App\Domain\Helper\HArray;
+use App\Domain\Repository\SemesterRepositoryInterface;
 use App\Domain\Service\Db\TransactionManagerInterface;
 use App\Domain\Service\FileReader\FileReaderInterface;
 use App\Domain\Service\Subject\SubjectService;
@@ -23,7 +26,6 @@ use App\Domain\Service\User\UserService;
 use App\Domain\Validation\ValidationError;
 use App\Domain\ValueObject\Email;
 use ArrayIterator;
-use DateTimeImmutable;
 use InvalidArgumentException;
 use Iterator;
 use Psr\Log\LoggerInterface;
@@ -40,6 +42,7 @@ class StudentSubjectsImporter
         private UserService $userService,
         private FileReaderInterface $dataImport,
         private TransactionManagerInterface $transactionManager,
+        private SemesterRepositoryInterface $semesterRepository,
         LoggerInterface $logger,
     ) {
         $this->setLogger($logger);
@@ -124,17 +127,19 @@ class StudentSubjectsImporter
         $existingRows = [];
         /** @var GetTSByIndexRawDto[] $teacherSubjectIndexes */
         $teacherSubjectIndexes = [];
-        /** @var GetSSByIntersectionRawDto[] $studentSubjectIntersectionIndexes */
+        /** @var GetSSByIndexRawDto[] $studentSubjectIntersectionIndexes */
         $studentSubjectIntersectionIndexes = [];
+        /** @var GetSemesterByIndexDto[] $semesterIndexes */
+        $semesterIndexes = [];
         foreach ($data as $k => $row) {
             $studentEmail = trim($row[$dto->getStudentEmailCol()] ?? '');
             $teacherEmail = trim($row[$dto->getTeacherEmailCol()] ?? '');
             $subject = trim($row[$dto->getSubjectCol()] ?? '');
             $type = trim($row[$dto->getTypeCol()] ?? '');
-            $actualFrom = trim($row[$dto->getActualFromCol()] ?? '');
-            $actualTo = trim($row[$dto->getActualToCol()] ?? '');
+            $year = trim($row[$dto->getYearCol()] ?? '');
+            $semesterNumber = trim($row[$dto->getSemesterCol()] ?? '');
 
-            $hash = md5("$studentEmail$teacherEmail$subject$type");
+            $hash = md5("$studentEmail$teacherEmail$subject$type$year$semesterNumber");
             if (isset($existingRows[$hash])) {
                 throw ValidationException::new([
                     $errorGenerator(
@@ -182,60 +187,48 @@ class StudentSubjectsImporter
                 ]);
             }
 
-            try {
-                $actualFromObj = DateTimeImmutable::createFromFormat('d/m/Y', $actualFrom);
-                if ($actualFromObj === false) {
-                    $actualFromObj = new DateTimeImmutable($actualFrom);
-                } else {
-                    $actualFromObj->setTime(0, 0, 0);
-                }
-                $actualFrom = $actualFromObj;
-            } catch (Throwable $e) {
+            if (!ctype_digit($year) && strlen($year) !== 4) {
                 throw ValidationException::new([
                     $errorGenerator(
                         $k,
-                        'некорректный формат даты начала актуальности',
+                        'год указан неверно. Укажите год 4-мя цифрами',
                     ),
                 ]);
             }
+            $year = (int)$year;
 
-            try {
-                $actualToObj = DateTimeImmutable::createFromFormat('d/m/Y', $actualTo);
-                if ($actualToObj === false) {
-                    $actualToObj = new DateTimeImmutable($actualTo);
-                } else {
-                    $actualToObj->setTime(0, 0, 0);
-                }
-                $actualTo = $actualToObj;
-            } catch (Throwable $e) {
+            if (!ctype_digit($semesterNumber) && !in_array($semesterNumber, ['1', '2'])) {
                 throw ValidationException::new([
                     $errorGenerator(
                         $k,
-                        'некорректный формат даты конца актуальности',
+                        'семестр указан неверно. Укажите его одной цифрой (1 - весенний семестр, 2 - осенний семестр)',
                     ),
                 ]);
             }
-
-            if ($actualTo->getTimestamp() <= $actualFrom->getTimestamp()) {
-                throw ValidationException::new([
-                    $errorGenerator(
-                        $k,
-                        'дата окончания актуальности предмета должна быть больше даты начала актуальности',
-                    ),
-                ]);
-            }
+            $semesterNumber = (int)$semesterNumber;
+            $isSpringSemester = (bool)($semesterNumber % 2);
 
             $teacherSubjectIndex = new GetTSByIndexRawDto(
                 $teacherEmail,
                 $subject,
                 $type,
+                new GetSemesterByIndexDto(
+                    $year,
+                    $isSpringSemester,
+                ),
             );
             $teacherSubjectIndexes[] = $teacherSubjectIndex;
-            $studentSubjectIntersectionIndexes[] = new GetSSByIntersectionRawDto(
+            $studentSubjectIntersectionIndexes[] = new GetSSByIndexRawDto(
                 $studentEmail,
                 $teacherSubjectIndex,
-                $actualFrom,
-                $actualTo,
+                new GetSemesterByIndexDto(
+                    $year,
+                    $isSpringSemester,
+                ),
+            );
+            $semesterIndexes[] = new GetSemesterByIndexDto(
+                $year,
+                $isSpringSemester,
             );
         }
 
@@ -247,7 +240,10 @@ class StudentSubjectsImporter
             ->getAllByRawIndexes($teacherSubjectIndexes);
         $studentSubjects = $this
             ->studentSubjectService
-            ->getAllByRawIntersections($studentSubjectIntersectionIndexes);
+            ->getAllByRawIndexes($studentSubjectIntersectionIndexes);
+        $semesters = $this
+            ->semesterRepository
+            ->findAllByIndexes($semesterIndexes);
 
         /** @var array<string, User> $students */
         $students = HArray::index(
@@ -261,7 +257,9 @@ class StudentSubjectsImporter
                 $teacherEmail = $ts->getTeacher()->getEmail()->getEmail();
                 $subject = $ts->getSubject()->getName();
                 $type = $ts->getType()->value;
-                return md5("$teacherEmail$subject$type");
+                $semYear = $ts->getSubject()->getSemester()->getYear();
+                $semSpring = (int)$ts->getSubject()->getSemester()->isSpring();
+                return md5("$teacherEmail$subject$type$semYear$semSpring");
             },
         );
         /** @var array<string, StudentSubject> $studentSubjects */
@@ -272,8 +270,15 @@ class StudentSubjectsImporter
                 $teacherEmail = $ss->getTeacher()->getEmail()->getEmail();
                 $subject = $ss->getSubject()->getName();
                 $type = $ss->getTeacherSubject()->getType()->value;
-                return md5("$studentEmail$teacherEmail$subject$type");
+                $year = $ss->getSubject()->getSemester()->getYear();
+                $semesterNumber = (int)$ss->getSubject()->getSemester()->isSpring();
+                return md5("$studentEmail$teacherEmail$subject$type$year$semesterNumber");
             },
+        );
+        /** @var array<string, Semester> $semesters */
+        $semesters = HArray::index(
+            $semesters,
+            fn(Semester $s) => md5("{$s->getYear()}" . (int)$s->isSpring()),
         );
 
         /** @var CreateStudentSubjectDto[] $createDtos */
@@ -284,8 +289,8 @@ class StudentSubjectsImporter
             $teacherEmail = trim($row[$dto->getTeacherEmailCol()]);
             $subject = trim($row[$dto->getSubjectCol()]);
             $type = trim($row[$dto->getTypeCol()]);
-            $actualFrom = trim($row[$dto->getActualFromCol()]);
-            $actualTo = trim($row[$dto->getActualToCol()]);
+            $year = (int)trim($row[$dto->getYearCol()]);
+            $semesterNumber = (int)trim($row[$dto->getSemesterCol()]) % 2;
 
             $student = $students[$studentEmail] ?? null;
             if ($student === null || $student->isStudent() === false) {
@@ -297,8 +302,19 @@ class StudentSubjectsImporter
                 ]);
             }
 
-            $ssHash = md5("$studentEmail$teacherEmail$subject$type");
-            $tsHash = md5("$teacherEmail$subject$type");
+            $semHash = md5("$year$semesterNumber");
+            $ssHash = md5("$studentEmail$teacherEmail$subject$type$year$semesterNumber");
+            $tsHash = md5("$teacherEmail$subject$type$year$semesterNumber");
+
+            $semester = $semesters[$semHash] ?? null;
+            if ($semester === null) {
+                throw ValidationException::new([
+                    $errorGenerator(
+                        $k,
+                        'семестр не найден',
+                    ),
+                ]);
+            }
 
             $existingSs = $studentSubjects[$ssHash] ?? null;
             if ($existingSs) {
@@ -309,11 +325,7 @@ class StudentSubjectsImporter
                     throw ValidationException::new([
                         $errorGenerator(
                             $k,
-                            sprintf(
-                                'студент уже ходит на этот предмет с %s по %s',
-                                $existingSs->getActualFrom()->format('Y-m-d'),
-                                $existingSs->getActualTo()->format('Y-m-d'),
-                            ),
+                            'студент уже ходит на этот предмет в указанном семестре',
                         ),
                     ]);
                 }
@@ -335,8 +347,6 @@ class StudentSubjectsImporter
             $createDtos[] = new CreateStudentSubjectDto(
                 $student,
                 $ts,
-                new DateTimeImmutable($actualFrom),
-                new DateTimeImmutable($actualTo),
             );
         }
 

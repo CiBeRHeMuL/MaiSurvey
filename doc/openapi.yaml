@@ -2479,12 +2479,12 @@ components:
           title: 'Столбец с типом предмета'
           type: string
           default: D
-        actual_from_col:
-          title: 'Столбец с датой начала актуальности предмета'
+        year_col:
+          title: 'Столбец с годом'
           type: string
           default: E
-        actual_to_col:
-          title: 'Столбец с датой окончания актуальности предмета'
+        semester_col:
+          title: 'Столбец с номером семестра (1 - весенний, 2 - осенний)'
           type: string
           default: F
         skip_if_exists:
@@ -2514,12 +2514,12 @@ components:
           title: 'Столбец с типом предмета'
           type: string
           default: D
-        actual_from_col:
-          title: 'Столбец с датой начала актуальности предмета'
+        year_col:
+          title: 'Столбец с годом'
           type: string
           default: E
-        actual_to_col:
-          title: 'Столбец с датой окончания актуальности предмета'
+        semester_col:
+          title: 'Столбец с номером семестра (1 - весенний, 2 - осенний)'
           type: string
           default: F
         skip_if_exists:
@@ -3302,6 +3302,8 @@ components:
         - survey
         - completed
         - teacher_subjects
+        - studying_from
+        - studying_to
       properties:
         survey:
           $ref: '#/components/schemas/LiteSurvey'
@@ -3315,12 +3317,20 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/TeacherSubject'
+        studying_from:
+          type: string
+          format: date
+        studying_to:
+          type: string
+          format: date
       type: object
     MySurvey:
       required:
         - survey
         - completed
         - teacher_subjects
+        - studying_from
+        - studying_to
       properties:
         survey:
           $ref: '#/components/schemas/Survey'
@@ -3334,6 +3344,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/TeacherSubject'
+        studying_from:
+          type: string
+          format: date
+        studying_to:
+          type: string
+          format: date
       type: object
     Survey:
       required:

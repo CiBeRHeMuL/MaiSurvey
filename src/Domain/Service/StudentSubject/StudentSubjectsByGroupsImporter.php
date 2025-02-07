@@ -127,8 +127,8 @@ class StudentSubjectsByGroupsImporter
                     $dto->getTeacherEmailCol() => $row[$dto->getTeacherEmailCol()] ?? '',
                     $dto->getSubjectCol() => $row[$dto->getSubjectCol()] ?? '',
                     $dto->getTypeCol() => $row[$dto->getTypeCol()] ?? '',
-                    $dto->getActualFromCol() => $row[$dto->getActualFromCol()] ?? '',
-                    $dto->getActualToCol() => $row[$dto->getActualToCol()] ?? '',
+                    $dto->getYearCol() => $row[$dto->getYearCol()] ?? '',
+                    $dto->getSemesterCol() => $row[$dto->getSemesterCol()] ?? '',
                 ];
             }
         }
@@ -146,8 +146,8 @@ class StudentSubjectsByGroupsImporter
                     $dto->getTeacherEmailCol(),
                     $dto->getSubjectCol(),
                     $dto->getTypeCol(),
-                    $dto->getActualFromCol(),
-                    $dto->getActualToCol(),
+                    $dto->getYearCol(),
+                    $dto->getSemesterCol(),
                     $dto->isSkipIfExists(),
                 ),
                 new ArrayIterator($data),
