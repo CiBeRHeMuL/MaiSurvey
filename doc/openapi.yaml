@@ -1140,7 +1140,7 @@ paths:
           schema:
             title: 'Сортировка по'
             type: string
-            default: created_at
+            default: name
             enum:
               - name
               - completed
@@ -2787,7 +2787,7 @@ components:
         sort_by:
           title: 'Сортировка по'
           type: string
-          default: created_at
+          default: name
           enum:
             - name
             - completed

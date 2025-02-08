@@ -24,7 +24,7 @@ readonly class GetMySurveysDto
         /** Сортировка по */
         #[Assert\Type('string', message: 'Значение должно быть строкой')]
         #[Assert\Choice(choices: SurveyService::GET_MY_SORT, message: 'Значение должно входить в список допустимых')]
-        public string $sort_by = 'created_at',
+        public string $sort_by = 'name',
         /** Тип сортировки */
         #[Assert\Type('string', message: 'Значение должно быть строкой')]
         #[LAssert\EnumChoice(enum: SortTypeEnum::class, message: 'Значение должно входить в список допустимых')]
