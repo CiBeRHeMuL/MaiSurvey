@@ -1152,7 +1152,7 @@ paths:
           schema:
             title: 'Тип сортировки'
             type: string
-            default: desc
+            default: asc
             enum:
               - asc
               - desc
@@ -2795,7 +2795,7 @@ components:
         sort_type:
           title: 'Тип сортировки'
           type: string
-          default: desc
+          default: asc
           enum:
             - asc
             - desc
