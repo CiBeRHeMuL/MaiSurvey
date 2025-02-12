@@ -24,7 +24,6 @@ use App\Presentation\Web\Response\Response;
 use OpenApi\Attributes as OA;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Attribute\MapQueryString;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
@@ -106,9 +105,7 @@ class SurveyController extends BaseController
         CompleteSurveyUseCase $useCase,
         #[MapRequestPayload('json', type: CompleteSurveyItemDto::class)]
         array $answers,
-        Request $request,
     ): JsonResponse {
-        $logger->error($request->getRequestUri());
         $useCase->setLogger($logger);
         $useCase->execute(
             $this->getUser()->getUser(),
