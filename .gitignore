@@ -1,4 +1,5 @@
 /.idea/
+/pgdata
 
 ###> symfony/framework-bundle ###
 /.env.local
