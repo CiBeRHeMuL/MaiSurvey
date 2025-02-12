@@ -48,7 +48,7 @@ when@prod:
       app:
         type: rotating_file
         path: '%kernel.logs_dir%/error.log'
-        level: debug
+        level: error
         max_files: 30
         channels: [ "!event" ]
       console:
@@ -57,10 +57,10 @@ when@prod:
         channels: [ "!event", "!doctrine", "!deprecation" ]
       filter_for_telegram:
         type: fingers_crossed
-        action_level: debug
+        action_level: error
         handler: telegram_error
         excluded_http_codes: [ 401, 403, 404, 405 ]
       telegram_error:
         type: service
         id: monolog.custom_handlers.telegram.error
-        level: debug
+        level: error
