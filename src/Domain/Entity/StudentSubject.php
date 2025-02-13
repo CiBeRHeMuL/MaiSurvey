@@ -9,7 +9,7 @@ use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity]
 #[ORM\Table('student_subject')]
-#[ORM\UniqueConstraint(columns: ['user_id', 'teacher_subject_id', 'semester_id'])]
+#[ORM\UniqueConstraint(columns: ['user_id', 'teacher_subject_id'])]
 class StudentSubject
 {
     #[ORM\Id]
@@ -21,8 +21,6 @@ class StudentSubject
     private Uuid $userId;
     #[ORM\Column(name: 'teacher_subject_id', type: 'uuid', nullable: false)]
     private Uuid $teacherSubjectId;
-    #[ORM\Column(name: 'semester_id', type: 'uuid', nullable: false)]
-    private Uuid $semesterId;
     #[ORM\Column(name: 'created_at', type: 'datetime_immutable', nullable: false, options: ['default' => 'CURRENT_TIMESTAMP'])]
     private DateTimeImmutable $createdAt;
     #[ORM\Column(name: 'updated_at', type: 'datetime_immutable', nullable: false, options: ['default' => 'CURRENT_TIMESTAMP'])]
@@ -34,9 +32,6 @@ class StudentSubject
     #[ORM\ManyToOne(targetEntity: TeacherSubject::class, inversedBy: 'students')]
     #[ORM\JoinColumn(name: 'teacher_subject_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
     private TeacherSubject $teacherSubject;
-    #[ORM\ManyToOne(targetEntity: Semester::class)]
-    #[ORM\JoinColumn(name: 'semester_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
-    private Semester $semester;
 
     public function getId(): Uuid
     {
@@ -68,12 +63,6 @@ class StudentSubject
     public function setTeacherSubjectId(Uuid $teacherSubjectId): StudentSubject
     {
         $this->teacherSubjectId = $teacherSubjectId;
-        return $this;
-    }
-
-    public function setSemesterId(Uuid $semesterId): StudentSubject
-    {
-        $this->semesterId = $semesterId;
         return $this;
     }
 
@@ -128,12 +117,6 @@ class StudentSubject
     public function setTeacherSubject(TeacherSubject $teacherSubject): StudentSubject
     {
         $this->teacherSubject = $teacherSubject;
-        return $this;
-    }
-
-    public function setSemester(Semester $semester): StudentSubject
-    {
-        $this->semester = $semester;
         return $this;
     }
 }
