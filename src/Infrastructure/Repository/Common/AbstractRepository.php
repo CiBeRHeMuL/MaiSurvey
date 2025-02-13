@@ -13,6 +13,7 @@ use App\Domain\Helper\HArray;
 use App\Domain\Repository\Common\RepositoryInterface;
 use App\Infrastructure\DataProvider\LazyBatchedDataProvider;
 use ArrayIterator;
+use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Result;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Id\AssignedGenerator;
@@ -466,15 +467,24 @@ abstract class AbstractRepository implements RepositoryInterface
         $connection = $this->getEntityManager()->getConnection();
         $params = $expr->getParams();
         $preparedParams = [];
+        $types = [];
         array_walk(
             $params,
-            function ($val, $k) use (&$preparedParams) {
-                $preparedParams[ltrim($k, ':')] = $val;
+            function ($val, $k) use (&$preparedParams, &$types) {
+                $k = ltrim($k, ':');
+                $preparedParams[$k] = $val;
+                $types[$k] = match (true) {
+                    is_bool($val) => ParameterType::BOOLEAN,
+                    is_null($val) => ParameterType::NULL,
+                    is_integer($val) => ParameterType::INTEGER,
+                    default => ParameterType::STRING,
+                };
             },
         );
         return $connection->executeQuery(
             $expr->getExpression(),
             $preparedParams,
+            $types,
         );
     }
 
