@@ -7,6 +7,8 @@ use App\Domain\DataProvider\DataSort;
 use App\Domain\DataProvider\LimitOffset;
 use App\Domain\DataProvider\SortColumn;
 use App\Domain\Dto\Subject\GetAllSubjectsDto;
+use App\Domain\Dto\Subject\GetByRawIndexDto;
+use App\Domain\Entity\Semester;
 use App\Domain\Entity\Subject;
 use App\Domain\Repository\SubjectRepositoryInterface;
 use App\Infrastructure\Db\Expr\ILikeExpr;
@@ -71,12 +73,23 @@ class SubjectRepository extends AbstractRepository implements SubjectRepositoryI
     public function findByRawIndexes(array $indexes): Iterator
     {
         $q = Query::select()
-            ->select(['*'])
-            ->from($this->getClassTable(Subject::class))
+            ->select(['s.*'])
+            ->from(['s' => $this->getClassTable(Subject::class)])
+            ->innerJoin(
+                ['sem' => $this->getClassTable(Semester::class)],
+                'sem.id = s.semester_id',
+            )
             ->where(
                 new InExpr(
-                    ['lower(name)'],
-                    array_map(mb_strtolower(...), $indexes),
+                    ['lower(s.name)', 'sem.year', 'sem.spring'],
+                    array_map(
+                        fn(GetByRawIndexDto $i) => [
+                            mb_strtolower($i->getName()),
+                            $i->getSemesterDto()->getYear(),
+                            $i->getSemesterDto()->isSpring(),
+                        ],
+                        $indexes,
+                    ),
                 )
             );
         yield from $this->findAllByQuery($q, Subject::class);
