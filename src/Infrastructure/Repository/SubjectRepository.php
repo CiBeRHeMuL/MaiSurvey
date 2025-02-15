@@ -32,6 +32,7 @@ class SubjectRepository extends AbstractRepository implements SubjectRepositoryI
         return $this->findWithProvider(
             $q,
             Subject::class,
+            ['semester'],
             limit: new LimitOffset(
                 $dto->getLimit(),
                 $dto->getOffset(),
@@ -58,7 +59,11 @@ class SubjectRepository extends AbstractRepository implements SubjectRepositoryI
                 ),
             )
             ->andWhere(['semester_id' => $semesterId->toRfc4122()]);
-        return $this->findOneByQuery($q, Subject::class);
+        return $this->findOneByQuery(
+            $q,
+            Subject::class,
+            ['semester'],
+        );
     }
 
     public function findById(Uuid $id): Subject|null
@@ -67,7 +72,11 @@ class SubjectRepository extends AbstractRepository implements SubjectRepositoryI
             ->select(['*'])
             ->from($this->getClassTable(Subject::class))
             ->where(['id' => $id->toRfc4122()]);
-        return $this->findOneByQuery($q, Subject::class);
+        return $this->findOneByQuery(
+            $q,
+            Subject::class,
+            ['semester'],
+        );
     }
 
     public function findByRawIndexes(array $indexes): Iterator
@@ -92,6 +101,10 @@ class SubjectRepository extends AbstractRepository implements SubjectRepositoryI
                     ),
                 )
             );
-        yield from $this->findAllByQuery($q, Subject::class);
+        yield from $this->findAllByQuery(
+            $q,
+            Subject::class,
+            ['semester'],
+        );
     }
 }
