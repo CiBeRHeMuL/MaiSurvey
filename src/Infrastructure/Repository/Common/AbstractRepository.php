@@ -326,21 +326,46 @@ abstract class AbstractRepository implements RepositoryInterface
         );
     }
 
-    public function findOneByQuery(SelectQuery $query, string|null $entityClassName = null, array|null $relations = null)
+    /**
+     * @template T of object
+     * @param SelectQuery $query
+     * @param class-string<T>|null $entityClassName
+     * @param string[]|null $relations
+     *
+     * @return ($entityClassName is null ? array : (T&object)|null)
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function findOneByQuery(SelectQuery $query, string|null $entityClassName = null, array|null $relations = null): mixed
     {
-        $query->limit(1);
+        $count = $this->queryCount($query);
+        if ($count === 0) {
+            return null;
+        }
         if ($entityClassName) {
             if ($relations) {
                 return $this->findWithRelations($query, $entityClassName, $relations, true);
             }
             return $this->getEmNativeQuery($entityClassName, $query)->getOneOrNullResult();
         } else {
-            return $this->executeQuery($query)->fetchAssociative();
+            return $this->executeQuery($query)->fetchAssociative() ?: null;
         }
     }
 
+    /**
+     * @template T of object
+     * @param SelectQuery $query
+     * @param class-string<T>|null $entityClassName
+     * @param string[]|null $relations
+     *
+     * @return ($entityClassName is null ? array : (T&object)[])
+     * @throws \Doctrine\DBAL\Exception
+     */
     public function findAllByQuery(SelectQuery $query, string|null $entityClassName = null, array|null $relations = null): array
     {
+        $count = $this->queryCount($query);
+        if ($count === 0) {
+            return [];
+        }
         if ($entityClassName) {
             if ($relations) {
                 return $this->findWithRelations($query, $entityClassName, $relations);
@@ -351,11 +376,28 @@ abstract class AbstractRepository implements RepositoryInterface
         return $this->executeQuery($query)->fetchAllAssociative();
     }
 
+    /**
+     * @param SelectQuery $query
+     *
+     * @return array
+     * @throws \Doctrine\DBAL\Exception
+     */
     public function findColumnByQuery(SelectQuery $query): array
     {
         return $this->executeQuery($query)->fetchFirstColumn();
     }
 
+    /**
+     * @template T of object
+     * @param SelectQuery $query
+     * @param class-string<T>|null $entityClassName
+     * @param string[]|null $relations
+     * @param DataLimitInterface|null $limit
+     * @param DataSortInterface|null $sort
+     *
+     * @return ($entityClassName is null ? DataProviderInterface<array> : DataProviderInterface<T>)
+     * @throws \Doctrine\DBAL\Exception
+     */
     public function findWithProvider(
         SelectQuery $query,
         string|null $entityClassName = null,
@@ -404,6 +446,18 @@ abstract class AbstractRepository implements RepositoryInterface
         );
     }
 
+    /**
+     * @template T of object
+     * @param SelectQuery $query
+     * @param class-string<T>|null $entityClassName
+     * @param string[]|null $relations
+     * @param DataLimitInterface|null $limit
+     * @param DataSortInterface|null $sort
+     * @param int $batchSize
+     *
+     * @return ($entityClassName is null ? DataProviderInterface<array> : DataProviderInterface<T>)
+     * @throws \Doctrine\DBAL\Exception
+     */
     public function findWithLazyBatchedProvider(
         SelectQuery $query,
         string|null $entityClassName = null,
@@ -459,6 +513,12 @@ abstract class AbstractRepository implements RepositoryInterface
         return new ArrayDataProvider([], 0, $limit, $sort);
     }
 
+    /**
+     * @param QueryInterface $query
+     *
+     * @return Result
+     * @throws \Doctrine\DBAL\Exception
+     */
     public function executeQuery(QueryInterface $query): Result
     {
         $qb = $query->getQueryBuilder()->setDialect(DialectSQL::POSTGRESQL);
@@ -498,7 +558,8 @@ abstract class AbstractRepository implements RepositoryInterface
      * @param string[] $relations
      * @param bool $one
      *
-     * @return ($one is false ? T[] : (T|null))
+     * @return ($one is false ? (T&object)[] : (T&object)|null)
+     * @throws \Doctrine\DBAL\Exception
      */
     protected function findWithRelations(SelectQuery $query, string $class, array $relations, bool $one = false): array|object|null
     {
@@ -658,5 +719,31 @@ abstract class AbstractRepository implements RepositoryInterface
         $emQuery->setParameters($expr->getParams());
 
         return $emQuery;
+    }
+
+    /**
+     * @param SelectQuery $q
+     *
+     * @return int
+     * @throws \Doctrine\DBAL\Exception
+     */
+    protected function queryCount(SelectQuery $q): int
+    {
+        return $this->findScalarByQuery(
+            Query::select()
+                ->select(new Expr('count(*)'))
+                ->from(['t' => $q]),
+        );
+    }
+
+    /**
+     * @param SelectQuery $q
+     *
+     * @return bool|int|float|string|null
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function findScalarByQuery(SelectQuery $q): null|bool|int|float|string
+    {
+        return $this->executeQuery($q)->fetchOne() ?: null;
     }
 }
