@@ -154,6 +154,7 @@ class TeacherSubjectRepository extends Common\AbstractRepository implements Teac
             $this->findAllByQuery(
                 $q,
                 TeacherSubject::class,
+                ['teacher', 'subject', 'subject.semester'],
             ),
         );
     }

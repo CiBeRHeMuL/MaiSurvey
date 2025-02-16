@@ -147,7 +147,7 @@ class SubjectsImporter
 
         $existingSubjects = $this
             ->subjectService
-            ->getByIndexes($indexes);
+            ->getByRawIndexes($indexes);
         $existingSubjects = HArray::index(
             $existingSubjects,
             function (Subject $s) {

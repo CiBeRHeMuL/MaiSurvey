@@ -2935,17 +2935,25 @@ components:
           type: boolean
           default: true
         subject_col:
-          title: 'Столбец с фамилией'
+          title: 'Столбец с предметом'
           type: string
           default: A
         email_col:
-          title: 'Столбец с именем'
+          title: 'Столбец с почтой'
           type: string
           default: B
         type_col:
-          title: 'Столбец с отчеством'
+          title: 'Столбец с типом предмета'
           type: string
           default: C
+        year_col:
+          title: 'Столбец с годом'
+          type: string
+          default: D
+        semester_col:
+          title: 'Столбец с семестром'
+          type: string
+          default: E
       type: object
     CreateFullUserDto:
       required:

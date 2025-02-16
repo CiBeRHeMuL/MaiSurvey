@@ -10,6 +10,8 @@ readonly class ImportDto
         private string $emailCol,
         private string $subjectCol,
         private string $typeCol,
+        private string $yearCol,
+        private string $semesterCol,
     ) {
     }
 
@@ -36,5 +38,15 @@ readonly class ImportDto
     public function getTypeCol(): string
     {
         return $this->typeCol;
+    }
+
+    public function getSemesterCol(): string
+    {
+        return $this->semesterCol;
+    }
+
+    public function getYearCol(): string
+    {
+        return $this->yearCol;
     }
 }

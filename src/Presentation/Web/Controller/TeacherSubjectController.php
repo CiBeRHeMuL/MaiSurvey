@@ -128,6 +128,8 @@ class TeacherSubjectController extends BaseController
                 $dto->email_col,
                 $dto->subject_col,
                 $dto->type_col,
+                $dto->year_col,
+                $dto->semester_col,
             ),
         );
         return Response::success(

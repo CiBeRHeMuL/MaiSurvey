@@ -99,7 +99,7 @@ class SubjectService
      *
      * @return Iterator<int, Subject>
      */
-    public function getByIndexes(array $indexes): Iterator
+    public function getByRawIndexes(array $indexes): Iterator
     {
         return $this
             ->subjectRepository

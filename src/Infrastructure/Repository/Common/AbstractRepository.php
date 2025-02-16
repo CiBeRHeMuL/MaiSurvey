@@ -744,6 +744,6 @@ abstract class AbstractRepository implements RepositoryInterface
      */
     public function findScalarByQuery(SelectQuery $q): null|bool|int|float|string
     {
-        return $this->executeQuery($q)->fetchOne() ?: null;
+        return $this->executeQuery($q)->fetchOne();
     }
 }

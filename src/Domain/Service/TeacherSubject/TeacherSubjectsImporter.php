@@ -2,6 +2,8 @@
 
 namespace App\Domain\Service\TeacherSubject;
 
+use App\Domain\Dto\Semester\GetSemesterByIndexDto;
+use App\Domain\Dto\Subject\GetByRawIndexDto;
 use App\Domain\Dto\TeacherSubject\CreateTeacherSubjectDto;
 use App\Domain\Dto\TeacherSubject\GetTSByIndexDto;
 use App\Domain\Dto\TeacherSubject\ImportDto;
@@ -64,53 +66,53 @@ class TeacherSubjectsImporter
 
         $validationErrorTemplate = 'Некорректное содержимое файла. Ошибка в строке %d: %s';
 
+        $errorGenerator = function (int $k, string $error) use (&$validationErrorTemplate): ValidationError {
+            return new ValidationError(
+                'file',
+                ValidationErrorSlugEnum::WrongFile->getSlug(),
+                sprintf(
+                    $validationErrorTemplate,
+                    $k,
+                    $error,
+                ),
+            );
+        };
+
         /** @var array $dtos */
         $indexesData = [];
         $emails = [];
-        $subjectNames = [];
+        $subjectIndexes = [];
         $types = [];
-        /** @var array<string, array<string, array<string, true>>> $existingRows */
+        /** @var array<string, int> $existingRows */
         $existingRows = [];
         foreach ($this->dataImport->getRows($firstRow, $this->dataImport->getHighestRow()) as $k => $row) {
-            $subject = $row[$dto->getSubjectCol()] ?? '';
-            $email = $row[$dto->getEmailCol()] ?? '';
-            $type = $row[$dto->getTypeCol()] ?? '';
-            $subject = trim($subject);
-            $email = trim($email);
-            $type = trim($type);
+            $subject = trim($row[$dto->getSubjectCol()] ?? '');
+            $email = trim($row[$dto->getEmailCol()] ?? '');
+            $type = trim($row[$dto->getTypeCol()] ?? '');
+            $year = trim($row[$dto->getYearCol()] ?? '');
+            $semesterNumber = trim($row[$dto->getSemesterCol()] ?? '');
 
-            if (isset($existingRows[$subject][$email][$type])) {
+            $hash = "{$subject}_{$email}_{$type}_{$year}_{$semesterNumber}";
+            if (isset($existingRows[$hash])) {
                 throw ValidationException::new([
-                    new ValidationError(
-                        'file',
-                        ValidationErrorSlugEnum::WrongFile->getSlug(),
+                    $errorGenerator(
+                        $k,
                         sprintf(
-                            $validationErrorTemplate,
-                            $k,
-                            sprintf(
-                                'повторяющийся набор данных, такой набор уже был указан в строке %d',
-                                $existingRows[$subject][$email][$type],
-                            ),
+                            'повторяющийся набор данных, такой набор уже был указан в строке %d',
+                            $existingRows[$hash],
                         ),
                     ),
                 ]);
             }
 
-            $existingRows[$subject][$email][$type] = $k;
-
-            $subjectNames[$k] = $subject;
+            $existingRows[$hash] = $k;
 
             $type = TeacherSubjectTypeEnum::tryFrom($type);
             if ($type === null) {
                 throw ValidationException::new([
-                    new ValidationError(
-                        'file',
-                        ValidationErrorSlugEnum::WrongFile->getSlug(),
-                        sprintf(
-                            $validationErrorTemplate,
-                            $k,
-                            'некорректный тип предмета',
-                        ),
+                    $errorGenerator(
+                        $k,
+                        'некорректный тип предмета',
                     ),
                 ]);
             }
@@ -121,23 +123,44 @@ class TeacherSubjectsImporter
                 $emails[$k] = $email;
             } catch (Throwable $e) {
                 throw ValidationException::new([
-                    new ValidationError(
-                        'file',
-                        ValidationErrorSlugEnum::WrongFile->getSlug(),
-                        sprintf(
-                            $validationErrorTemplate,
-                            $k,
-                            'некорректная почта',
-                        ),
+                    $errorGenerator(
+                        $k,
+                        'некорректный формат почты преподавателя',
                     ),
                 ]);
             }
+
+            if (!ctype_digit($year) && strlen($year) !== 4) {
+                throw ValidationException::new([
+                    $errorGenerator(
+                        $k,
+                        'год указан неверно. Укажите год 4-мя цифрами',
+                    ),
+                ]);
+            }
+            $year = (int)$year;
+
+            if (!ctype_digit($semesterNumber) && !in_array($semesterNumber, ['1', '2'])) {
+                throw ValidationException::new([
+                    $errorGenerator(
+                        $k,
+                        'семестр указан неверно. Укажите его одной цифрой (1 - весенний семестр, 2 - осенний семестр)',
+                    ),
+                ]);
+            }
+            $semesterNumber = (int)$semesterNumber;
+            $isSpringSemester = (bool)($semesterNumber % 2);
+
             $indexesData[$k] = compact('subject', 'email', 'type');
+            $subjectIndexes[$k] = new GetByRawIndexDto(
+                $subject,
+                new GetSemesterByIndexDto($year, $isSpringSemester),
+            );
         }
 
         $subjects = $this
             ->subjectService
-            ->getByIndexes($subjectNames);
+            ->getByRawIndexes($subjectIndexes);
         /** @var array<string, Subject> $subjects */
         $subjects = HArray::index(
             $subjects,
@@ -200,7 +223,7 @@ class TeacherSubjectsImporter
             try {
                 $this
                     ->teacherSubjectService
-                    ->validateCreateDto($createDto);
+                    ->validateCreateDto($createDto, false);
             } catch (ValidationException $e) {
                 throw ValidationException::new(array_map(
                     fn(ValidationError $error) => new ValidationError(
@@ -211,17 +234,7 @@ class TeacherSubjectsImporter
                     $e->getErrors(),
                 ));
             } catch (Throwable $e) {
-                throw ValidationException::new([
-                    new ValidationError(
-                        'file',
-                        ValidationErrorSlugEnum::WrongFile->getSlug(),
-                        sprintf(
-                            $validationErrorTemplate,
-                            $k,
-                            'некорректные данные',
-                        ),
-                    ),
-                ]);
+                throw $e;
             }
             $createDtos[] = $createDto;
         }
@@ -229,20 +242,18 @@ class TeacherSubjectsImporter
         $existingTeacherSubjects = $this
             ->teacherSubjectService
             ->getAllByIndexes($indexes);
-        if (iterator_count($existingTeacherSubjects) > 0) {
+        if ($existingTeacherSubjects->current() !== null) {
             $teacher = $existingTeacherSubjects->current()->getTeacher();
             $subject = $existingTeacherSubjects->current()->getSubject();
             $type = $existingTeacherSubjects->current()->getType();
-            $row = $existingRows[$subject->getName()][$teacher->getEmail()->getEmail()][$type->value];
+            $semester = $subject->getSemester();
+            $semesterNumber = (int)$semester->isSpring();
+            $hash = "{$subject->getName()}_{$teacher->getEmail()->getEmail()}_{$type->value}_{$semester->getYear()}_{$semesterNumber}";
+            $row = $existingRows[$hash];
             throw ValidationException::new([
-                new ValidationError(
-                    'file',
-                    ValidationErrorSlugEnum::WrongFile->getSlug(),
-                    sprintf(
-                        $validationErrorTemplate,
-                        $row - 1 + $firstRow,
-                        'этот преподаватель уже ведет такой предмет',
-                    ),
+                $errorGenerator(
+                    $row,
+                    'преподаватель уже ведет этот предмет в указанном семестре',
                 ),
             ]);
         }

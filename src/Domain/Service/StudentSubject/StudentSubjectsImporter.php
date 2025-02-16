@@ -182,7 +182,7 @@ class StudentSubjectsImporter
                 throw ValidationException::new([
                     $errorGenerator(
                         $k,
-                        'некорректный формат почты преподавателя',
+                        'некорректный тип предмета',
                     ),
                 ]);
             }

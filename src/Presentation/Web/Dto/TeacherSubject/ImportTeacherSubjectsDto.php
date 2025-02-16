@@ -10,21 +10,31 @@ readonly class ImportTeacherSubjectsDto
         /** Находятся ли в первой строке файла заголовки для столбцов */
         #[Assert\Type('boolean', message: 'Значение должно быть булевым значением')]
         public bool $headers_in_first_row = true,
-        /** Столбец с фамилией */
+        /** Столбец с предметом */
         #[Assert\Type('string', message: 'Значение должно быть строкой')]
         #[Assert\Regex('/^[A-Z]+$/u', message: 'Значение должно быть названием столбца excel')]
         #[Assert\NotBlank(message: 'Значение не должно быть пустым')]
         public string $subject_col = 'A',
-        /** Столбец с именем */
+        /** Столбец с почтой */
         #[Assert\Type('string', message: 'Значение должно быть строкой')]
         #[Assert\Regex('/^[A-Z]+$/u', message: 'Значение должно быть названием столбца excel')]
         #[Assert\NotBlank(message: 'Значение не должно быть пустым')]
         public string $email_col = 'B',
-        /** Столбец с отчеством */
+        /** Столбец с типом предмета */
         #[Assert\Type('string', message: 'Значение должно быть строкой')]
         #[Assert\Regex('/^[A-Z]+$/u', message: 'Значение должно быть названием столбца excel')]
         #[Assert\NotBlank(message: 'Значение не должно быть пустым')]
         public string $type_col = 'C',
+        /** Столбец с годом */
+        #[Assert\Type('string', message: 'Значение должно быть строкой')]
+        #[Assert\Regex('/^[A-Z]+$/u', message: 'Значение должно быть названием столбца excel')]
+        #[Assert\NotBlank(message: 'Значение не должно быть пустым')]
+        public string $year_col = 'D',
+        /** Столбец с семестром */
+        #[Assert\Type('string', message: 'Значение должно быть строкой')]
+        #[Assert\Regex('/^[A-Z]+$/u', message: 'Значение должно быть названием столбца excel')]
+        #[Assert\NotBlank(message: 'Значение не должно быть пустым')]
+        public string $semester_col = 'E',
     ) {
     }
 }
