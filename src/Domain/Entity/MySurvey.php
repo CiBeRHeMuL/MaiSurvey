@@ -17,6 +17,7 @@ readonly class MySurvey
      * @param Uuid $userId
      * @param bool $completed
      * @param DateTimeImmutable|null $completedAt
+     * @param bool $actual
      * @param Survey $survey
      * @param User $user
      * @param Collection<int, MySurveyItem> $myItems
@@ -32,6 +33,8 @@ readonly class MySurvey
         private bool $completed,
         #[ORM\Column(name: 'completed_at', type: 'datetime_immutable', nullable: true)]
         private DateTimeImmutable|null $completedAt,
+        #[ORM\Column(type: 'boolean', nullable: false)]
+        private bool $actual,
         #[ORM\ManyToOne(targetEntity: Survey::class)]
         #[ORM\JoinColumn(name: 'id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
         private Survey $survey,
@@ -64,6 +67,11 @@ readonly class MySurvey
     public function getCompletedAt(): DateTimeImmutable|null
     {
         return $this->completedAt;
+    }
+
+    public function isActual(): bool
+    {
+        return $this->actual;
     }
 
     public function getSurvey(): Survey

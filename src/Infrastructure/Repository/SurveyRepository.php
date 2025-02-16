@@ -29,6 +29,7 @@ class SurveyRepository extends Common\AbstractRepository implements SurveyReposi
             ->getMyQuery($user)
             ->andFilterWhere([
                 'ms.completed' => $dto->getCompleted(),
+                'ms.actual' => $dto->getActual(),
             ]);
         if ($dto->getSubjectIds() !== null) {
             $q->andWhere(new InExpr(
@@ -67,6 +68,7 @@ class SurveyRepository extends Common\AbstractRepository implements SurveyReposi
             ->andWhere(['ms.id' => $dto->getId()->toRfc4122()])
             ->andFilterWhere([
                 'ms.completed' => $dto->getCompleted(),
+                'ms.actual' => $dto->getActual(),
             ]);
         return $this->findOneByQuery(
             $q,

@@ -78,6 +78,7 @@ class SurveyController extends BaseController
             new DomainGetMySurveyByIdDto(
                 $id,
                 $dto->completed,
+                true,
             ),
         );
         if ($survey === null) {

@@ -45,7 +45,10 @@ class CompleteSurveyService
 
     public function complete(User $user, CompleteSurveyDto $dto): void
     {
-        $survey = $this->surveyService->getMyById($user, new GetMySurveyByIdDto($dto->getId()));
+        $survey = $this->surveyService->getMyById(
+            $user,
+            new GetMySurveyByIdDto($dto->getId(), null, true),
+        );
         if ($survey === null) {
             throw ErrorException::new('Опрос не найден', 404);
         }

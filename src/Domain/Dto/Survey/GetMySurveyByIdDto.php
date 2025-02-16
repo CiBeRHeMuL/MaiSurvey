@@ -9,6 +9,7 @@ readonly class GetMySurveyByIdDto
     public function __construct(
         private Uuid $id,
         private bool|null $completed = null,
+        private bool|null $actual = true,
     ) {
     }
 
@@ -20,5 +21,10 @@ readonly class GetMySurveyByIdDto
     public function getCompleted(): bool|null
     {
         return $this->completed;
+    }
+
+    public function getActual(): bool|null
+    {
+        return $this->actual;
     }
 }

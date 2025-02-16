@@ -51,6 +51,7 @@ class GetMySurveysUseCase
                     $dto->offset,
                     $dto->sort_by,
                     SortTypeEnum::from($dto->sort_type),
+                    true,
                 ),
             );
     }
