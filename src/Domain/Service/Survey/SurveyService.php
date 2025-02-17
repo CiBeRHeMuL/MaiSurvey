@@ -130,6 +130,9 @@ class SurveyService
 
             $this->transactionManager->commit();
             return $entity;
+        } catch (ErrorException|ValidationException $e) {
+            $this->transactionManager->rollback();
+            throw $e;
         } catch (Throwable $e) {
             $this->logger->error($e);
             $this->transactionManager->rollback();
