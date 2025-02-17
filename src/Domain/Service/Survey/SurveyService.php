@@ -166,7 +166,7 @@ class SurveyService
             ]);
         }
 
-        if ($dto->getActualTo()->getTimestamp() <= $dto->getSubject()->getSemester()->getDateEnd()) {
+        if ($dto->getActualTo()->getTimestamp() <= $dto->getSubject()->getSemester()->getDateEnd()->getTimestamp()) {
             throw ValidationException::new([
                 new ValidationError(
                     'actual_to',
