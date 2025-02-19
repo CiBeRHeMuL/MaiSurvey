@@ -6,6 +6,7 @@ use App\Domain\Dto\SurveyItem\Choice;
 use App\Domain\Dto\SurveyItem\ChoiceItemData;
 use App\Domain\Dto\SurveyItem\CommentItemData;
 use App\Domain\Dto\SurveyItem\CreateSurveyItemDto;
+use App\Domain\Dto\SurveyItem\ItemDataInterface;
 use App\Domain\Dto\SurveyItem\MultiChoiceItemData;
 use App\Domain\Dto\SurveyItem\RatingItemData;
 use App\Domain\Entity\SurveyItem;
@@ -62,7 +63,11 @@ class SurveyItemService
             ]);
         }
 
-        $data = $dto->getData();
+        $this->validateData($dto->getData());
+    }
+
+    public function validateData(ItemDataInterface $data): void
+    {
         switch ($data->getType()) {
             case SurveyItemTypeEnum::Rating:
                 /** @var RatingItemData $data */

@@ -1336,6 +1336,163 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationResponse'
+  /survey-templates:
+    get:
+      tags:
+        - survey-templates
+      summary: 'Список шаблонов опросов'
+      operationId: get_survey-template-get-all
+      parameters:
+        -
+          name: name
+          in: query
+          required: false
+          schema:
+            title: 'Название шаблона'
+            type: string
+            default: null
+            nullable: true
+        -
+          name: sort_by
+          in: query
+          required: false
+          schema:
+            title: 'Сортировка по'
+            type: string
+            default: name
+            enum:
+              - name
+              - created_at
+        -
+          name: sort_type
+          in: query
+          required: false
+          schema:
+            title: 'Тип сортировки'
+            type: string
+            default: asc
+            enum:
+              - asc
+              - desc
+        -
+          name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+        -
+          name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 100
+            maximum: 100
+            minimum: 0
+            nullable: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/SuccessWithPaginationResponse' }
+                  - { properties: { data: { properties: { items: { type: array, items: { $ref: '#/components/schemas/LiteSurveyTemplate' } } }, type: object } }, type: object }
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: 'Unprocessable Entity'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResponse'
+  '/survey-templates/{id}':
+    get:
+      tags:
+        - survey-templates
+      summary: 'Получить шаблон опроса по id'
+      operationId: get_survey-template-get-my-by-id
+      parameters:
+        -
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '[0-9a-f]{8}-[0-9a-f]{4}-[13-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/SuccessResponse' }
+                  - { properties: { data: { $ref: '#/components/schemas/SurveyTemplate' } }, type: object }
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 'Not Found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: 'Unprocessable Entity'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResponse'
+  /survey-template:
+    post:
+      tags:
+        - survey-templates
+      summary: 'Создать шаблон опроса'
+      operationId: post_create-survey-template
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSurveyTemplateDto'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/SuccessResponse' }
+                  - { properties: { data: { $ref: '#/components/schemas/SurveyTemplate' } }, type: object }
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 'Not Found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: 'Unprocessable Entity'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResponse'
   /teacher-subjects:
     get:
       tags:
@@ -2106,6 +2263,7 @@ paths:
             title: 'Учитывать только данные с группой'
             type: boolean
             default: null
+            nullable: true
         -
           name: with_user
           in: query
@@ -2239,6 +2397,7 @@ paths:
             title: 'Учитывать только данные с группой'
             type: boolean
             default: null
+            nullable: true
         -
           name: 'group_ids[]'
           in: query
@@ -2853,6 +3012,58 @@ components:
           items:
             $ref: '#/components/schemas/CreateItemDto'
       type: object
+    GetAllSurveyTemplatesDto:
+      properties:
+        name:
+          title: 'Название шаблона'
+          type: string
+          default: null
+          nullable: true
+        sort_by:
+          title: 'Сортировка по'
+          type: string
+          default: name
+          enum:
+            - name
+            - created_at
+        sort_type:
+          title: 'Тип сортировки'
+          type: string
+          default: asc
+          enum:
+            - asc
+            - desc
+        offset:
+          type: integer
+          default: 0
+          minimum: 0
+        limit:
+          type: integer
+          default: 100
+          maximum: 100
+          minimum: 0
+          nullable: true
+      type: object
+    CreateSurveyTemplateDto:
+      required:
+        - name
+        - title
+        - items
+      properties:
+        name:
+          title: 'Название шаблона'
+          type: string
+          maxLength: 255
+        title:
+          title: Заголовок
+          type: string
+          maxLength: 255
+        items:
+          title: Вопросы
+          type: array
+          items:
+            $ref: '#/components/schemas/CreateTemplateItemDto'
+      type: object
     GetAllTeacherSubjectsDto:
       properties:
         teacher_ids:
@@ -3161,6 +3372,7 @@ components:
           title: 'Учитывать только данные с группой'
           type: boolean
           default: null
+          nullable: true
         with_user:
           title: 'Учитывать только данные с пользователем'
           type: boolean
@@ -3221,6 +3433,7 @@ components:
           title: 'Учитывать только данные с группой'
           type: boolean
           default: null
+          nullable: true
         group_ids:
           title: 'Группы для фильтрации'
           type: array
@@ -3551,6 +3764,37 @@ components:
           items:
             $ref: '#/components/schemas/SurveyItem'
       type: object
+    LiteSurveyTemplate:
+      required:
+        - id
+        - name
+        - title
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        title:
+          type: string
+      type: object
+    SurveyTemplate:
+      required:
+        - id
+        - name
+        - title
+        - items
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        title:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/SurveyTemplateItem'
+      type: object
     TeacherSubject:
       required:
         - subject
@@ -3684,6 +3928,31 @@ components:
         subject_type:
           $ref: '#/components/schemas/TeacherSubjectTypeEnum'
       type: object
+    CreateTemplateItemDto:
+      required:
+        - answer_required
+        - type
+        - text
+        - position
+        - data
+        - subject_type
+      properties:
+        answer_required:
+          title: 'Обязательность ответа'
+          type: boolean
+        type:
+          $ref: '#/components/schemas/SurveyItemTypeEnum'
+        text:
+          title: 'Текст вопроса'
+          type: string
+        position:
+          title: Позиция
+          type: integer
+        data:
+          $ref: '#/components/schemas/ItemDataInterface'
+        subject_type:
+          $ref: '#/components/schemas/TeacherSubjectTypeEnum'
+      type: object
     Meta:
       required:
         - mode
@@ -3735,6 +4004,11 @@ components:
         - teacher_subject.view_my
         - teacher_subject.import
         - semester.create
+        - survey_template.view
+        - survey_template.create
+        - survey_template.update
+        - survey_template.delete
+        - survey_template.view_all
     PaginatedData:
       properties:
         items:
@@ -3812,6 +4086,34 @@ components:
         id:
           type: string
         survey_id:
+          type: string
+        answer_required:
+          type: boolean
+        type:
+          $ref: '#/components/schemas/SurveyItemTypeEnum'
+        text:
+          type: string
+        position:
+          type: integer
+        data:
+          $ref: '#/components/schemas/ItemDataInterface2'
+        subject_type:
+          $ref: '#/components/schemas/TeacherSubjectTypeEnum'
+      type: object
+    SurveyTemplateItem:
+      required:
+        - id
+        - survey_template_id
+        - answer_required
+        - type
+        - text
+        - position
+        - data
+        - subject_type
+      properties:
+        id:
+          type: string
+        survey_template_id:
           type: string
         answer_required:
           type: boolean
@@ -4095,4 +4397,6 @@ tags:
   -
     name: semesters
     description: 'Ручки для работы с семестрами'
+  -
+    name: survey-templates
 

@@ -73,6 +73,10 @@ services:
     class: App\Infrastructure\Repository\SurveyItemRepository
   App\Domain\Repository\SemesterRepositoryInterface:
     class: App\Infrastructure\Repository\SemesterRepository
+  App\Domain\Repository\SurveyTemplateRepositoryInterface:
+    class: App\Infrastructure\Repository\SurveyTemplateRepository
+  App\Domain\Repository\SurveyTemplateItemRepositoryInterface:
+    class: App\Infrastructure\Repository\SurveyTemplateItemRepository
   # --- end repositories
 
   # --- start serializer

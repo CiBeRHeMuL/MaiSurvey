@@ -2,19 +2,18 @@
 
 namespace App\Presentation\Web\Response\Model;
 
-use App\Domain\Entity\MySurveyItem;
-use App\Domain\Entity\SurveyItem as DomainSurveyItem;
+use App\Domain\Entity\SurveyTemplateItem as DomainSurveyTemplateItem;
 use App\Domain\Enum\SurveyItemTypeEnum;
 use App\Domain\Enum\TeacherSubjectTypeEnum;
 use App\Presentation\Web\OpenApi\Attribute as LOA;
 use App\Presentation\Web\Response\Model\SurveyItemData\Factory\SurveyItemDataFactory;
 use App\Presentation\Web\Response\Model\SurveyItemData\ItemDataInterface;
 
-readonly class SurveyItem
+readonly class SurveyTemplateItem
 {
     /**
      * @param string $id
-     * @param string $survey_id
+     * @param string $survey_template_id
      * @param bool $answer_required
      * @param string $type
      * @param string $text
@@ -24,7 +23,7 @@ readonly class SurveyItem
      */
     public function __construct(
         public string $id,
-        public string $survey_id,
+        public string $survey_template_id,
         public bool $answer_required,
         #[LOA\Enum(SurveyItemTypeEnum::class)]
         public string $type,
@@ -36,11 +35,11 @@ readonly class SurveyItem
     ) {
     }
 
-    public static function fromItem(DomainSurveyItem $item): self
+    public static function fromItem(DomainSurveyTemplateItem $item): self
     {
         return new self(
             $item->getId()->toRfc4122(),
-            $item->getSurveyId()->toRfc4122(),
+            $item->getSurveyTemplateId()->toRfc4122(),
             $item->isAnswerRequired(),
             $item->getType()->value,
             $item->getText(),
@@ -48,10 +47,5 @@ readonly class SurveyItem
             SurveyItemDataFactory::fromItemData($item->getData()),
             $item->getSubjectType()?->value,
         );
-    }
-
-    public static function fromMyItem(MySurveyItem $item): self
-    {
-        return self::fromItem($item->getSurveyItem());
     }
 }
