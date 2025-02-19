@@ -86,10 +86,10 @@ SQL,
 
     public function down(Schema $schema): void
     {
-//        $this->addSql('DROP TRIGGER refresh_views_survey;');
-//        $this->addSql('DROP TRIGGER refresh_views_survey_item;');
-//        $this->addSql('DROP TRIGGER refresh_views_student_subject;');
-//        $this->addSql('DROP TRIGGER refresh_views_completed_survey;');
+        $this->addSql('DROP TRIGGER refresh_views_survey ON survey;');
+        $this->addSql('DROP TRIGGER refresh_views_survey_item ON survey_item;');
+        $this->addSql('DROP TRIGGER refresh_views_student_subject ON student_subject;');
+        $this->addSql('DROP TRIGGER refresh_views_completed_survey ON completed_survey;');
         $this->addSql('DROP FUNCTION trigger_refresh_views;');
     }
 }

@@ -2,24 +2,23 @@
 
 namespace App\Application\UseCase\Survey;
 
-use App\Application\Dto\Survey\Create\CreateItemDto;
-use App\Application\Dto\Survey\Create\CreateSurveyDto;
-use App\Application\Mapper\Survey\ItemDataMapper;
-use App\Domain\Dto\Survey\CreateItemDto as DomainCreateItemDto;
-use App\Domain\Dto\Survey\CreateSurveyDto as DomainCreateSurveyDto;
+use App\Application\Dto\Survey\Create\CreateFromTemplateDto;
+use App\Domain\Dto\Survey\CreateSurveyFromTemplateDto;
 use App\Domain\Entity\Survey;
-use App\Domain\Enum\SurveyItemTypeEnum;
-use App\Domain\Enum\TeacherSubjectTypeEnum;
 use App\Domain\Enum\ValidationErrorSlugEnum;
 use App\Domain\Exception\ValidationException;
 use App\Domain\Service\Subject\SubjectService;
 use App\Domain\Service\Survey\SurveyService;
+use App\Domain\Service\SurveyTemplate\SurveyTemplateService;
 use App\Domain\Validation\ValidationError;
 use DateTimeImmutable;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Uid\Uuid;
 
-class CreateSurveyUseCase
+/**
+ * Создает опрос из шаблона
+ */
+class CreateSurveyFromTemplateUseCase
 {
     private LoggerInterface $logger;
 
@@ -27,22 +26,23 @@ class CreateSurveyUseCase
         LoggerInterface $logger,
         private SurveyService $surveyService,
         private SubjectService $subjectService,
+        private SurveyTemplateService $surveyTemplateService,
     ) {
         $this->setLogger($logger);
     }
 
-    public function setLogger(LoggerInterface $logger): CreateSurveyUseCase
+    public function setLogger(LoggerInterface $logger): self
     {
         $this->logger = $logger;
         $this->surveyService->setLogger($logger);
         $this->subjectService->setLogger($logger);
+        $this->surveyTemplateService->setLogger($logger);
         return $this;
     }
 
-    public function execute(CreateSurveyDto $dto): Survey
+    public function execute(CreateFromTemplateDto $dto): Survey
     {
         $subjectId = new Uuid($dto->subject_id);
-
         $subject = $this->subjectService->getById($subjectId);
         if ($subject === null) {
             throw ValidationException::new([
@@ -54,26 +54,25 @@ class CreateSurveyUseCase
             ]);
         }
 
+        $templateId = new Uuid($dto->template_id);
+        $template = $this->surveyTemplateService->getById($templateId);
+        if ($template === null) {
+            throw ValidationException::new([
+                new ValidationError(
+                    'template_id',
+                    ValidationErrorSlugEnum::NotFound->getSlug(),
+                    'Шаблон не найден',
+                ),
+            ]);
+        }
+
         return $this
             ->surveyService
-            ->create(
-                new DomainCreateSurveyDto(
-                    $dto->title,
-                    new DateTimeImmutable($dto->actual_to),
-                    array_map(
-                        fn(CreateItemDto $item) => new DomainCreateItemDto(
-                            $item->answer_required,
-                            SurveyItemTypeEnum::from($item->type),
-                            $item->text,
-                            $item->position,
-                            ItemDataMapper::map($item->data),
-                            $item->subject_type !== null
-                                ? TeacherSubjectTypeEnum::from($item->subject_type)
-                                : null,
-                        ),
-                        $dto->items,
-                    ),
+            ->createFromTemplate(
+                new CreateSurveyFromTemplateDto(
                     $subject,
+                    new DateTimeImmutable($dto->actual_to),
+                    $template,
                 ),
             );
     }

@@ -1336,6 +1336,123 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationResponse'
+  /survey/multi-subject:
+    post:
+      tags:
+        - surveys
+      summary: 'Создать опрос для нескольких предметов сразу'
+      operationId: post_create-survey-multi-subject
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSurveyMSDto'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/SuccessWithPaginationResponse' }
+                  - { properties: { data: { properties: { items: { type: array, items: { $ref: '#/components/schemas/Survey' } } }, type: object } }, type: object }
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 'Not Found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: 'Unprocessable Entity'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResponse'
+  /survey/from-template:
+    post:
+      tags:
+        - surveys
+      summary: 'Создать опрос из шаблона'
+      operationId: post_create-survey-from-template
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateFromTemplateDto'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/SuccessResponse' }
+                  - { properties: { data: { $ref: '#/components/schemas/Survey' } }, type: object }
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 'Not Found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: 'Unprocessable Entity'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResponse'
+  /survey/from-template/multi-subject:
+    post:
+      tags:
+        - surveys
+      summary: 'Создать опрос из шаблона для нескольких предметов сразу'
+      operationId: post_create-survey-from-template-multi-subject
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMSFromTemplateDto'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/SuccessWithPaginationResponse' }
+                  - { properties: { data: { properties: { items: { type: array, items: { $ref: '#/components/schemas/Survey' } } }, type: object } }, type: object }
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 'Not Found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: 'Unprocessable Entity'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResponse'
   /survey-templates:
     get:
       tags:
@@ -3011,6 +3128,67 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CreateItemDto'
+      type: object
+    CreateSurveyMSDto:
+      required:
+        - title
+        - subject_ids
+        - actual_to
+        - items
+      properties:
+        title:
+          title: Заголовок
+          type: string
+          maxLength: 255
+        subject_ids:
+          title: 'ID предметов'
+          type: array
+          items: {  }
+          maxItems: 20
+          minItems: 1
+        actual_to:
+          title: 'Актуален до'
+          type: string
+        items:
+          title: Вопросы
+          type: array
+          items:
+            $ref: '#/components/schemas/CreateItemDto'
+      type: object
+    CreateFromTemplateDto:
+      required:
+        - template_id
+        - subject_id
+        - actual_to
+      properties:
+        template_id:
+          title: 'ID шаблона'
+          type: string
+        subject_id:
+          title: 'ID предмета'
+          type: string
+        actual_to:
+          title: 'Актуален до'
+          type: string
+      type: object
+    CreateMSFromTemplateDto:
+      required:
+        - template_id
+        - subject_ids
+        - actual_to
+      properties:
+        template_id:
+          title: 'ID шаблона'
+          type: string
+        subject_ids:
+          title: 'ID предметов'
+          type: array
+          items: {  }
+          maxItems: 20
+          minItems: 1
+        actual_to:
+          title: 'Актуален до'
+          type: string
       type: object
     GetAllSurveyTemplatesDto:
       properties:

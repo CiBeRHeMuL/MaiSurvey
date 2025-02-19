@@ -4,12 +4,15 @@ namespace App\Domain\Service\Survey;
 
 use App\Domain\DataProvider\DataProviderInterface;
 use App\Domain\DataProvider\ProjectionAwareDataProvider;
+use App\Domain\Dto\Survey\CreateItemDto;
 use App\Domain\Dto\Survey\CreateSurveyDto;
+use App\Domain\Dto\Survey\CreateSurveyFromTemplateDto;
 use App\Domain\Dto\Survey\GetMySurveyByIdDto;
 use App\Domain\Dto\Survey\GetMySurveysDto;
 use App\Domain\Dto\SurveyItem\CreateSurveyItemDto;
 use App\Domain\Entity\MySurvey;
 use App\Domain\Entity\Survey;
+use App\Domain\Entity\SurveyTemplateItem;
 use App\Domain\Entity\User;
 use App\Domain\Enum\ValidationErrorSlugEnum;
 use App\Domain\Exception\ErrorException;
@@ -192,5 +195,33 @@ class SurveyService
         $items = $survey->getMyItems()->toArray();
         array_walk($items, $this->templateService->putTsIntoMySurveyItem(...));
         return $survey;
+    }
+
+    public function createFromTemplate(CreateSurveyFromTemplateDto $dto): Survey
+    {
+        $template = $dto->getTemplate();
+        try {
+            return $this->create(
+                new CreateSurveyDto(
+                    $template->getTitle(),
+                    $dto->getActualTo(),
+                    array_map(
+                        fn(SurveyTemplateItem $item) => new CreateItemDto(
+                            $item->isAnswerRequired(),
+                            $item->getType(),
+                            $item->getText(),
+                            $item->getPosition(),
+                            $item->getData(),
+                            $item->getSubjectType(),
+                        ),
+                        $template->getItems()->toArray(),
+                    ),
+                    $dto->getSubject(),
+                ),
+            );
+        } catch (Throwable $e) {
+            $this->logger->error($e);
+            throw ErrorException::new('Не удалось создать опрос из шаблона, обратитесь в поддержку');
+        }
     }
 }

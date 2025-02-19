@@ -4,9 +4,15 @@ namespace App\Presentation\Web\Controller;
 
 use App\Application\Dto\Survey\Complete\CompleteSurveyDto;
 use App\Application\Dto\Survey\Complete\CompleteSurveyItemDto;
+use App\Application\Dto\Survey\Create\CreateFromTemplateDto;
+use App\Application\Dto\Survey\Create\CreateMSFromTemplateDto;
 use App\Application\Dto\Survey\Create\CreateSurveyDto;
+use App\Application\Dto\Survey\Create\CreateSurveyMSDto;
 use App\Application\Dto\Survey\GetMySurveysDto;
 use App\Application\UseCase\Survey\CompleteSurveyUseCase;
+use App\Application\UseCase\Survey\CreateSurveyFromTemplateUseCase;
+use App\Application\UseCase\Survey\CreateSurveyMSFromTemplateUseCase;
+use App\Application\UseCase\Survey\CreateSurveyMSUseCase;
 use App\Application\UseCase\Survey\CreateSurveyUseCase;
 use App\Application\UseCase\Survey\GetMySurveyByIdUseCase;
 use App\Application\UseCase\Survey\GetMySurveysUseCase;
@@ -137,6 +143,85 @@ class SurveyController extends BaseController
         return Response::success(
             new SuccessResponse(
                 Survey::fromSurvey($survey),
+            ),
+        );
+    }
+
+    /** Создать опрос для нескольких предметов сразу */
+    #[Route('/survey/multi-subject', 'create-survey-multi-subject', methods: ['POST'])]
+    #[IsGranted(PermissionEnum::SurveyCreate->value, statusCode: 404, exceptionCode: 404)]
+    #[OA\Tag('surveys')]
+    #[LOA\SuccessPaginationResponse(Survey::class)]
+    #[LOA\ErrorResponse(401)]
+    #[LOA\ErrorResponse(404)]
+    #[LOA\ValidationResponse]
+    public function createMS(
+        LoggerInterface $logger,
+        #[MapRequestPayload]
+        CreateSurveyMSDto $dto,
+        CreateSurveyMSUseCase $useCase,
+    ): JsonResponse {
+        $useCase->setLogger($logger);
+        $surveys = $useCase->execute($dto);
+        return Response::successWithPagination(
+            new SuccessWithPaginationResponse(
+                new PaginatedData(
+                    array_map(
+                        Survey::fromSurvey(...),
+                        $surveys,
+                    ),
+                ),
+            ),
+        );
+    }
+
+    /** Создать опрос из шаблона */
+    #[Route('/survey/from-template', 'create-survey-from-template', methods: ['POST'])]
+    #[IsGranted(PermissionEnum::SurveyCreate->value, statusCode: 404, exceptionCode: 404)]
+    #[OA\Tag('surveys')]
+    #[LOA\SuccessResponse(Survey::class)]
+    #[LOA\ErrorResponse(401)]
+    #[LOA\ErrorResponse(404)]
+    #[LOA\ValidationResponse]
+    public function createFromTemplate(
+        LoggerInterface $logger,
+        #[MapRequestPayload]
+        CreateFromTemplateDto $dto,
+        CreateSurveyFromTemplateUseCase $useCase,
+    ): JsonResponse {
+        $useCase->setLogger($logger);
+        $survey = $useCase->execute($dto);
+        return Response::success(
+            new SuccessResponse(
+                Survey::fromSurvey($survey),
+            ),
+        );
+    }
+
+    /** Создать опрос из шаблона для нескольких предметов сразу */
+    #[Route('/survey/from-template/multi-subject', 'create-survey-from-template-multi-subject', methods: ['POST'])]
+    #[IsGranted(PermissionEnum::SurveyCreate->value, statusCode: 404, exceptionCode: 404)]
+    #[OA\Tag('surveys')]
+    #[LOA\SuccessPaginationResponse(Survey::class)]
+    #[LOA\ErrorResponse(401)]
+    #[LOA\ErrorResponse(404)]
+    #[LOA\ValidationResponse]
+    public function createFromTemplateMS(
+        LoggerInterface $logger,
+        #[MapRequestPayload]
+        CreateMSFromTemplateDto $dto,
+        CreateSurveyMSFromTemplateUseCase $useCase,
+    ): JsonResponse {
+        $useCase->setLogger($logger);
+        $surveys = $useCase->execute($dto);
+        return Response::successWithPagination(
+            new SuccessWithPaginationResponse(
+                new PaginatedData(
+                    array_map(
+                        Survey::fromSurvey(...),
+                        $surveys,
+                    ),
+                ),
             ),
         );
     }
