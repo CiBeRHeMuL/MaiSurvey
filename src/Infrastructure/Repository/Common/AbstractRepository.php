@@ -470,11 +470,11 @@ abstract class AbstractRepository implements RepositoryInterface
         $sort ??= new DataSort([]);
 
         $total = intval(
-            $this->findOneByQuery(
+            $this->findScalarByQuery(
                 Query::select()
                     ->select(['count' => new Expr('count(*)')])
                     ->from(['t' => (clone $query)->limit(null)->offset(null)]),
-            )['count'] ?? 0,
+            ) ?: 0,
         );
 
         if ($total > 0) {
