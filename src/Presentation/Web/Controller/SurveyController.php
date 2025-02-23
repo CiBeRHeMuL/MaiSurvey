@@ -9,6 +9,7 @@ use App\Application\Dto\Survey\Create\CreateMSFromTemplateDto;
 use App\Application\Dto\Survey\Create\CreateSurveyDto;
 use App\Application\Dto\Survey\Create\CreateSurveyMSDto;
 use App\Application\Dto\Survey\GetMySurveysDto;
+use App\Application\Dto\Survey\GetSurveysDto;
 use App\Application\UseCase\Survey\CompleteSurveyUseCase;
 use App\Application\UseCase\Survey\CreateSurveyFromTemplateUseCase;
 use App\Application\UseCase\Survey\CreateSurveyMSFromTemplateUseCase;
@@ -17,6 +18,7 @@ use App\Application\UseCase\Survey\CreateSurveyUseCase;
 use App\Application\UseCase\Survey\GetMySurveyByIdUseCase;
 use App\Application\UseCase\Survey\GetMySurveysUseCase;
 use App\Application\UseCase\Survey\GetSurveyByIdUseCase;
+use App\Application\UseCase\Survey\GetSurveysUseCase;
 use App\Domain\Dto\Survey\GetMySurveyByIdDto as DomainGetMySurveyByIdDto;
 use App\Domain\Enum\PermissionEnum;
 use App\Presentation\Web\Dto\Survey\GetMySurveyByIdDto;
@@ -25,6 +27,7 @@ use App\Presentation\Web\Response\Model\Common\PaginatedData;
 use App\Presentation\Web\Response\Model\Common\SuccessResponse;
 use App\Presentation\Web\Response\Model\Common\SuccessWithPaginationResponse;
 use App\Presentation\Web\Response\Model\LiteMySurvey;
+use App\Presentation\Web\Response\Model\LiteSurvey;
 use App\Presentation\Web\Response\Model\MySurvey;
 use App\Presentation\Web\Response\Model\Survey;
 use App\Presentation\Web\Response\Response;
@@ -227,7 +230,7 @@ class SurveyController extends BaseController
         );
     }
 
-    #[Route('/surveys/{id}', 'survey-get-my-by-id', requirements: ['id' => Requirement::UUID], methods: ['GET'])]
+    #[Route('/surveys/{id}', 'survey-get-by-id', requirements: ['id' => Requirement::UUID], methods: ['GET'])]
     #[IsGranted(PermissionEnum::SurveyView->value, statusCode: 404, exceptionCode: 404)]
     #[OA\Tag('surveys')]
     #[LOA\SuccessResponse(Survey::class)]
@@ -250,5 +253,30 @@ class SurveyController extends BaseController
                 ),
             );
         }
+    }
+
+    #[Route('/surveys', 'survey-get-all', methods: ['GET'])]
+    #[IsGranted(PermissionEnum::SurveyViewAll->value, statusCode: 404, exceptionCode: 404)]
+    #[OA\Tag('surveys')]
+    #[LOA\SuccessPaginationResponse(LiteSurvey::class)]
+    #[LOA\ErrorResponse(401)]
+    #[LOA\ErrorResponse(404)]
+    #[LOA\ValidationResponse]
+    public function getAll(
+        LoggerInterface $logger,
+        GetSurveysUseCase $useCase,
+        #[MapQueryString(validationFailedStatusCode: 422)]
+        GetSurveysDto $dto = new GetSurveysDto(),
+    ): JsonResponse {
+        $useCase->setLogger($logger);
+        $provider = $useCase->execute($dto);
+        return Response::successWithPagination(
+            new SuccessWithPaginationResponse(
+                PaginatedData::fromDataProvider(
+                    $provider,
+                    LiteSurvey::fromMySurvey(...),
+                ),
+            ),
+        );
     }
 }

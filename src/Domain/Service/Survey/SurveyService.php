@@ -9,6 +9,7 @@ use App\Domain\Dto\Survey\CreateSurveyDto;
 use App\Domain\Dto\Survey\CreateSurveyFromTemplateDto;
 use App\Domain\Dto\Survey\GetMySurveyByIdDto;
 use App\Domain\Dto\Survey\GetMySurveysDto;
+use App\Domain\Dto\Survey\GetSurveysDto;
 use App\Domain\Dto\SurveyItem\CreateSurveyItemDto;
 use App\Domain\Entity\MySurvey;
 use App\Domain\Entity\Survey;
@@ -31,6 +32,7 @@ use Throwable;
 class SurveyService
 {
     public const array GET_MY_SORT = ['name', 'completed', 'created_at'];
+    public const array GET_ALL_SORT = ['name', 'title', 'created_at'];
 
     private LoggerInterface $logger;
 
@@ -196,6 +198,37 @@ class SurveyService
         return $this
             ->surveyRepository
             ->findById($id);
+    }
+
+    /**
+     * @param GetSurveysDto $dto
+     *
+     * @return DataProviderInterface<Survey>
+     */
+    public function getAll(GetSurveysDto $dto): DataProviderInterface
+    {
+        if ($dto->getTitle() !== null && mb_strlen($dto->getTitle()) < 3) {
+            throw ValidationException::new([
+                new ValidationError(
+                    'title',
+                    ValidationErrorSlugEnum::WrongField->getSlug(),
+                    'Для поиска по названию название должно быть длиннее 3 символов',
+                ),
+            ]);
+        }
+        if (!in_array($dto->getSortBy(), self::GET_ALL_SORT, true)) {
+            throw ValidationException::new([
+                new ValidationError(
+                    'sort_by',
+                    ValidationErrorSlugEnum::WrongField->getSlug(),
+                    sprintf('Сортировка доступна по полям: %s', implode(', ', self::GET_MY_SORT)),
+                ),
+            ]);
+        }
+
+        return $this
+            ->surveyRepository
+            ->findAll($dto);
     }
 
     private function prepareMySurvey(MySurvey $survey): MySurvey

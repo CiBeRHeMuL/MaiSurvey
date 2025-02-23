@@ -8,11 +8,14 @@ use App\Domain\DataProvider\LimitOffset;
 use App\Domain\DataProvider\SortColumn;
 use App\Domain\Dto\Survey\GetMySurveyByIdDto;
 use App\Domain\Dto\Survey\GetMySurveysDto;
+use App\Domain\Dto\Survey\GetSurveysDto;
 use App\Domain\Entity\MySurvey;
 use App\Domain\Entity\Subject;
 use App\Domain\Entity\Survey;
 use App\Domain\Entity\User;
 use App\Domain\Repository\SurveyRepositoryInterface;
+use App\Infrastructure\Db\Expr\ILikeExpr;
+use Qstart\Db\QueryBuilder\DML\Expression\Expr;
 use Qstart\Db\QueryBuilder\DML\Expression\InExpr;
 use Qstart\Db\QueryBuilder\DML\Query\SelectQuery;
 use Qstart\Db\QueryBuilder\Query;
@@ -83,6 +86,55 @@ class SurveyRepository extends Common\AbstractRepository implements SurveyReposi
             ->from(['t' => $this->getClassTable(Survey::class)])
             ->where(['id' => $id->toRfc4122()]);
         return $this->findOneByQuery($q, Survey::class, ['items', 'subject', 'subject.semester']);
+    }
+
+    public function findAll(GetSurveysDto $dto): DataProviderInterface
+    {
+        $q = Query::select()
+            ->select([
+                's.*',
+                'name' => 'ss.name',
+            ])
+            ->from(['s' => $this->getClassTable(Survey::class)])
+            ->innerJoin(
+                ['ss' => $this->getClassTable(Subject::class)],
+                'ss.id = s.subject_id',
+            );
+        if ($dto->getTitle() !== null) {
+            $q->andWhere([
+                'OR',
+                new ILikeExpr(new Expr('s.title'), $dto->getTitle()),
+                new ILikeExpr(new Expr('ss.name'), $dto->getTitle()),
+            ]);
+        }
+        if ($dto->getSubjectIds() !== null) {
+            $q->andWhere(new InExpr(
+                's.subject_id',
+                array_map(
+                    fn(Uuid $uuid) => $uuid->toRfc4122(),
+                    $dto->getSubjectIds(),
+                ),
+            ));
+        }
+        return $this->findWithLazyBatchedProvider(
+            $q,
+            Survey::class,
+            ['subject', 'subject.semester'],
+            new LimitOffset(
+                $dto->getLimit(),
+                $dto->getOffset(),
+            ),
+            new DataSort([
+                new SortColumn(
+                    match ($dto->getSortBy()) {
+                        'name' => 'ss.name',
+                        default => "s.{$dto->getSortBy()}",
+                    },
+                    $dto->getSortBy(),
+                    $dto->getSortType()->getPhpSort(),
+                ),
+            ]),
+        );
     }
 
     private function getMyQuery(User $user): SelectQuery
