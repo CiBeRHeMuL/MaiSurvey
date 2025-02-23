@@ -1453,6 +1453,140 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationResponse'
+  '/surveys/{id}':
+    get:
+      tags:
+        - surveys
+      operationId: get_survey-get-by-id
+      parameters:
+        -
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '[0-9a-f]{8}-[0-9a-f]{4}-[13-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/SuccessResponse' }
+                  - { properties: { data: { $ref: '#/components/schemas/Survey' } }, type: object }
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 'Not Found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: 'Unprocessable Entity'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResponse'
+  /surveys:
+    get:
+      tags:
+        - surveys
+      operationId: get_survey-get-all
+      parameters:
+        -
+          name: 'subject_ids[]'
+          in: query
+          required: false
+          schema:
+            title: 'Предметы для фильтрации'
+            type: array
+            items: {  }
+            default: null
+            maxItems: 50
+            nullable: true
+        -
+          name: title
+          in: query
+          required: false
+          schema:
+            title: 'Название опроса'
+            type: string
+            default: null
+            nullable: true
+        -
+          name: sort_by
+          in: query
+          required: false
+          schema:
+            title: 'Сортировка по'
+            type: string
+            default: name
+            enum:
+              - name
+              - completed
+              - created_at
+        -
+          name: sort_type
+          in: query
+          required: false
+          schema:
+            title: 'Тип сортировки'
+            type: string
+            default: asc
+            enum:
+              - asc
+              - desc
+        -
+          name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+        -
+          name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 100
+            maximum: 100
+            minimum: 0
+            nullable: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/SuccessWithPaginationResponse' }
+                  - { properties: { data: { properties: { items: { type: array, items: { $ref: '#/components/schemas/LiteSurvey' } } }, type: object } }, type: object }
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 'Not Found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: 'Unprocessable Entity'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResponse'
   /survey-templates:
     get:
       tags:
@@ -3190,6 +3324,46 @@ components:
           title: 'Актуален до'
           type: string
       type: object
+    GetSurveysDto:
+      properties:
+        subject_ids:
+          title: 'Предметы для фильтрации'
+          type: array
+          items: {  }
+          default: null
+          maxItems: 50
+          nullable: true
+        title:
+          title: 'Название опроса'
+          type: string
+          default: null
+          nullable: true
+        sort_by:
+          title: 'Сортировка по'
+          type: string
+          default: name
+          enum:
+            - name
+            - completed
+            - created_at
+        sort_type:
+          title: 'Тип сортировки'
+          type: string
+          default: asc
+          enum:
+            - asc
+            - desc
+        offset:
+          type: integer
+          default: 0
+          minimum: 0
+        limit:
+          type: integer
+          default: 100
+          maximum: 100
+          minimum: 0
+          nullable: true
+      type: object
     GetAllSurveyTemplatesDto:
       properties:
         name:
@@ -3942,6 +4116,19 @@ components:
           items:
             $ref: '#/components/schemas/SurveyItem'
       type: object
+    LiteSurvey:
+      required:
+        - id
+        - title
+        - subject
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        subject:
+          $ref: '#/components/schemas/Subject'
+      type: object
     LiteSurveyTemplate:
       required:
         - id
@@ -4236,19 +4423,6 @@ components:
           oneOf:
             -
               $ref: '#/components/schemas/UserData'
-      type: object
-    LiteSurvey:
-      required:
-        - id
-        - title
-        - subject
-      properties:
-        id:
-          type: string
-        title:
-          type: string
-        subject:
-          $ref: '#/components/schemas/Subject'
       type: object
     SurveyItem:
       required:
