@@ -30,7 +30,7 @@ nelmio_api_doc:
       - name: semesters
         description: Ручки для работы с семестрами
     servers:
-      - url: https://mai-survey.net
+      - url: https://api.mai-survey.ru
       - url: http://mai-survey.loc
         description: Local development server
     components:

@@ -130,7 +130,9 @@ class TeacherSubjectService
             return $created;
         } catch (Throwable $e) {
             $this->logger->error($e);
-            $this->transactionManager->rollback();
+            if ($transaction) {
+                $this->transactionManager->rollback();
+            }
             if ($throwOnError) {
                 throw $e;
             } else {

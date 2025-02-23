@@ -92,7 +92,7 @@ class TeacherSubjectsImporter
             $year = trim($row[$dto->getYearCol()] ?? '');
             $semesterNumber = trim($row[$dto->getSemesterCol()] ?? '');
 
-            $hash = "{$subject}_{$email}_{$type}_{$year}_{$semesterNumber}";
+            $hash = md5("{$subject}_{$email}_{$type}_{$year}_{$semesterNumber}");
             if (isset($existingRows[$hash])) {
                 throw ValidationException::new([
                     $errorGenerator(
@@ -151,7 +151,7 @@ class TeacherSubjectsImporter
             $semesterNumber = (int)$semesterNumber;
             $isSpringSemester = (bool)($semesterNumber % 2);
 
-            $indexesData[$k] = compact('subject', 'email', 'type');
+            $indexesData[$k] = compact('subject', 'email', 'type', 'year', 'isSpringSemester');
             $subjectIndexes[$k] = new GetByRawIndexDto(
                 $subject,
                 new GetSemesterByIndexDto($year, $isSpringSemester),
@@ -164,7 +164,7 @@ class TeacherSubjectsImporter
         /** @var array<string, Subject> $subjects */
         $subjects = HArray::index(
             $subjects,
-            fn(Subject $s) => $s->getName(),
+            fn(Subject $s) => md5("{$s->getName()}_{$s->getSemester()->getYear()}_{$s->getSemester()->isSpring()}"),
         );
 
         $teachers = $this
@@ -179,8 +179,8 @@ class TeacherSubjectsImporter
         $createDtos = [];
         $indexes = [];
         foreach ($indexesData as $k => $indexesDatum) {
-            ['subject' => $subject, 'email' => $email, 'type' => $type] = $indexesDatum;
-            $subject = $subjects[$subject] ?? null;
+            ['subject' => $subject, 'email' => $email, 'type' => $type, 'year' => $year, 'isSpringSemester' => $isSpringSemester] = $indexesDatum;
+            $subject = $subjects[md5("{$subject}_{$year}_{$isSpringSemester}")] ?? null;
             if (!$subject) {
                 throw ValidationException::new([
                     new ValidationError(
@@ -248,7 +248,7 @@ class TeacherSubjectsImporter
             $type = $existingTeacherSubjects->current()->getType();
             $semester = $subject->getSemester();
             $semesterNumber = (int)$semester->isSpring();
-            $hash = "{$subject->getName()}_{$teacher->getEmail()->getEmail()}_{$type->value}_{$semester->getYear()}_{$semesterNumber}";
+            $hash = md5("{$subject->getName()}_{$teacher->getEmail()->getEmail()}_{$type->value}_{$semester->getYear()}_{$semesterNumber}");
             $row = $existingRows[$hash];
             throw ValidationException::new([
                 $errorGenerator(
