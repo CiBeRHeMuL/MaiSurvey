@@ -15,6 +15,9 @@ services:
       - caddy
     volumes:
       - ./pgdata:/var/lib/postgresql/data
+      - type: bind
+        source: .
+        target: /app
   mai-survey-php:
     build:
       context: ./

@@ -58,3 +58,6 @@ help:
 # Документация
 openapi:
 	touch ./doc/openapi.yaml && $(CONSOLE) nelmio:apidoc:dump --format=yaml > ./doc/openapi.yaml
+
+dump:
+	pg_dump --file=dump.sql --create --format=c --clean --if-exists
