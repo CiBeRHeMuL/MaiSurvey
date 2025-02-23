@@ -57,8 +57,6 @@ enum RoleEnum: string
             ],
             self::Student => [
                 PermissionEnum::SurveyComplete,
-                PermissionEnum::SurveyView,
-                PermissionEnum::SurveyViewResult,
                 PermissionEnum::StudentSubjectViewMy,
                 PermissionEnum::SurveyViewMy,
             ],
@@ -68,7 +66,6 @@ enum RoleEnum: string
             self::SurveyCreator => [
                 PermissionEnum::SurveyCreate,
                 PermissionEnum::SurveyUpdate,
-                PermissionEnum::SurveyDelete,
                 PermissionEnum::SurveyViewAll,
             ],
         };

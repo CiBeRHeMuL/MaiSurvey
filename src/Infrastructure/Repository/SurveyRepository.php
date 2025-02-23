@@ -77,6 +77,14 @@ class SurveyRepository extends Common\AbstractRepository implements SurveyReposi
         );
     }
 
+    public function findById(Uuid $id): Survey|null
+    {
+        $q = Query::select()
+            ->from(['t' => $this->getClassTable(Survey::class)])
+            ->where(['id' => $id->toRfc4122()]);
+        return $this->findOneByQuery($q, Survey::class, ['items', 'subject', 'subject.semester']);
+    }
+
     private function getMyQuery(User $user): SelectQuery
     {
         return Query::select()

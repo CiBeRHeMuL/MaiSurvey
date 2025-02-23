@@ -16,6 +16,7 @@ use App\Application\UseCase\Survey\CreateSurveyMSUseCase;
 use App\Application\UseCase\Survey\CreateSurveyUseCase;
 use App\Application\UseCase\Survey\GetMySurveyByIdUseCase;
 use App\Application\UseCase\Survey\GetMySurveysUseCase;
+use App\Application\UseCase\Survey\GetSurveyByIdUseCase;
 use App\Domain\Dto\Survey\GetMySurveyByIdDto as DomainGetMySurveyByIdDto;
 use App\Domain\Enum\PermissionEnum;
 use App\Presentation\Web\Dto\Survey\GetMySurveyByIdDto;
@@ -224,5 +225,30 @@ class SurveyController extends BaseController
                 ),
             ),
         );
+    }
+
+    #[Route('/surveys/{id}', 'survey-get-my-by-id', requirements: ['id' => Requirement::UUID], methods: ['GET'])]
+    #[IsGranted(PermissionEnum::SurveyView->value, statusCode: 404, exceptionCode: 404)]
+    #[OA\Tag('surveys')]
+    #[LOA\SuccessResponse(Survey::class)]
+    #[LOA\ErrorResponse(401)]
+    #[LOA\ErrorResponse(404)]
+    #[LOA\ValidationResponse]
+    public function getById(
+        Uuid $id,
+        LoggerInterface $logger,
+        GetSurveyByIdUseCase $useCase,
+    ): JsonResponse {
+        $useCase->setLogger($logger);
+        $survey = $useCase->execute($id);
+        if ($survey === null) {
+            return Response::notFound();
+        } else {
+            return Response::success(
+                new SuccessResponse(
+                    Survey::fromSurvey($survey),
+                ),
+            );
+        }
     }
 }

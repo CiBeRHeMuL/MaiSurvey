@@ -6,8 +6,10 @@ use App\Domain\DataProvider\DataProviderInterface;
 use App\Domain\Dto\Survey\GetMySurveyByIdDto;
 use App\Domain\Dto\Survey\GetMySurveysDto;
 use App\Domain\Entity\MySurvey;
+use App\Domain\Entity\Survey;
 use App\Domain\Entity\User;
 use App\Domain\Repository\Common\RepositoryInterface;
+use Symfony\Component\Uid\Uuid;
 
 interface SurveyRepositoryInterface extends RepositoryInterface
 {
@@ -26,4 +28,6 @@ interface SurveyRepositoryInterface extends RepositoryInterface
      * @return MySurvey|null
      */
     public function findMyById(User $user, GetMySurveyByIdDto $dto): MySurvey|null;
+
+    public function findById(Uuid $id): Survey|null;
 }

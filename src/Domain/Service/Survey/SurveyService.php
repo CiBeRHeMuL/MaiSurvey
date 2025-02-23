@@ -25,6 +25,7 @@ use App\Domain\Service\Template\TemplateService;
 use App\Domain\Validation\ValidationError;
 use DateTimeImmutable;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Uid\Uuid;
 use Throwable;
 
 class SurveyService
@@ -188,6 +189,13 @@ class SurveyService
                 ),
             ]);
         }
+    }
+
+    public function getById(Uuid $id): Survey|null
+    {
+        return $this
+            ->surveyRepository
+            ->findById($id);
     }
 
     private function prepareMySurvey(MySurvey $survey): MySurvey
