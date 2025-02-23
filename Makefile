@@ -3,6 +3,8 @@
 CONSOLE = php bin/console
 Command := $(firstword $(MAKECMDGOALS))
 Arguments := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
+PG_USER = ms
+PG_DBNAME = ms
 
 # Установка проекта с docker
 docker-install:
@@ -60,4 +62,4 @@ openapi:
 	touch ./doc/openapi.yaml && $(CONSOLE) nelmio:apidoc:dump --format=yaml > ./doc/openapi.yaml
 
 dump:
-	pg_dump --file=./dump/dump.sql --create --format=c --clean --if-exists
+	pg_dump --file=./dump/dump.sql --create --format=c --clean --if-exists --dbname=$(PG_DBNAME) -U $(PG_USER)
