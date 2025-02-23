@@ -8,6 +8,7 @@ use Iterator;
 use PhpOffice\PhpSpreadsheet\Reader\BaseReader;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Worksheet\CellIterator;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class XlsxFileReader implements FileReaderInterface
@@ -32,12 +33,20 @@ class XlsxFileReader implements FileReaderInterface
     /**
      * @param int $startIndex
      * @param int|null $endIndex
+     * @param bool $allowEmptyRows
      *
      * @return Iterator<string, string[]>
      */
-    public function getRows(int $startIndex = 1, int|null $endIndex = null): Iterator
+    public function getRows(int $startIndex = 1, int|null $endIndex = null, bool $allowEmptyRows = false): Iterator
     {
         foreach ($this->worksheet->getRowIterator($startIndex, $endIndex) as $k => $row) {
+            $empty = $allowEmptyRows === false
+                && $row->isEmpty(
+                    CellIterator::TREAT_NULL_VALUE_AS_EMPTY_CELL | CellIterator::TREAT_EMPTY_STRING_AS_EMPTY_CELL,
+                );
+            if ($empty) {
+                continue;
+            }
             $rowData = [];
             foreach ($row->getCellIterator() as $cKey => $cell) {
                 $rowData[$cKey] = $cell->getFormattedValue();

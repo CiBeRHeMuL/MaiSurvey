@@ -41,4 +41,11 @@ interface UserRepositoryInterface extends RepositoryInterface
      * @return DataProviderInterface<User>
      */
     public function findLastN(int $count, DataSortInterface $sort): DataProviderInterface;
+
+    /**
+     * @param string[] $emails
+     *
+     * @return string[]
+     */
+    public function findEmailsByEmails(array $emails): array;
 }

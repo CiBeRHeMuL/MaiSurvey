@@ -14,6 +14,7 @@ use App\Domain\Service\FileReader\FileReaderInterface;
 use App\Domain\Service\Group\GroupService;
 use App\Domain\Validation\ValidationError;
 use InvalidArgumentException;
+use Iterator;
 use Psr\Log\LoggerInterface;
 use Throwable;
 
@@ -64,10 +65,16 @@ class UserDataImporter
         }
         $firstRow = $dto->isHeadersInFirstRow() ? 2 : 1;
 
+        return $this->importFromIterator($dto, $this->dataImport->getRows($firstRow, $this->dataImport->getHighestRow()));
+    }
+
+    public function importFromIterator(ImportDto $dto, Iterator $data): int
+    {
+        $data = iterator_to_array($data);
         // Сначала собираем id групп для
         /** @var string[] $groupNames */
         $groupNames = [];
-        foreach ($this->dataImport->getRows($firstRow, $this->dataImport->getHighestRow()) as $row) {
+        foreach ($data as $row) {
             $groupName = $row[$dto->getGroupNameCol()] ?? null;
             $groupName = trim($groupName);
 
@@ -86,7 +93,7 @@ class UserDataImporter
 
         $createDtos = [];
         // Обрабатываем строки на ошибки
-        foreach ($this->dataImport->getRows($firstRow, $this->dataImport->getHighestRow()) as $k => $row) {
+        foreach ($data as $k => $row) {
             $groupName = $row[$dto->getGroupNameCol()] ?? null;
             $groupName = trim($groupName);
 
@@ -104,7 +111,7 @@ class UserDataImporter
                         ValidationErrorSlugEnum::WrongFile->getSlug(),
                         sprintf(
                             $validationErrorTemplate,
-                            $k - 1 + $firstRow,
+                            $k,
                             sprintf(
                                 'Группа "%s" не найдена',
                                 $groupName,
@@ -128,7 +135,7 @@ class UserDataImporter
                     fn(ValidationError $error) => new ValidationError(
                         'file',
                         ValidationErrorSlugEnum::WrongFile->getSlug(),
-                        sprintf($validationErrorTemplate, $k - 1 + $firstRow, $error->getMessage()),
+                        sprintf($validationErrorTemplate, $k, $error->getMessage()),
                     ),
                     $e->getErrors(),
                 ));

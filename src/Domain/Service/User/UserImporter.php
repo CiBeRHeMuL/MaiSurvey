@@ -25,8 +25,10 @@ use App\Domain\Service\UserData\UserDataImporter;
 use App\Domain\Service\UserData\UserDataService;
 use App\Domain\Validation\ValidationError;
 use App\Domain\ValueObject\Email;
+use ArrayIterator;
 use DateTimeImmutable;
 use Exception;
+use InvalidArgumentException;
 use Iterator;
 use Psr\Log\LoggerInterface;
 use Throwable;
@@ -73,19 +75,42 @@ class UserImporter
 
         try {
             $this->transactionManager->beginTransaction();
-            $userDataCount = $this->userDataImporter->import($importUserDataDto);
+            if ($dto->getForRole()->importEnabled() === false) {
+                throw ValidationException::new([
+                    new ValidationError(
+                        'for_role',
+                        ValidationErrorSlugEnum::WrongField->getSlug(),
+                        'Импорт данных недоступен для этой роли',
+                    ),
+                ]);
+            }
+
+            try {
+                $this->fileReader->openFile($dto->getFile());
+            } catch (InvalidArgumentException $e) {
+                $this->logger->error($e);
+                throw ValidationException::new([
+                    new ValidationError(
+                        'file',
+                        ValidationErrorSlugEnum::FileNotExists->getSlug(),
+                        'Не удалось открыть файл',
+                    ),
+                ]);
+            }
+            /** @var Iterator<int, array<string, string>> $presetData */
+            $presetData = $this->fileReader->getRows(
+                $dto->isHeadersInFirstRow() ? 2 : 1,
+                $this->fileReader->getHighestRow(),
+            );
+            $arrayPresetData = iterator_to_array($presetData);
+            $presetData = new ArrayIterator($arrayPresetData);
+            $userDataCount = $this->userDataImporter->importFromIterator($importUserDataDto, $presetData);
 
             if ($userDataCount === 0) {
                 return new CreatedUsersInfo(0);
             }
 
             $validationErrorTemplate = 'Некорректное содержимое файла. Ошибка в строке %d: %s';
-
-            /** @var Iterator<int, array<string, string>> $presetData */
-            $presetData = $this->fileReader->getRows(
-                $dto->isHeadersInFirstRow() ? 2 : 1,
-                $this->fileReader->getHighestRow(),
-            );
 
             $allUserData = $this
                 ->userDataService
@@ -102,19 +127,29 @@ class UserImporter
 
             $names = new ProjectionAwareDataProvider(
                 $allUserData,
-                function (UserData $userData) use ($dto) {
+                function (UserData $userData) {
                     return $userData->getFullName();
                 },
             );
 
-            $existingEmails = $this
-                ->userDataService
-                ->getEmailsByNames(iterator_to_array($names->getItems()));
+            $existingEmails = array_unique(array_merge(
+                $this
+                    ->userDataService
+                    ->getEmailsByNames(iterator_to_array($names->getItems())),
+                $this
+                    ->userService
+                    ->getEmailsByEmails(array_filter(array_column(
+                        $arrayPresetData,
+                        $dto->getEmailCol(),
+                    )))
+            ));
+
 
             /** @var array<string, UserData> $userDataByEmail */
             $userDataByEmail = [];
             $emailDomain = '@' . $dto->getForRole()->value . '.' . $this->appHost;
 
+            $presetData->rewind();
             $userDtos = new ProjectionAwareDataProvider(
                 $allUserData,
                 function (UserData $userData) use (
@@ -159,7 +194,8 @@ class UserImporter
                         }
                         $email = new Email("$tempEmail$emailDomain");
                     } else {
-                        if (in_array($presetEmail, $existingEmails)) {
+                        /** @var Email $presetEmail */
+                        if (in_array($presetEmail->getEmail(), $existingEmails)) {
                             throw ValidationException::new([
                                 new ValidationError(
                                     'file',

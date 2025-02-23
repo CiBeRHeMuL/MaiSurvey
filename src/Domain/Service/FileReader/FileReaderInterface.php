@@ -23,11 +23,12 @@ interface FileReaderInterface
      *
      * @param int $startIndex
      * @param int|null $endIndex
+     * @param bool $allowEmptyRows включать ли в выборку пустые строки
      *
      * @return Iterator<string, string[]>
      * @throws RuntimeException
      */
-    public function getRows(int $startIndex = 1, int|null $endIndex = null): Iterator;
+    public function getRows(int $startIndex = 1, int|null $endIndex = null, bool $allowEmptyRows = false): Iterator;
 
     /**
      * Возвращает номер последней строки файла

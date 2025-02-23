@@ -167,4 +167,15 @@ class UserRepository extends AbstractRepository implements UserRepositoryInterfa
             $sort,
         );
     }
+
+    public function findEmailsByEmails(array $emails): array
+    {
+        $q = Query::select()
+            ->distinct(true)
+            ->select(['u.email'])
+            ->from(['u' => $this->getClassTable(User::class)])
+            ->where(['u.email' => $emails]);
+        return $this
+            ->findColumnByQuery($q);
+    }
 }

@@ -248,6 +248,21 @@ class UserService
         }
     }
 
+    /**
+     * @param string[] $emails
+     *
+     * @return string[]
+     */
+    public function getEmailsByEmails(array $emails): array
+    {
+        if (empty($emails)) {
+            return [];
+        }
+        return $this
+            ->userRepository
+            ->findEmailsByEmails($emails);
+    }
+
     private function entityFromCreateDto(CreateUserDto $dto): User
     {
         $accessToken = $this->securityService->generateAccessToken();
