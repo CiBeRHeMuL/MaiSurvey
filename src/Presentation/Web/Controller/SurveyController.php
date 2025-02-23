@@ -274,7 +274,7 @@ class SurveyController extends BaseController
             new SuccessWithPaginationResponse(
                 PaginatedData::fromDataProvider(
                     $provider,
-                    LiteSurvey::fromMySurvey(...),
+                    LiteSurvey::fromSurvey(...),
                 ),
             ),
         );
