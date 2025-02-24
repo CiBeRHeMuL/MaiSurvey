@@ -46,7 +46,16 @@ class SurveyRepository extends Common\AbstractRepository implements SurveyReposi
         return $this->findWithLazyBatchedProvider(
             $q,
             MySurvey::class,
-            ['survey', 'survey.subject', 'user', 'user.data', 'myItems', 'myItems.surveyItem'],
+            [
+                'survey',
+                'survey.subject',
+                'user',
+                'user.data',
+                'myItems',
+                'myItems.surveyItem',
+                'survey.subject.semester',
+                'myItems.teacherSubject.teacher.data.group',
+            ],
             new LimitOffset(
                 $dto->getLimit(),
                 $dto->getOffset(),
@@ -76,7 +85,16 @@ class SurveyRepository extends Common\AbstractRepository implements SurveyReposi
         return $this->findOneByQuery(
             $q,
             MySurvey::class,
-            ['survey', 'survey.subject', 'user', 'user.data', 'myItems', 'myItems.surveyItem'],
+            [
+                'survey',
+                'survey.subject',
+                'user',
+                'user.data',
+                'myItems',
+                'myItems.surveyItem',
+                'survey.subject.semester',
+                'myItems.teacherSubject.teacher.data.group',
+            ],
         );
     }
 
