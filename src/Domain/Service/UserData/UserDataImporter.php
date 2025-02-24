@@ -65,10 +65,17 @@ class UserDataImporter
         }
         $firstRow = $dto->isHeadersInFirstRow() ? 2 : 1;
 
-        return $this->importFromIterator($dto, $this->dataImport->getRows($firstRow, $this->dataImport->getHighestRow()));
+        $ids = $this->importFromIteratorReturningIds($dto, $this->dataImport->getRows($firstRow, $this->dataImport->getHighestRow()));
+        return count($ids);
     }
 
-    public function importFromIterator(ImportDto $dto, Iterator $data): int
+    /**
+     * @param ImportDto $dto
+     * @param Iterator $data
+     *
+     * @return string[]
+     */
+    public function importFromIteratorReturningIds(ImportDto $dto, Iterator $data): array
     {
         $data = iterator_to_array($data);
         // Сначала собираем id групп для
@@ -148,10 +155,13 @@ class UserDataImporter
         $chunks = array_chunk($createDtos, 100, true);
 
         $this->transactionManager->beginTransaction();
-        $created = 0;
+        $created = [];
         foreach ($chunks as $dtos) {
             try {
-                $created += $this->userDataService->createMulti($dtos, false, false, true);
+                $created = array_merge(
+                    $created,
+                    $this->userDataService->createMultiReturningIds($dtos, false, false, true),
+                );
             } catch (Throwable $e) {
                 $this->logger->error($e);
                 $this->transactionManager->rollback();

@@ -230,6 +230,148 @@ abstract class AbstractRepository implements RepositoryInterface
         return $cnt;
     }
 
+    public function createMultiReturningIds(array $entities, array $replaceTables = [], bool $generateId = true): array
+    {
+        if (empty($entities)) {
+            return [];
+        }
+
+        $em = $this->entityManager;
+        $conn = $this->entityManager->getConnection();
+
+        // Строки для вставки
+        /** @var array<string, array<int, array>> $inserts */
+        $inserts = [];
+        // Сущности, для которых идентификаторы проставляются после вставки
+        /** @var array<string, array<int, object>> $postInsertIdEntities */
+        $postInsertIdEntities = [];
+        // Мапа с полями сущности и колонками идентификаторов для таблиц, для которых проставляются они после вставки
+        /** @var array<string, string[]> $idColumnsMap */
+        $idColumnsMap = [];
+        // Количества полей в сущностях (таблица - количество) для наиболее эффективной вставки
+        /** @var array<string, int> $entityFieldCounts */
+        $entityFieldCounts = [];
+        foreach ($entities as $k => &$entity) {
+            $metadata = $em->getClassMetadata($entity::class);
+            $tableName = $metadata->getTableName();
+            // Если есть таблица для замены, то используем ее
+            if (isset($replaceTables[$tableName])) {
+                $tableName = $replaceTables[$tableName];
+            }
+
+            $idColumnsMap[$tableName] ??= $metadata->getIdentifierColumnNames();
+
+            $rowData = [];
+            $idGen = $metadata->idGenerator;
+            if ($generateId) {
+                if ($idGen->isPostInsertGenerator()) {
+                    $postInsertIdEntities[$tableName][$k] = $entity;
+                } else {
+                    $idValue = $idGen->generateId($em, $entity);
+
+                    if (!$idGen instanceof AssignedGenerator) {
+                        $idValue = [
+                            $metadata->getSingleIdentifierFieldName() => $conn->convertToPHPValue(
+                                $idValue,
+                                $metadata->getTypeOfField($metadata->getSingleIdentifierFieldName()),
+                            ),
+                        ];
+                        $metadata->setIdentifierValues($entity, $idValue);
+                    }
+                }
+            }
+
+            $entityFieldCounts[$tableName] ??= 0;
+            $fieldNames = $metadata->getFieldNames();
+            $fieldsCount = 0;
+            foreach ($fieldNames as $fieldName) {
+                // Пропускаем автогенирируемые во время вставки идентификаторы
+                if ($generateId && $metadata->isIdentifier($fieldName) && $idGen->isPostInsertGenerator()) {
+                    continue;
+                }
+                $rowData[$metadata->getColumnName($fieldName)] = $conn->convertToDatabaseValue(
+                    $metadata->getFieldValue($entity, $fieldName),
+                    $metadata->getTypeOfField($fieldName),
+                );
+                $fieldsCount++;
+            }
+            $entityFieldCounts[$tableName] = $fieldsCount;
+            $inserts[$tableName][$k] = $rowData;
+        }
+
+        // Выполнение SQL-запроса
+        $conn->beginTransaction();
+        $ids = [];
+        try {
+            foreach ($inserts as $tableName => $rows) {
+                // Разбиваем строки на чанки, чтобы не улететь за лимит в 65535 параметров
+                // Сохраняем ключи чтобы потом можно было связать строку из вставки с сущностью, если надо будет проставлять идентификаторы
+                $chunks = array_chunk(
+                    $rows,
+                    floor(65535 / ($entityFieldCounts[$tableName] ?? 100)),
+                    true,
+                );
+                foreach ($chunks as $chunk) {
+                    // Колонки ключей
+                    $columns = $idColumnsMap[$tableName];
+                    $query = Query::insert()
+                        ->into($tableName)
+                        ->addMultipleValues($chunk)
+                        ->setEndOfQuery(' RETURNING "' . implode('", "', $columns) . '"');
+                    $result = $this->executeQuery($query);
+
+                    // Первичные ключи для связывания
+                    $allIds = $result->fetchAllAssociative();
+
+                    $ids[$tableName] = array_merge($ids[$tableName] ?? [], $allIds);
+
+                    // Если есть сущности, для которых идентификаторы проставляются после вставки, то проставляем им идентификаторы
+                    if ($generateId && !empty($postInsertIdEntities[$tableName])) {
+
+                        $entities = &$postInsertIdEntities[$tableName];
+                        $metadata = $em->getClassMetadata($entities[array_key_first($entities)]::class);
+                        $idsKey = 0;
+                        foreach (array_keys($chunk) as $k) {
+                            $idValues = $allIds[$idsKey];
+                            // Удаляем ссылку на предыдущую сущность
+                            unset($entity);
+                            $entity = &$entities[$k];
+
+                            array_walk(
+                                $idValues,
+                                function (mixed &$id, string $column) use (&$conn, &$metadata) {
+                                    $id = $conn->convertToPHPValue(
+                                        $id,
+                                        $metadata->getTypeOfField($metadata->getFieldName($column)),
+                                    );
+                                }
+                            );
+
+                            $metadata->setIdentifierValues(
+                                $entity,
+                                array_combine(
+                                    array_map(
+                                        $metadata->getFieldName(...),
+                                        $columns,
+                                    ),
+                                    $idValues,
+                                ),
+                            );
+                            $idsKey++;
+                        }
+                    }
+                }
+            }
+
+            $conn->commit();
+        } catch (Throwable $e) {
+            $conn->rollBack();
+            throw $e;
+        }
+
+        return $ids;
+    }
+
     public function updateMulti(array $entities): int
     {
         if ($entities === []) {

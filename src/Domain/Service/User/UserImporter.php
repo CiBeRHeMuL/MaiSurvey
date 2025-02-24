@@ -18,6 +18,7 @@ use App\Domain\Enum\ValidationErrorSlugEnum;
 use App\Domain\Exception\ErrorException;
 use App\Domain\Exception\ValidationException;
 use App\Domain\Helper\HString;
+use App\Domain\Iterator\ProjectionIterator;
 use App\Domain\Service\Db\TransactionManagerInterface;
 use App\Domain\Service\FileReader\FileReaderInterface;
 use App\Domain\Service\Security\PasswordCheckerServiceInterface;
@@ -104,9 +105,9 @@ class UserImporter
             );
             $arrayPresetData = iterator_to_array($presetData);
             $presetData = new ArrayIterator($arrayPresetData);
-            $userDataCount = $this->userDataImporter->importFromIterator($importUserDataDto, $presetData);
+            $userDataIds = $this->userDataImporter->importFromIteratorReturningIds($importUserDataDto, $presetData);
 
-            if ($userDataCount === 0) {
+            if ($userDataIds === []) {
                 return new CreatedUsersInfo(0);
             }
 
@@ -114,19 +115,10 @@ class UserImporter
 
             $allUserData = $this
                 ->userDataService
-                ->getLastN(
-                    $userDataCount,
-                    new DataSort([
-                        new SortColumn(
-                            'created_at',
-                            'created_at',
-                            SORT_DESC,
-                        ),
-                    ]),
-                );
+                ->getByIdsWithIdsOrder($userDataIds);
 
-            $names = new ProjectionAwareDataProvider(
-                $allUserData,
+            $names = new ProjectionIterator(
+                new ArrayIterator($allUserData),
                 function (UserData $userData) {
                     return $userData->getFullName();
                 },
@@ -135,7 +127,7 @@ class UserImporter
             $existingEmails = array_unique(array_merge(
                 $this
                     ->userDataService
-                    ->getEmailsByNames(iterator_to_array($names->getItems())),
+                    ->getEmailsByNames(iterator_to_array($names)),
                 $this
                     ->userService
                     ->getEmailsByEmails(array_filter(array_column(
@@ -150,8 +142,8 @@ class UserImporter
             $emailDomain = '@' . $dto->getForRole()->value . '.' . $this->appHost;
 
             $presetData->rewind();
-            $userDtos = new ProjectionAwareDataProvider(
-                $allUserData,
+            $userDtos = new ProjectionIterator(
+                new ArrayIterator($allUserData),
                 function (UserData $userData) use (
                     &$dto,
                     &$existingEmails,
@@ -224,16 +216,16 @@ class UserImporter
             );
 
             $created = $this->userService->createMulti(
-                iterator_to_array($userDtos->getItems()),
+                iterator_to_array($userDtos),
                 false,
                 throwOnError: true,
             );
 
-            if ($created !== $userDataCount) {
+            if ($created !== $userDataIds) {
                 throw new Exception(sprintf(
                     'Несовпадение количества сохраненных пользователей и данных: %d -> %d',
                     $created,
-                    $userDataCount,
+                    $userDataIds,
                 ));
             }
 

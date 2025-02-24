@@ -4,7 +4,6 @@ namespace App\Infrastructure\Repository;
 
 use App\Domain\DataProvider\DataProviderInterface;
 use App\Domain\DataProvider\DataSort;
-use App\Domain\DataProvider\DataSortInterface;
 use App\Domain\DataProvider\LimitOffset;
 use App\Domain\DataProvider\SortColumn;
 use App\Domain\Dto\UserData\GetAllUserDataDto;
@@ -102,19 +101,6 @@ class UserDataRepository extends AbstractRepository implements UserDataRepositor
         );
     }
 
-    public function findLastN(int $count, DataSortInterface $sort): DataProviderInterface
-    {
-        $q = Query::select()
-            ->from($this->getClassTable(UserData::class));
-        return $this->findWithLazyBatchedProvider(
-            $q,
-            UserData::class,
-            ['user', 'group', 'group.group'],
-            new LimitOffset($count, 0),
-            $sort,
-        );
-    }
-
     public function findEmailsByNames(array $names): array
     {
         $q = Query::select()
@@ -127,5 +113,19 @@ class UserDataRepository extends AbstractRepository implements UserDataRepositor
             )
             ->where(new InExpr(new FullNameExpr('ud'), $names));
         return $this->findColumnByQuery($q);
+    }
+
+    public function findAllByIdsWithIdsOrder(array $ids): array
+    {
+        $q = Query::select()
+            ->from(['t' => $this->getClassTable(UserData::class)])
+            ->where(['id' => $ids])
+            ->orderBy([
+                new Expr(
+                    'array_position(ARRAY[' . implode(', ', array_fill(0, count($ids), '?')) . ']::text[], id::text) ASC',
+                    $ids,
+                ),
+            ]);
+        return $this->findAllByQuery($q, UserData::class);
     }
 }

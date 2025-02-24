@@ -2,9 +2,7 @@
 
 namespace App\Domain\Service\UserData;
 
-use App\Domain\DataProvider\ArrayDataProvider;
 use App\Domain\DataProvider\DataProviderInterface;
-use App\Domain\DataProvider\DataSortInterface;
 use App\Domain\Dto\UserData\CreateUserDataDto;
 use App\Domain\Dto\UserData\GetAllUserDataDto;
 use App\Domain\Dto\UserData\UpdateUserDataDto;
@@ -243,10 +241,10 @@ class UserDataService
      * @param bool $transaction выполнять в транзакции?
      * @param bool $throwOnError
      *
-     * @return int
+     * @return string[] uuid созданных сущностей
      * @throws Throwable
      */
-    public function createMulti(array $dtos, bool $validate = true, bool $transaction = true, bool $throwOnError = false): int
+    public function createMultiReturningIds(array $dtos, bool $validate = true, bool $transaction = true, bool $throwOnError = false): array
     {
         if ($transaction) {
             $this->transactionManager->beginTransaction();
@@ -267,7 +265,7 @@ class UserDataService
                 }
             }
 
-            $created = $this->userDataRepository->createMulti($entities);
+            $created = $this->userDataRepository->createMultiReturningIds($entities);
 
             $this->userDataGroupService->createMulti($groupDtos, false, true, $throwOnError);
 
@@ -275,7 +273,9 @@ class UserDataService
                 $this->transactionManager->commit();
             }
 
-            return $created;
+            return count($created) < 1
+                ? []
+                : array_column(array_pop($created), 'id');
         } catch (Throwable $e) {
             $this->logger->error($e);
             if ($transaction) {
@@ -284,7 +284,7 @@ class UserDataService
             if ($throwOnError) {
                 throw $e;
             }
-            return 0;
+            return [];
         }
     }
 
@@ -418,6 +418,21 @@ class UserDataService
             ->findEmailsByNames($names);
     }
 
+    /**
+     * @param string[] $ids
+     *
+     * @return UserData[]
+     */
+    public function getByIdsWithIdsOrder(array $ids): array
+    {
+        if ($ids === []) {
+            return [];
+        }
+        return $this
+            ->userDataRepository
+            ->findAllByIdsWithIdsOrder($ids);
+    }
+
     private function entityFromDto(CreateUserDataDto $dto): UserData
     {
         $userData = new UserData();
@@ -429,15 +444,5 @@ class UserDataService
             ->setCreatedAt(new DateTimeImmutable())
             ->setUpdatedAt(new DateTimeImmutable());
         return $userData;
-    }
-
-    public function getLastN(int $count, DataSortInterface $sort): DataProviderInterface
-    {
-        if ($count <= 0) {
-            return new ArrayDataProvider([]);
-        }
-        return $this
-            ->userDataRepository
-            ->findLastN($count, $sort);
     }
 }
