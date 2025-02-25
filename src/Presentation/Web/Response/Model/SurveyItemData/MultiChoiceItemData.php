@@ -4,7 +4,6 @@ namespace App\Presentation\Web\Response\Model\SurveyItemData;
 
 use App\Domain\Enum\SurveyItemTypeEnum;
 use App\Presentation\Web\OpenApi\Attribute as LOA;
-use App\Presentation\Web\Response\Model\Choice;
 
 readonly class MultiChoiceItemData implements ItemDataInterface
 {

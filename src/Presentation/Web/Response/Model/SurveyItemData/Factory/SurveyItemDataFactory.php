@@ -4,7 +4,7 @@ namespace App\Presentation\Web\Response\Model\SurveyItemData\Factory;
 
 use App\Domain\Dto\SurveyItem\ItemDataInterface as DomainItemDataInterfaceAlias;
 use App\Domain\Enum\SurveyItemTypeEnum;
-use App\Presentation\Web\Response\Model\Choice;
+use App\Presentation\Web\Response\Model\SurveyItemData\Choice;
 use App\Presentation\Web\Response\Model\SurveyItemData\ChoiceItemData;
 use App\Presentation\Web\Response\Model\SurveyItemData\CommentItemData;
 use App\Presentation\Web\Response\Model\SurveyItemData\ItemDataInterface;

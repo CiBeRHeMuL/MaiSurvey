@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Presentation\Web\Response\Model;
+namespace App\Presentation\Web\Response\Model\SurveyItemData;
 
 use App\Domain\Dto\SurveyItem\Choice as DomainChoice;
 
@@ -15,8 +15,8 @@ readonly class Choice
     public static function fromChoice(DomainChoice $choice): self
     {
         return new self(
-            $choice->value,
             $choice->text,
+            $choice->value,
         );
     }
 }
