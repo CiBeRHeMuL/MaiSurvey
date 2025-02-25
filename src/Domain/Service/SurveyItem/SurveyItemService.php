@@ -116,7 +116,7 @@ class SurveyItemService
                  * @var Choice $choice
                  */
                 foreach ($data->getChoices() as $k => $choice) {
-                    if (mb_strlen($choice->text) > 255) {
+                    if (mb_strlen($choice->getText()) > 255) {
                         throw ValidationException::new([
                             new ValidationError(
                                 "data.choices[$k].text",
@@ -125,7 +125,7 @@ class SurveyItemService
                             ),
                         ]);
                     }
-                    if (mb_strlen($choice->value) > 255) {
+                    if (mb_strlen($choice->getValue()) > 255) {
                         throw ValidationException::new([
                             new ValidationError(
                                 "data.choices[$k].value",

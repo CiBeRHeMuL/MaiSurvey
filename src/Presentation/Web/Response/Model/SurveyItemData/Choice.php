@@ -15,8 +15,8 @@ readonly class Choice
     public static function fromChoice(DomainChoice $choice): self
     {
         return new self(
-            $choice->text,
-            $choice->value,
+            $choice->getText(),
+            $choice->getValue(),
         );
     }
 }

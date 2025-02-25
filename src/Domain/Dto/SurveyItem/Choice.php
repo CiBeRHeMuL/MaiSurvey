@@ -9,4 +9,14 @@ readonly class Choice
         public string $value,
     ) {
     }
+
+    public function getText(): string
+    {
+        return $this->text;
+    }
+
+    public function getValue(): string
+    {
+        return $this->value;
+    }
 }

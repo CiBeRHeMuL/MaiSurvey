@@ -65,7 +65,7 @@ class SurveyItemAnswerService
                 $checked = false;
                 /** @var Choice $choice */
                 foreach ($choices as $choice) {
-                    if ($choice->value === $data->getChoice()) {
+                    if ($choice->getValue() === $data->getChoice()) {
                         $checked = true;
                     }
                 }
@@ -89,7 +89,7 @@ class SurveyItemAnswerService
                     $checked = false;
                     /** @var Choice $choice */
                     foreach ($choices as $choice) {
-                        if ($choice->value === $checkingChoice) {
+                        if ($choice->getValue() === $checkingChoice) {
                             $checked = true;
                         }
                     }
