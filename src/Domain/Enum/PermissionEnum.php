@@ -49,11 +49,12 @@ enum PermissionEnum: string
     case SemesterCreate = 'semester.create';
 
     // Survey Template
-
-    // Survey
     case SurveyTemplateView = 'survey_template.view';
     case SurveyTemplateCreate = 'survey_template.create';
     case SurveyTemplateUpdate = 'survey_template.update';
     case SurveyTemplateDelete = 'survey_template.delete';
     case SurveyTemplateViewAll = 'survey_template.view_all';
+
+    // Survey Stat
+    case SurveyStatView = 'survey_stat.view';
 }

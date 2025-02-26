@@ -11,6 +11,8 @@ use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity]
 #[ORM\Table('survey_item_answer')]
+#[ORM\Index(columns: ['answer'])]
+#[ORM\Index(columns: ['type'])]
 class SurveyItemAnswer
 {
     #[ORM\Id]

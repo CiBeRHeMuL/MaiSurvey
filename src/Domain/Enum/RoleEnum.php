@@ -54,6 +54,7 @@ enum RoleEnum: string
                 PermissionEnum::SurveyTemplateUpdate,
                 PermissionEnum::SurveyTemplateDelete,
                 PermissionEnum::SurveyTemplateViewAll,
+                PermissionEnum::SurveyStatView,
             ],
             self::Student => [
                 PermissionEnum::SurveyComplete,

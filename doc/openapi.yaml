@@ -1587,6 +1587,46 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationResponse'
+  '/surveys/{id}/stat':
+    get:
+      tags:
+        - survey-stats
+      operationId: get_get-survey-stat-by-id
+      parameters:
+        -
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '[0-9a-f]{8}-[0-9a-f]{4}-[13-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/SuccessResponse' }
+                  - { properties: { data: { $ref: '#/components/schemas/SurveyStat' } }, type: object }
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 'Not Found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: 'Internal Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /survey-templates:
     get:
       tags:
@@ -4129,6 +4169,24 @@ components:
         subject:
           $ref: '#/components/schemas/Subject'
       type: object
+    SurveyStat:
+      required:
+        - id
+        - available_count
+        - completed_count
+        - items
+      properties:
+        id:
+          type: string
+        available_count:
+          type: integer
+        completed_count:
+          type: integer
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/SurveyStat'
+      type: object
     LiteSurveyTemplate:
       required:
         - id
@@ -4374,6 +4432,7 @@ components:
         - survey_template.update
         - survey_template.delete
         - survey_template.view_all
+        - survey_stat.view
     PaginatedData:
       properties:
         items:
@@ -4749,6 +4808,9 @@ tags:
   -
     name: semesters
     description: 'Ручки для работы с семестрами'
+  -
+    name: survey-stats
+    description: 'Ручки для работы со статистикой по опросам'
   -
     name: survey-templates
 
