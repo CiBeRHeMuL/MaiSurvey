@@ -4665,20 +4665,20 @@ components:
     StatDataInterface:
       required:
         - type
-        - availableCount
-        - completedCount
+        - available_count
+        - completed_count
       properties:
         type:
           $ref: '#/components/schemas/SurveyItemTypeEnum'
-        teacherName:
+        teacher_name:
           type: string
           nullable: true
-        teacherId:
+        teacher_id:
           type: string
           nullable: true
-        availableCount:
+        available_count:
           type: integer
-        completedCount:
+        completed_count:
           type: integer
       type: object
       discriminator:
@@ -4803,8 +4803,6 @@ components:
         - completed_count
         - available_count
         - summary
-        - completedCount
-        - availableCount
       properties:
         type:
           type: string
@@ -4820,16 +4818,6 @@ components:
           type: integer
         summary:
           type: string
-        teacherId:
-          type: string
-          nullable: true
-        teacherName:
-          type: string
-          nullable: true
-        completedCount:
-          type: integer
-        availableCount:
-          type: integer
       type: object
     ChoiceStatData:
       required:
@@ -4837,8 +4825,6 @@ components:
         - completed_count
         - available_count
         - counts
-        - completedCount
-        - availableCount
       properties:
         type:
           type: string
@@ -4856,16 +4842,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ChoiceCount'
-        teacherId:
-          type: string
-          nullable: true
-        teacherName:
-          type: string
-          nullable: true
-        completedCount:
-          type: integer
-        availableCount:
-          type: integer
       type: object
     MultiChoiceStatData:
       required:
@@ -4873,8 +4849,6 @@ components:
         - completed_count
         - available_count
         - counts
-        - completedCount
-        - availableCount
       properties:
         type:
           type: string
@@ -4892,16 +4866,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ChoiceCount'
-        teacherId:
-          type: string
-          nullable: true
-        teacherName:
-          type: string
-          nullable: true
-        completedCount:
-          type: integer
-        availableCount:
-          type: integer
       type: object
     RatingStatData:
       required:
@@ -4910,8 +4874,6 @@ components:
         - available_count
         - counts
         - average
-        - completedCount
-        - availableCount
       properties:
         type:
           type: string
@@ -4932,16 +4894,6 @@ components:
         average:
           type: number
           format: float
-        teacherId:
-          type: string
-          nullable: true
-        teacherName:
-          type: string
-          nullable: true
-        completedCount:
-          type: integer
-        availableCount:
-          type: integer
       type: object
     Choice:
       required:
