@@ -10,7 +10,7 @@ readonly class SurveyStat
      * @param string $id
      * @param int $available_count
      * @param int $completed_count
-     * @param SurveyStat[] $items
+     * @param SurveyStatItem[] $items
      */
     public function __construct(
         public string $id,

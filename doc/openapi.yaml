@@ -4185,7 +4185,7 @@ components:
         items:
           type: array
           items:
-            $ref: '#/components/schemas/SurveyStat'
+            $ref: '#/components/schemas/SurveyStatItem'
       type: object
     LiteSurveyTemplate:
       required:
@@ -4511,6 +4511,27 @@ components:
         subject_type:
           $ref: '#/components/schemas/TeacherSubjectTypeEnum'
       type: object
+    SurveyStatItem:
+      required:
+        - id
+        - available_count
+        - completed_count
+        - type
+        - stats
+      properties:
+        id:
+          type: string
+        available_count:
+          type: integer
+        completed_count:
+          type: integer
+        type:
+          type: string
+        stats:
+          type: array
+          items:
+            $ref: '#/components/schemas/StatDataInterface'
+      type: object
     SurveyTemplateItem:
       required:
         - id
@@ -4641,6 +4662,41 @@ components:
           $ref: '#/components/schemas/MultiChoiceItemData2'
         -
           $ref: '#/components/schemas/RatingItemData2'
+    StatDataInterface:
+      required:
+        - type
+        - availableCount
+        - completedCount
+      properties:
+        type:
+          $ref: '#/components/schemas/SurveyItemTypeEnum'
+        teacherName:
+          type: string
+          nullable: true
+        teacherId:
+          type: string
+          nullable: true
+        availableCount:
+          type: integer
+        completedCount:
+          type: integer
+      type: object
+      discriminator:
+        propertyName: type
+        mapping:
+          comment: '#/components/schemas/CommentStatData'
+          choice: '#/components/schemas/ChoiceStatData'
+          multi_choice: '#/components/schemas/MultiChoiceStatData'
+          rating: '#/components/schemas/RatingStatData'
+      oneOf:
+        -
+          $ref: '#/components/schemas/CommentStatData'
+        -
+          $ref: '#/components/schemas/ChoiceStatData'
+        -
+          $ref: '#/components/schemas/MultiChoiceStatData'
+        -
+          $ref: '#/components/schemas/RatingStatData'
     CommentItemData:
       required:
         - type
@@ -4741,6 +4797,152 @@ components:
         max:
           type: integer
       type: object
+    CommentStatData:
+      required:
+        - type
+        - completed_count
+        - available_count
+        - summary
+        - completedCount
+        - availableCount
+      properties:
+        type:
+          type: string
+        teacher_id:
+          type: string
+          nullable: true
+        teacher_name:
+          type: string
+          nullable: true
+        completed_count:
+          type: integer
+        available_count:
+          type: integer
+        summary:
+          type: string
+        teacherId:
+          type: string
+          nullable: true
+        teacherName:
+          type: string
+          nullable: true
+        completedCount:
+          type: integer
+        availableCount:
+          type: integer
+      type: object
+    ChoiceStatData:
+      required:
+        - type
+        - completed_count
+        - available_count
+        - counts
+        - completedCount
+        - availableCount
+      properties:
+        type:
+          type: string
+        teacher_id:
+          type: string
+          nullable: true
+        teacher_name:
+          type: string
+          nullable: true
+        completed_count:
+          type: integer
+        available_count:
+          type: integer
+        counts:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChoiceCount'
+        teacherId:
+          type: string
+          nullable: true
+        teacherName:
+          type: string
+          nullable: true
+        completedCount:
+          type: integer
+        availableCount:
+          type: integer
+      type: object
+    MultiChoiceStatData:
+      required:
+        - type
+        - completed_count
+        - available_count
+        - counts
+        - completedCount
+        - availableCount
+      properties:
+        type:
+          type: string
+        teacher_id:
+          type: string
+          nullable: true
+        teacher_name:
+          type: string
+          nullable: true
+        completed_count:
+          type: integer
+        available_count:
+          type: integer
+        counts:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChoiceCount'
+        teacherId:
+          type: string
+          nullable: true
+        teacherName:
+          type: string
+          nullable: true
+        completedCount:
+          type: integer
+        availableCount:
+          type: integer
+      type: object
+    RatingStatData:
+      required:
+        - type
+        - completed_count
+        - available_count
+        - counts
+        - average
+        - completedCount
+        - availableCount
+      properties:
+        type:
+          type: string
+        teacher_id:
+          type: string
+          nullable: true
+        teacher_name:
+          type: string
+          nullable: true
+        completed_count:
+          type: integer
+        available_count:
+          type: integer
+        counts:
+          type: array
+          items:
+            $ref: '#/components/schemas/RatingCount'
+        average:
+          type: number
+          format: float
+        teacherId:
+          type: string
+          nullable: true
+        teacherName:
+          type: string
+          nullable: true
+        completedCount:
+          type: integer
+        availableCount:
+          type: integer
+      type: object
     Choice:
       required:
         - text
@@ -4762,6 +4964,26 @@ components:
           type: string
         value:
           type: string
+      type: object
+    ChoiceCount:
+      required:
+        - count
+        - choice
+      properties:
+        count:
+          type: integer
+        choice:
+          type: string
+      type: object
+    RatingCount:
+      required:
+        - count
+        - rating
+      properties:
+        count:
+          type: integer
+        rating:
+          type: integer
       type: object
   securitySchemes:
     Bearer:
