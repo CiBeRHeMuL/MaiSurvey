@@ -16,6 +16,7 @@ use App\Domain\Helper\HArray;
 use App\Domain\Service\CompletedSurvey\CompletedSurveyService;
 use App\Domain\Service\Db\TransactionManagerInterface;
 use App\Domain\Service\SurveyItemAnswer\SurveyItemAnswerService;
+use App\Domain\Service\SurveyStat\StatRefresherInterface;
 use App\Domain\Validation\ValidationError;
 use Psr\Log\LoggerInterface;
 use Throwable;
@@ -30,6 +31,7 @@ class CompleteSurveyService
         private SurveyItemAnswerService $surveyItemAnswerService,
         private TransactionManagerInterface $transactionManager,
         private CompletedSurveyService $completedSurveyService,
+        private StatRefresherInterface $statRefresher,
     ) {
         $this->setLogger($logger);
     }
@@ -40,6 +42,7 @@ class CompleteSurveyService
         $this->surveyService->setLogger($logger);
         $this->surveyItemAnswerService->setLogger($logger);
         $this->completedSurveyService->setLogger($logger);
+        $this->statRefresher->setLogger($logger);
         return $this;
     }
 
@@ -76,7 +79,16 @@ class CompleteSurveyService
                     ),
                 ]);
             }
-            if ($answer->getData()->getType() !== $item->getSurveyItem()->getType()) {
+            if ($answer->getData() === null && $item->getSurveyItem()->isAnswerRequired()) {
+                throw ValidationException::new([
+                    new ValidationError(
+                        "[$k].data",
+                        ValidationErrorSlugEnum::WrongField->getSlug(),
+                        'Ответ на этот вопрос обязателен',
+                    ),
+                ]);
+            }
+            if ($answer->getData() !== null && $answer->getData()->getType() !== $item->getSurveyItem()->getType()) {
                 throw ValidationException::new([
                     new ValidationError(
                         "[$k].data.type",

@@ -41,7 +41,7 @@ class CompleteSurveyUseCase
                     array_map(
                         fn(CompleteSurveyItemDto $item) => new DomainCompleteSurveyItemDto(
                             new Uuid($item->id),
-                            AnswerDataMapper::map($item->data),
+                            $item->data !== null ? AnswerDataMapper::map($item->data) : null,
                         ),
                         $dto->answers,
                     ),
