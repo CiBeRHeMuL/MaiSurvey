@@ -11,6 +11,7 @@ readonly class SurveyStatItem
 {
     /**
      * @param string $id
+     * @param string $text
      * @param int $available_count
      * @param int $completed_count
      * @param value-of<SurveyItemTypeEnum> $type
@@ -18,6 +19,7 @@ readonly class SurveyStatItem
      */
     public function __construct(
         public string $id,
+        public string $text,
         public int $available_count,
         public int $completed_count,
         public string $type,
@@ -29,6 +31,7 @@ readonly class SurveyStatItem
     {
         return new self(
             $item->getId()->toRfc4122(),
+            $item->getItem()->getText(),
             $item->getAvailableCount(),
             $item->getCompletedCount(),
             $item->getType()->value,

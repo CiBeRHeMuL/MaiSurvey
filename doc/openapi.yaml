@@ -4514,12 +4514,15 @@ components:
     SurveyStatItem:
       required:
         - id
+        - text
         - available_count
         - completed_count
         - type
         - stats
       properties:
         id:
+          type: string
+        text:
           type: string
         available_count:
           type: integer
