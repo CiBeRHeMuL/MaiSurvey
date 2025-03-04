@@ -11,8 +11,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Uid\Uuid;
 use Throwable;
 
-#[AsCommand('survey:generate-stats')]
-class SurveyGenerateStatsCommand extends AbstractCommand
+#[AsCommand('surveys:generate-stat')]
+class SurveysGenerateStatCommand extends AbstractCommand
 {
     private LoggerInterface $logger;
 
@@ -24,7 +24,7 @@ class SurveyGenerateStatsCommand extends AbstractCommand
         parent::__construct();
     }
 
-    public function setLogger(LoggerInterface $logger): SurveyGenerateStatsCommand
+    public function setLogger(LoggerInterface $logger): SurveysGenerateStatCommand
     {
         $this->logger = $logger;
         $this->generateForSurveysUseCase->setLogger($logger);
