@@ -16,10 +16,11 @@ use App\Domain\Helper\HArray;
 use App\Domain\Service\CompletedSurvey\CompletedSurveyService;
 use App\Domain\Service\Db\TransactionManagerInterface;
 use App\Domain\Service\SurveyItemAnswer\SurveyItemAnswerService;
-use App\Domain\Service\SurveyStat\StatRefresherInterface;
 use App\Domain\Validation\ValidationError;
 use Psr\Log\LoggerInterface;
 use Throwable;
+
+//use App\Domain\Service\SurveyStat\StatRefresherInterface;
 
 class CompleteSurveyService
 {
@@ -31,7 +32,7 @@ class CompleteSurveyService
         private SurveyItemAnswerService $surveyItemAnswerService,
         private TransactionManagerInterface $transactionManager,
         private CompletedSurveyService $completedSurveyService,
-        private StatRefresherInterface $statRefresher,
+//        private StatRefresherInterface $statRefresher,
     ) {
         $this->setLogger($logger);
     }
