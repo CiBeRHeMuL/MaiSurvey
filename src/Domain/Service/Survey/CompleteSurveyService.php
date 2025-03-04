@@ -43,7 +43,7 @@ class CompleteSurveyService
         $this->surveyService->setLogger($logger);
         $this->surveyItemAnswerService->setLogger($logger);
         $this->completedSurveyService->setLogger($logger);
-        $this->statRefresher->setLogger($logger);
+//        $this->statRefresher->setLogger($logger);
         return $this;
     }
 
