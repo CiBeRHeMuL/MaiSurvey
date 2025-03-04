@@ -1,0 +1,46 @@
+<?php
+
+namespace App\Infrastructure\Service\SurveyStat;
+
+use App\Domain\Entity\Survey;
+use App\Domain\Exception\ErrorException;
+use App\Domain\Service\SurveyStat\StatRefresherInterface;
+use App\Infrastructure\Messenger\Message\RefreshStatMessage;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\Messenger\MessageBusInterface;
+use Throwable;
+
+class AsyncStatRefresher implements StatRefresherInterface
+{
+    private LoggerInterface $logger;
+
+    public function __construct(
+        LoggerInterface $logger,
+        private MessageBusInterface $messageBus,
+    ) {
+        $this->setLogger($logger);
+    }
+
+    public function getLogger(): LoggerInterface
+    {
+        return $this->logger;
+    }
+
+    public function setLogger(LoggerInterface $logger): static
+    {
+        $this->logger = $logger;
+        return $this;
+    }
+
+    public function refreshStat(Survey $survey): void
+    {
+        try {
+            $this->messageBus->dispatch(
+                new RefreshStatMessage($survey->getId()),
+            );
+        } catch (Throwable $e) {
+            $this->logger->error($e);
+            throw ErrorException::new('Не удалось пройти опрос');
+        }
+    }
+}

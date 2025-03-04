@@ -85,4 +85,10 @@ class SurveyStat
         $this->items = $items;
         return $this;
     }
+
+    public function addItem(SurveyStatItem $item): SurveyStat
+    {
+        $this->items->add($item);
+        return $this;
+    }
 }

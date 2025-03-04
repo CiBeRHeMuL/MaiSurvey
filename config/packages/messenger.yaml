@@ -12,6 +12,7 @@ framework:
         routing:
             # Route your messages to the transports
             App\Infrastructure\Messenger\Message\RefreshViewsMessage: [async, sync]
+            App\Infrastructure\Messenger\Message\RefreshStatMessage: async
 
 # when@test:
 #    framework:

@@ -48,6 +48,21 @@ services:
   App\Domain\Service\User\UserImporter:
     arguments:
       $appHost: '%env(APP_HOST)%'
+
+  stat_refresher.sync:
+    class: App\Domain\Service\SurveyStat\SyncStatRefresher
+  stat_refresher.async:
+    class: App\Infrastructure\Service\SurveyStat\AsyncStatRefresher
+
+  summary_generator.mock:
+    class: App\Infrastructure\Service\SurveyStat\MockCommentsSummaryGenerator
+  summary_generator.gpt:
+    class: App\Infrastructure\Service\SurveyStat\GptCommentsSummaryGenerator
+
+  App\Domain\Service\SurveyStat\StatRefresherInterface:
+    factory: '@=env("STAT_REFRESH_TYPE") == "async" ? service("stat_refresher.async") : service("stat_refresher.sync")'
+  App\Infrastructure\Service\SurveyStat\CommentsSummaryGeneratorInterface:
+    factory: '@=env("SUMMARY_GENERATION_TYPE") == "gpt" ? service("summary_generator.gpt") : service("summary_generator.mock")'
   # --- end services
 
   # --- start repositories
@@ -77,6 +92,10 @@ services:
     class: App\Infrastructure\Repository\SurveyTemplateRepository
   App\Domain\Repository\SurveyTemplateItemRepositoryInterface:
     class: App\Infrastructure\Repository\SurveyTemplateItemRepository
+  App\Domain\Repository\SurveyStatRepositoryInterface:
+    class: App\Infrastructure\Repository\SurveyStatRepository
+  App\Domain\Repository\SurveyStatItemRepositoryInterface:
+    class: App\Infrastructure\Repository\SurveyStatItemRepository
   # --- end repositories
 
   # --- start serializer
