@@ -7,6 +7,7 @@ use App\Domain\Entity\SurveyStat;
 use App\Domain\Repository\SurveyStatItemRepositoryInterface;
 use App\Domain\Repository\SurveyStatRepositoryInterface;
 use App\Domain\Service\Db\TransactionManagerInterface;
+use App\Domain\Service\Survey\SurveyService;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Uid\Uuid;
 use Throwable;
@@ -20,6 +21,7 @@ class SurveyStatService
         private SurveyStatRepositoryInterface $surveyStatRepository,
         private SurveyStatItemRepositoryInterface $surveyStatItemRepository,
         private TransactionManagerInterface $transactionManager,
+        private SurveyService $surveyService,
     ) {
         $this->setLogger($logger);
     }
@@ -46,22 +48,30 @@ class SurveyStatService
      */
     public function refreshStat(Survey $survey, bool $transaction = true): void
     {
-        $this->refreshStats([$survey->getId()], $transaction);
+        $this->refreshStats([$survey], $transaction);
     }
 
     /**
-     * @param Uuid[] $surveyIds
+     * @param Survey[] $surveys
      * @param bool $transaction
      *
      * @return int
      * @throws Throwable
      */
-    public function refreshStats(array|null $surveyIds = null, bool $transaction = true): int
+    public function refreshStats(array $surveys, bool $transaction = true): int
     {
+        if ($surveys === []) {
+            return 0;
+        }
         if ($transaction) {
             $this->transactionManager->beginTransaction();
         }
         try {
+            $surveys = array_filter(
+                $surveys,
+                fn(Survey $s) => $s->isActual(),
+            );
+            $surveyIds = array_map(fn(Survey $s) => $s->getId(), $surveys);
             $stats = $this
                 ->surveyStatRepository
                 ->findStatFromSurveys($surveyIds);

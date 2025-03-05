@@ -2,6 +2,7 @@
 
 namespace App\Presentation\Console\Command;
 
+use App\Application\UseCase\Survey\GetSurveysByIdsUseCase;
 use App\Application\UseCase\SurveyStat\GenerateForSurveysUseCase;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -19,6 +20,7 @@ class SurveysGenerateStatCommand extends AbstractCommand
     public function __construct(
         LoggerInterface $logger,
         private GenerateForSurveysUseCase $generateForSurveysUseCase,
+        private GetSurveysByIdsUseCase $surveysByIdsUseCase,
     ) {
         $this->setLogger($logger);
         parent::__construct();
@@ -28,6 +30,7 @@ class SurveysGenerateStatCommand extends AbstractCommand
     {
         $this->logger = $logger;
         $this->generateForSurveysUseCase->setLogger($logger);
+        $this->surveysByIdsUseCase->setLogger($logger);
         return $this;
     }
 
@@ -44,7 +47,7 @@ class SurveysGenerateStatCommand extends AbstractCommand
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $surveyIds = $input->getArgument('survey_ids');
+        $surveyIds = $input->getArgument('survey_ids') ?: null;
         if ($surveyIds) {
             try {
                 array_walk(
@@ -64,13 +67,16 @@ class SurveysGenerateStatCommand extends AbstractCommand
         }
 
         try {
-            $updated = $this->generateForSurveysUseCase->execute($surveyIds);
+            $surveys = $surveyIds !== null
+                ? $this->surveysByIdsUseCase->execute($surveyIds, true)
+                : null;
+            $this->generateForSurveysUseCase->execute($surveys);
         } catch (Throwable $e) {
             $this->logger->error($e);
             $this->io->error('Не удалось обновить статистику');
             return self::FAILURE;
         }
-        $this->io->success(sprintf('Статистка успешно обновлена по %d опросам', $updated));
+        $this->io->success('Статистка успешно обновлена');
         return self::SUCCESS;
     }
 }

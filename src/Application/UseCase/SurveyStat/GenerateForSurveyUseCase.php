@@ -26,6 +26,6 @@ class GenerateForSurveyUseCase
 
     public function execute(Survey $survey): void
     {
-        $this->statRefresher->refreshStat($survey);
+        $this->statRefresher->refreshStats([$survey]);
     }
 }

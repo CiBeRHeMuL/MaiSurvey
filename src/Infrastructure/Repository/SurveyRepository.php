@@ -134,6 +134,13 @@ class SurveyRepository extends Common\AbstractRepository implements SurveyReposi
                 ),
             ));
         }
+        if ($dto->getActual() !== null) {
+            $q->andWhere(
+                $dto->getActual()
+                    ? new Expr('s.actual_to > now()')
+                    : new Expr('s.actual_to < now()'),
+            );
+        }
         return $this->findWithLazyBatchedProvider(
             $q,
             Survey::class,
@@ -153,6 +160,26 @@ class SurveyRepository extends Common\AbstractRepository implements SurveyReposi
                 ),
             ]),
         );
+    }
+
+    public function findByIds(array $ids, ?bool $actual = null): array
+    {
+        $q = Query::select()
+            ->from(['t' => $this->getClassTable(Survey::class)])
+            ->where(['id' => array_map(fn(Uuid $id) => $id->toRfc4122(), $ids)]);
+        if ($actual !== null) {
+            $q->andWhere(
+                $actual
+                    ? new Expr('t.actual_to > now()')
+                    : new Expr('t.actual_to < now()'),
+            );
+        }
+        return $this
+            ->findAllByQuery(
+                $q,
+                Survey::class,
+                ['items', 'subject', 'subject.semester'],
+            );
     }
 
     private function getMyQuery(User $user): SelectQuery

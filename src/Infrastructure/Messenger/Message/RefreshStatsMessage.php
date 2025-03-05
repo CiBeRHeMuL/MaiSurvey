@@ -7,19 +7,25 @@ use Symfony\Component\Messenger\Attribute\AsMessage;
 use Symfony\Component\Uid\Uuid;
 
 #[AsMessage('async')]
-readonly class RefreshStatMessage
+readonly class RefreshStatsMessage
 {
     private DateTimeImmutable $refreshTime;
 
+    /**
+     * @param Uuid[]|null $surveyIds
+     */
     public function __construct(
-        private Uuid $surveyId,
+        private array|null $surveyIds,
     ) {
         $this->refreshTime = new DateTimeImmutable();
     }
 
-    public function getSurveyId(): Uuid
+    /**
+     * @return Uuid[]|null
+     */
+    public function getSurveyIds(): array|null
     {
-        return $this->surveyId;
+        return $this->surveyIds;
     }
 
     public function getRefreshTime(): DateTimeImmutable

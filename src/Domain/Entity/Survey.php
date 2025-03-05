@@ -122,4 +122,9 @@ class Survey
         $this->items->add($item);
         return $this;
     }
+
+    public function isActual(): bool
+    {
+        return $this->getActualTo()->getTimestamp() > (new DateTimeImmutable())->getTimestamp();
+    }
 }

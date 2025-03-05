@@ -36,6 +36,9 @@ readonly class GetSurveysDto
         #[Assert\GreaterThanOrEqual(0, message: 'Значение должно быть больше или равно 0')]
         #[Assert\LessThanOrEqual(100, message: 'Значение должно быть меньше или равно 100')]
         public int|null $limit = 100,
+        /** Актуален ли опрос */
+        #[Assert\Type('boolean', message: 'Значение должно быть булевым')]
+        public bool|null $actual = null,
     ) {
     }
 }

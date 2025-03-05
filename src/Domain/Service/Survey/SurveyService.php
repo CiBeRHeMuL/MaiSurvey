@@ -231,6 +231,19 @@ class SurveyService
             ->findAll($dto);
     }
 
+    /**
+     * @param Uuid[] $ids
+     * @param bool|null $actual
+     *
+     * @return Survey[]
+     */
+    public function getByIds(array $ids, bool|null $actual = null): array
+    {
+        return $this
+            ->surveyRepository
+            ->findByIds($ids, $actual);
+    }
+
     private function prepareMySurvey(MySurvey $survey): MySurvey
     {
         $items = $survey->getMyItems()->toArray();

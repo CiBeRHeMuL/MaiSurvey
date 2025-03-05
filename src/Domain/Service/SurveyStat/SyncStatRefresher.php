@@ -2,7 +2,6 @@
 
 namespace App\Domain\Service\SurveyStat;
 
-use App\Domain\Entity\Survey;
 use App\Domain\Exception\ErrorException;
 use Psr\Log\LoggerInterface;
 use Throwable;
@@ -30,13 +29,13 @@ class SyncStatRefresher implements StatRefresherInterface
         return $this;
     }
 
-    public function refreshStat(Survey $survey): void
+    public function refreshStats(array|null $surveys = null): void
     {
         try {
-            $this->surveyStatService->refreshStat($survey, false);
+            $this->surveyStatService->refreshStat($surveys, false);
         } catch (Throwable $e) {
             $this->logger->error($e);
-            throw ErrorException::new("Не удалось обновить статистику по опросу {$survey->getId()->toRfc4122()}");
+            throw ErrorException::new("Не удалось обновить статистику по опросу {$surveys->getId()->toRfc4122()}");
         }
     }
 }

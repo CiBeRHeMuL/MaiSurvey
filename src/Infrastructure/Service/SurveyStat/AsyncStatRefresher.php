@@ -5,7 +5,7 @@ namespace App\Infrastructure\Service\SurveyStat;
 use App\Domain\Entity\Survey;
 use App\Domain\Exception\ErrorException;
 use App\Domain\Service\SurveyStat\StatRefresherInterface;
-use App\Infrastructure\Messenger\Message\RefreshStatMessage;
+use App\Infrastructure\Messenger\Message\RefreshStatsMessage;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Throwable;
@@ -32,12 +32,18 @@ class AsyncStatRefresher implements StatRefresherInterface
         return $this;
     }
 
-    public function refreshStat(Survey $survey): void
+    public function refreshStats(array|null $surveys = null): void
     {
         try {
-            $this->messageBus->dispatch(
-                new RefreshStatMessage($survey->getId()),
-            );
+            if ($surveys !== []) {
+                $this->messageBus->dispatch(
+                    new RefreshStatsMessage(
+                        $surveys !== null
+                            ? array_map(fn(Survey $s) => $s->getId(), $surveys)
+                            : null,
+                    ),
+                );
+            }
         } catch (Throwable $e) {
             $this->logger->error($e);
             throw ErrorException::new('Не удалось пройти опрос');

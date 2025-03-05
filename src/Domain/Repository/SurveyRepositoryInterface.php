@@ -38,4 +38,12 @@ interface SurveyRepositoryInterface extends RepositoryInterface
      * @return DataProviderInterface<Survey>
      */
     public function findAll(GetSurveysDto $dto): DataProviderInterface;
+
+    /**
+     * @param Uuid[] $ids
+     * @param bool|null $actual
+     *
+     * @return Survey[]
+     */
+    public function findByIds(array $ids, bool|null $actual = null): array;
 }
