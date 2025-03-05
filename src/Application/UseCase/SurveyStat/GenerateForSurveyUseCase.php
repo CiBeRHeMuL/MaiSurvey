@@ -3,7 +3,7 @@
 namespace App\Application\UseCase\SurveyStat;
 
 use App\Domain\Entity\Survey;
-use App\Domain\Service\SurveyStat\SurveyStatService;
+use App\Domain\Service\SurveyStat\StatRefresherInterface;
 use Psr\Log\LoggerInterface;
 
 class GenerateForSurveyUseCase
@@ -12,7 +12,7 @@ class GenerateForSurveyUseCase
 
     public function __construct(
         LoggerInterface $logger,
-        private SurveyStatService $surveyStatService,
+        private StatRefresherInterface $statRefresher,
     ) {
         $this->setLogger($logger);
     }
@@ -20,12 +20,12 @@ class GenerateForSurveyUseCase
     public function setLogger(LoggerInterface $logger): GenerateForSurveyUseCase
     {
         $this->logger = $logger;
-        $this->surveyStatService->setLogger($logger);
+        $this->statRefresher->setLogger($logger);
         return $this;
     }
 
     public function execute(Survey $survey): void
     {
-        $this->surveyStatService->refreshStat($survey, true);
+        $this->statRefresher->refreshStat($survey);
     }
 }

@@ -6,8 +6,11 @@ use App\Domain\Exception\ErrorException;
 use App\Domain\Service\Survey\SurveyService;
 use App\Domain\Service\SurveyStat\SurveyStatService;
 use App\Infrastructure\Messenger\Message\RefreshStatMessage;
+use DateTimeImmutable;
+use Psr\Cache\CacheItemInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use Symfony\Contracts\Cache\CacheInterface;
 use Throwable;
 
 #[AsMessageHandler]
@@ -19,6 +22,7 @@ class RefreshStatHandler
         LoggerInterface $logger,
         private SurveyStatService $surveyStatService,
         private SurveyService $surveyService,
+        private CacheInterface $cache,
     ) {
         $this->setLogger($logger);
     }
@@ -37,8 +41,32 @@ class RefreshStatHandler
         if ($survey === null) {
             throw ErrorException::new("Не удалось найти опрос {$message->getSurveyId()->toRfc4122()} для обновления статистики");
         }
+        $lastRefreshTimeKey = "slrt_{$survey->getId()->toRfc4122()}";
+        /** @var DateTimeImmutable|null $lastRefreshTime */
+        $lastRefreshTime = $this
+            ->cache
+            ->get(
+                $lastRefreshTimeKey,
+                function (CacheItemInterface $item, bool &$save) {
+                    $save = false;
+                    return null;
+                },
+            );
+        if ($lastRefreshTime !== null && $message->getRefreshTime()->getTimestamp() < $lastRefreshTime->getTimestamp()) {
+            $this->logger->info(sprintf('Пропускается обновление статистики, она была обновлена позже отправки сообщения...'));
+            return;
+        }
         try {
             $this->surveyStatService->refreshStat($survey);
+            $this
+                ->cache
+                ->get(
+                    $lastRefreshTimeKey,
+                    function (CacheItemInterface $item, bool &$save) {
+                        $save = true;
+                        return new DateTimeImmutable();
+                    },
+                );
         } catch (Throwable $e) {
             $this->logger->error($e);
             throw ErrorException::new("Не удалось обновить статистику по опросу {$message->getSurveyId()->toRfc4122()}");
