@@ -16,6 +16,16 @@ docker-install:
 	fi;
 	@docker compose -f docker-compose.yml --env-file .env.local up --build -d --remove-orphans
 
+# Установка проекта с docker для прода
+docker-install-prod:
+	@if [ -z "$$(docker network ls | grep caddy)" ]; then \
+		echo "Сеть caddy не найдена. Создание сети..."; \
+		docker network create --driver bridge caddy; \
+	else \
+		echo "Сеть caddy уже существует."; \
+	fi;
+	@docker compose -f docker-compose-prod.yml --env-file .env.local up --build -d --remove-orphans
+
 # Запуск команд внутри php контейнера
 dphp:
 	@docker exec -it mai-survey-php-container $(cmd)
@@ -38,8 +48,8 @@ migrate:
 
 # Применение миграций
 docker-migrate:
-	@docker exec -it mai-survey-php-container doctrine:migrations:migrate
-	@docker exec -it mai-survey-php-container cache:clear
+	@docker exec -it mai-survey-php-container bin/console doctrine:migrations:migrate
+	@docker exec -it mai-survey-php-container bin/console cache:clear
 
 # Создание новой миграции
 migration:

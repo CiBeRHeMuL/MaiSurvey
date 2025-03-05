@@ -1,4 +1,4 @@
-FROM php:8.3-fpm AS builder
+FROM php:8.3 AS builder
 
 ENV TIME_ZONE Europe/Moscow
 ENV PHP_ENABLE_XDEBUG 1
@@ -26,6 +26,4 @@ ADD ./docker/php/zz-docker.conf /usr/local/etc/php-fpm.d/zz-docker.conf
 
 RUN rm /usr/local/etc/php/conf.d/base.ini -f
 
-RUN echo "Install Composer"
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-RUN composer --version
+ENTRYPOINT exec php /app/bin/console messenger:consume async --time-limit=3600 -vv >> /app/var/log/messenger-$(date +%Y-%m-%d).log 2>&1
