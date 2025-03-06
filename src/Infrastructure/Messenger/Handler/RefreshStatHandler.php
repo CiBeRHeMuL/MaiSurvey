@@ -79,7 +79,7 @@ class RefreshStatHandler
         }
 
         try {
-            $this->surveyStatService->refreshStats($surveys, $message->isForce());
+            $this->surveyStatService->refreshStats($surveys, false, $message->isForce());
             foreach ($surveys as $survey) {
                 $this
                     ->cache
