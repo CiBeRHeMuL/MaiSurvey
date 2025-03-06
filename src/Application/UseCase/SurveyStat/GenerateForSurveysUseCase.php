@@ -27,14 +27,15 @@ class GenerateForSurveysUseCase
 
     /**
      * @param Survey[]|null $surveys
+     * @param bool $force обновить все опросы принудительно
      *
      * @return void
      * @throws Throwable
      */
-    public function execute(array|null $surveys = null): void
+    public function execute(array|null $surveys = null, bool $force = false): void
     {
         $this
             ->statRefresher
-            ->refreshStats($surveys);
+            ->refreshStats($surveys, $force);
     }
 }

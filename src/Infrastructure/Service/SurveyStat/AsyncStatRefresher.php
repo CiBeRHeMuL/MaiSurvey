@@ -32,7 +32,7 @@ class AsyncStatRefresher implements StatRefresherInterface
         return $this;
     }
 
-    public function refreshStats(array|null $surveys = null): void
+    public function refreshStats(array|null $surveys = null, bool $force = false): void
     {
         try {
             if ($surveys !== []) {
@@ -41,6 +41,7 @@ class AsyncStatRefresher implements StatRefresherInterface
                         $surveys !== null
                             ? array_map(fn(Survey $s) => $s->getId(), $surveys)
                             : null,
+                        $force,
                     ),
                 );
             }

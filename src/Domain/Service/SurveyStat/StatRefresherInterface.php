@@ -13,8 +13,9 @@ interface StatRefresherInterface
 
     /**
      * @param Survey[]|null $surveys
+     * @param bool $force
      *
      * @return void
      */
-    public function refreshStats(array|null $surveys = null): void;
+    public function refreshStats(array|null $surveys = null, bool $force = false): void;
 }

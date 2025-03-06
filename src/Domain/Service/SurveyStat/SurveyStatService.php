@@ -42,23 +42,25 @@ class SurveyStatService
     /**
      * @param Survey $survey
      * @param bool $transaction
+     * @param bool $force обновить все опросы принудительно
      *
      * @return void
      * @throws Throwable
      */
-    public function refreshStat(Survey $survey, bool $transaction = true): void
+    public function refreshStat(Survey $survey, bool $transaction = true, bool $force = false): void
     {
-        $this->refreshStats([$survey], $transaction);
+        $this->refreshStats([$survey], $transaction, $force);
     }
 
     /**
      * @param Survey[] $surveys
      * @param bool $transaction
+     * @param bool $force обновить все опросы принудительно
      *
      * @return int
      * @throws Throwable
      */
-    public function refreshStats(array $surveys, bool $transaction = true): int
+    public function refreshStats(array $surveys, bool $transaction = true, bool $force = false): int
     {
         if ($surveys === []) {
             return 0;
@@ -67,10 +69,12 @@ class SurveyStatService
             $this->transactionManager->beginTransaction();
         }
         try {
-            $surveys = array_filter(
-                $surveys,
-                fn(Survey $s) => $s->isActual(),
-            );
+            if ($force === false) {
+                $surveys = array_filter(
+                    $surveys,
+                    fn(Survey $s) => $s->isActual(),
+                );
+            }
             $surveyIds = array_map(fn(Survey $s) => $s->getId(), $surveys);
             $stats = $this
                 ->surveyStatRepository

@@ -8,6 +8,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Uid\Uuid;
 use Throwable;
@@ -42,6 +43,13 @@ class SurveysGenerateStatCommand extends AbstractCommand
                 'survey_ids',
                 InputArgument::OPTIONAL | InputArgument::IS_ARRAY,
                 'ID опросов',
+            )
+            ->addOption(
+                'force',
+                'f',
+                InputOption::VALUE_OPTIONAL,
+                'Обновить опросы принудительно (даже если они уже завершены)',
+                false,
             );
     }
 
@@ -70,7 +78,7 @@ class SurveysGenerateStatCommand extends AbstractCommand
             $surveys = $surveyIds !== null
                 ? $this->surveysByIdsUseCase->execute($surveyIds, true)
                 : null;
-            $this->generateForSurveysUseCase->execute($surveys);
+            $this->generateForSurveysUseCase->execute($surveys, $input->getOption('force'));
         } catch (Throwable $e) {
             $this->logger->error($e);
             $this->io->error('Не удалось обновить статистику');

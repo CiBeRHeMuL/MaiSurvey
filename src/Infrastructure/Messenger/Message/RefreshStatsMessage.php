@@ -16,6 +16,7 @@ readonly class RefreshStatsMessage
      */
     public function __construct(
         private array|null $surveyIds,
+        private bool $force = false,
     ) {
         $this->refreshTime = new DateTimeImmutable();
     }
@@ -26,6 +27,11 @@ readonly class RefreshStatsMessage
     public function getSurveyIds(): array|null
     {
         return $this->surveyIds;
+    }
+
+    public function isForce(): bool
+    {
+        return $this->force;
     }
 
     public function getRefreshTime(): DateTimeImmutable

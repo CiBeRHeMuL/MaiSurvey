@@ -29,13 +29,13 @@ class SyncStatRefresher implements StatRefresherInterface
         return $this;
     }
 
-    public function refreshStats(array|null $surveys = null): void
+    public function refreshStats(array|null $surveys = null, bool $force = false): void
     {
         try {
-            $this->surveyStatService->refreshStat($surveys, false);
+            $this->surveyStatService->refreshStats($surveys, false, $force);
         } catch (Throwable $e) {
             $this->logger->error($e);
-            throw ErrorException::new("Не удалось обновить статистику по опросу {$surveys->getId()->toRfc4122()}");
+            throw ErrorException::new('Не удалось обновить статистику по опросам');
         }
     }
 }
