@@ -47,7 +47,7 @@ class AsyncStatRefresher implements StatRefresherInterface
             }
         } catch (Throwable $e) {
             $this->logger->error($e);
-            throw ErrorException::new('Не удалось пройти опрос');
+            throw ErrorException::new('Не удалось обновить статистику');
         }
     }
 }

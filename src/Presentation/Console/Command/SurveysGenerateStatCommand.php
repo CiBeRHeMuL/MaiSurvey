@@ -47,7 +47,7 @@ class SurveysGenerateStatCommand extends AbstractCommand
             ->addOption(
                 'force',
                 'f',
-                InputOption::VALUE_OPTIONAL,
+                InputOption::VALUE_NEGATABLE,
                 'Обновить опросы принудительно (даже если они уже завершены)',
                 false,
             );
