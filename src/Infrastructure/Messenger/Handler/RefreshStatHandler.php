@@ -41,7 +41,10 @@ class RefreshStatHandler
     {
         $surveys = [];
         if ($message->getSurveyIds() !== null) {
-            $surveys = $this->surveyService->getByIds($message->getSurveyIds());
+            $surveys = $this->surveyService->getByIds(
+                $message->getSurveyIds(),
+                $message->isForce() === false,
+            );
         } else {
             $surveys = iterator_to_array(
                 $this
