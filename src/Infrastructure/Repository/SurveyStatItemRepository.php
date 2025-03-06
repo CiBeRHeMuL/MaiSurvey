@@ -217,9 +217,14 @@ class SurveyStatItemRepository extends Common\AbstractRepository implements Surv
                                         ),
                                     ),
                                     'average',
-                                    new Expr(
-                                        'round(avg(t.answer::integer) FILTER ( WHERE t.type = :dc_r ), 2)',
-                                        [':dc_r' => SurveyItemTypeEnum::Rating->value],
+                                    new CaseExpr(
+                                        [[0, new Expr('0.00::numeric(3, 2)')]],
+                                        new SumFunc(new Expr('t.completed_count')),
+                                        new Expr(
+                                            'round(sum(t.answer::integer * t.completed_count)'
+                                            . ' FILTER ( WHERE t.type = :dc_r ) / sum(t.completed_count), 2)',
+                                            [':dc_r' => SurveyItemTypeEnum::Rating->value],
+                                        )
                                     ),
                                     'type',
                                     new Expr('t.type'),
