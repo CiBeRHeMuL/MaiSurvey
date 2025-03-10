@@ -416,9 +416,14 @@ class SurveyStatItemRepository extends Common\AbstractRepository implements Surv
                                 ],
                                 [
                                     'AND',
+                                    ['si.id' => new Expr('sia.survey_item_id')],
                                     [
-                                        'si.id' => new Expr('sia.survey_item_id'),
-                                        'msi.teacher_subject_id' => new Expr('sia.teacher_subject_id'),
+                                        'OR',
+                                        ['msi.teacher_subject_id' => new Expr('sia.teacher_subject_id')],
+                                        [
+                                            'msi.teacher_subject_id' => null,
+                                            'sia.teacher_subject_id' => null,
+                                        ],
                                     ],
                                     [
                                         'OR',
