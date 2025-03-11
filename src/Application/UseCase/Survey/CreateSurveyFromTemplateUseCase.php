@@ -5,6 +5,7 @@ namespace App\Application\UseCase\Survey;
 use App\Application\Dto\Survey\Create\CreateFromTemplateDto;
 use App\Domain\Dto\Survey\CreateSurveyFromTemplateDto;
 use App\Domain\Entity\Survey;
+use App\Domain\Enum\SurveyStatusEnum;
 use App\Domain\Enum\ValidationErrorSlugEnum;
 use App\Domain\Exception\ValidationException;
 use App\Domain\Service\Subject\SubjectService;
@@ -71,8 +72,9 @@ class CreateSurveyFromTemplateUseCase
             ->createFromTemplate(
                 new CreateSurveyFromTemplateDto(
                     $subject,
-                    new DateTimeImmutable($dto->actual_to),
+                    $dto->actual_to !== null ? new DateTimeImmutable($dto->actual_to) : null,
                     $template,
+                    SurveyStatusEnum::from($dto->status),
                 ),
             );
     }

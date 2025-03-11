@@ -10,6 +10,7 @@ use App\Application\Dto\Survey\Create\CreateSurveyDto;
 use App\Application\Dto\Survey\Create\CreateSurveyMSDto;
 use App\Application\Dto\Survey\GetMySurveysDto;
 use App\Application\Dto\Survey\GetSurveysDto;
+use App\Application\Dto\Survey\Update\UpdateSurveyDto;
 use App\Application\UseCase\Survey\CompleteSurveyUseCase;
 use App\Application\UseCase\Survey\CreateSurveyFromTemplateUseCase;
 use App\Application\UseCase\Survey\CreateSurveyMSFromTemplateUseCase;
@@ -19,6 +20,7 @@ use App\Application\UseCase\Survey\GetMySurveyByIdUseCase;
 use App\Application\UseCase\Survey\GetMySurveysUseCase;
 use App\Application\UseCase\Survey\GetSurveyByIdUseCase;
 use App\Application\UseCase\Survey\GetSurveysUseCase;
+use App\Application\UseCase\Survey\UpdateSurveyUseCase;
 use App\Domain\Dto\Survey\GetMySurveyByIdDto as DomainGetMySurveyByIdDto;
 use App\Domain\Enum\PermissionEnum;
 use App\Presentation\Web\Dto\Survey\GetMySurveyByIdDto;
@@ -26,8 +28,9 @@ use App\Presentation\Web\OpenApi\Attribute as LOA;
 use App\Presentation\Web\Response\Model\Common\PaginatedData;
 use App\Presentation\Web\Response\Model\Common\SuccessResponse;
 use App\Presentation\Web\Response\Model\Common\SuccessWithPaginationResponse;
+use App\Presentation\Web\Response\Model\FullSurvey;
+use App\Presentation\Web\Response\Model\LiteFullSurvey;
 use App\Presentation\Web\Response\Model\LiteMySurvey;
-use App\Presentation\Web\Response\Model\LiteSurvey;
 use App\Presentation\Web\Response\Model\MySurvey;
 use App\Presentation\Web\Response\Model\Survey;
 use App\Presentation\Web\Response\Response;
@@ -151,6 +154,30 @@ class SurveyController extends BaseController
         );
     }
 
+    /** Обновить опрос */
+    #[Route('/surveys/{id}', 'update-survey', requirements: ['id' => Requirement::UUID], methods: ['PUT'])]
+    #[IsGranted(PermissionEnum::SurveyCreate->value, statusCode: 404, exceptionCode: 404)]
+    #[OA\Tag('surveys')]
+    #[LOA\SuccessResponse(FullSurvey::class)]
+    #[LOA\ErrorResponse(401)]
+    #[LOA\ErrorResponse(404)]
+    #[LOA\ValidationResponse]
+    public function update(
+        Uuid $id,
+        LoggerInterface $logger,
+        #[MapRequestPayload]
+        UpdateSurveyDto $dto,
+        UpdateSurveyUseCase $useCase,
+    ): JsonResponse {
+        $useCase->setLogger($logger);
+        $survey = $useCase->execute($id, $dto);
+        return Response::success(
+            new SuccessResponse(
+                FullSurvey::fromSurvey($survey),
+            ),
+        );
+    }
+
     /** Создать опрос для нескольких предметов сразу */
     #[Route('/survey/multi-subject', 'create-survey-multi-subject', methods: ['POST'])]
     #[IsGranted(PermissionEnum::SurveyCreate->value, statusCode: 404, exceptionCode: 404)]
@@ -169,7 +196,7 @@ class SurveyController extends BaseController
         $surveys = $useCase->execute($dto);
         return Response::successWithPagination(
             new SuccessWithPaginationResponse(
-                new PaginatedData(
+                PaginatedData::fromArray(
                     array_map(
                         Survey::fromSurvey(...),
                         $surveys,
@@ -220,7 +247,7 @@ class SurveyController extends BaseController
         $surveys = $useCase->execute($dto);
         return Response::successWithPagination(
             new SuccessWithPaginationResponse(
-                new PaginatedData(
+                PaginatedData::fromArray(
                     array_map(
                         Survey::fromSurvey(...),
                         $surveys,
@@ -233,7 +260,7 @@ class SurveyController extends BaseController
     #[Route('/surveys/{id}', 'survey-get-by-id', requirements: ['id' => Requirement::UUID], methods: ['GET'])]
     #[IsGranted(PermissionEnum::SurveyView->value, statusCode: 404, exceptionCode: 404)]
     #[OA\Tag('surveys')]
-    #[LOA\SuccessResponse(Survey::class)]
+    #[LOA\SuccessResponse(FullSurvey::class)]
     #[LOA\ErrorResponse(401)]
     #[LOA\ErrorResponse(404)]
     #[LOA\ValidationResponse]
@@ -249,7 +276,7 @@ class SurveyController extends BaseController
         } else {
             return Response::success(
                 new SuccessResponse(
-                    Survey::fromSurvey($survey),
+                    FullSurvey::fromSurvey($survey),
                 ),
             );
         }
@@ -258,7 +285,7 @@ class SurveyController extends BaseController
     #[Route('/surveys', 'survey-get-all', methods: ['GET'])]
     #[IsGranted(PermissionEnum::SurveyViewAll->value, statusCode: 404, exceptionCode: 404)]
     #[OA\Tag('surveys')]
-    #[LOA\SuccessPaginationResponse(LiteSurvey::class)]
+    #[LOA\SuccessPaginationResponse(LiteFullSurvey::class)]
     #[LOA\ErrorResponse(401)]
     #[LOA\ErrorResponse(404)]
     #[LOA\ValidationResponse]
@@ -274,7 +301,7 @@ class SurveyController extends BaseController
             new SuccessWithPaginationResponse(
                 PaginatedData::fromDataProvider(
                     $provider,
-                    LiteSurvey::fromSurvey(...),
+                    LiteFullSurvey::fromSurvey(...),
                 ),
             ),
         );

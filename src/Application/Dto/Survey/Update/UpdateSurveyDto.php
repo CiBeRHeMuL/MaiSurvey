@@ -1,18 +1,20 @@
 <?php
 
-namespace App\Application\Dto\Survey\Create;
+namespace App\Application\Dto\Survey\Update;
 
+use App\Application\Dto\Survey\Create\CreateItemDto;
 use App\Application\Validator\Constraints as LAssert;
 use App\Domain\Enum\SurveyStatusEnum;
 use Symfony\Component\Validator\Constraints as Assert;
 
-readonly class CreateSurveyMSDto
+#[Assert\Cascade]
+readonly class UpdateSurveyDto
 {
     /**
      * @param string $title
-     * @param array $subject_ids
+     * @param string $subject_id
      * @param string|null $actual_to
-     * @param CreateItemDto[] $items
+     * @param UpdateItemDto[] $items
      * @param value-of<SurveyStatusEnum> $status
      */
     public function __construct(
@@ -21,22 +23,18 @@ readonly class CreateSurveyMSDto
         #[Assert\NotBlank(message: 'Значение не должно быть пустым')]
         #[Assert\Length(max: 255, maxMessage: 'Значение должно быть короче 255 символов')]
         public string $title,
-        /** ID предметов */
-        #[Assert\Type('array', message: 'Значение должно быть строкой')]
-        #[Assert\Count(min: 1, max: 20, minMessage: 'Необходимо указать хотя бы один предмет', maxMessage: 'Максимум 20 предметов')]
-        #[Assert\All([
-            new Assert\Type('string', message: 'Значение должно быть строкой'),
-            new Assert\NotBlank(message: 'Значение не должно быть пустым'),
-            new Assert\Uuid(message: 'Значение должно быть корректным uuid'),
-        ])]
-        public array $subject_ids,
+        /** ID предмета */
+        #[Assert\Type('string', message: 'Значение должно быть строкой')]
+        #[Assert\NotBlank(message: 'Значение не должно быть пустым')]
+        #[Assert\Uuid(message: 'Значение должно быть корректным uuid')]
+        public string $subject_id,
         /** Вопросы */
         #[Assert\Type('array', message: 'Значение должно быть массивом')]
         public array $items,
         /** Статус */
         #[LAssert\EnumChoice(SurveyStatusEnum::class)]
         public string $status,
-        /** Время закрытия */
+        /** Актуален до */
         #[Assert\Type('string', message: 'Значение должно быть строкой')]
         #[LAssert\DateTime]
         public string|null $actual_to = null,

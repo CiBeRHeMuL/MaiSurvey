@@ -9,6 +9,7 @@ use App\Domain\Dto\Survey\CreateItemDto as DomainCreateItemDto;
 use App\Domain\Dto\Survey\CreateSurveyDto as DomainCreateSurveyDto;
 use App\Domain\Entity\Survey;
 use App\Domain\Enum\SurveyItemTypeEnum;
+use App\Domain\Enum\SurveyStatusEnum;
 use App\Domain\Enum\TeacherSubjectTypeEnum;
 use App\Domain\Enum\ValidationErrorSlugEnum;
 use App\Domain\Exception\ValidationException;
@@ -59,7 +60,7 @@ class CreateSurveyUseCase
             ->create(
                 new DomainCreateSurveyDto(
                     $dto->title,
-                    new DateTimeImmutable($dto->actual_to),
+                    $dto->actual_to !== null ? new DateTimeImmutable($dto->actual_to) : null,
                     array_map(
                         fn(CreateItemDto $item) => new DomainCreateItemDto(
                             $item->answer_required,
@@ -74,6 +75,7 @@ class CreateSurveyUseCase
                         $dto->items,
                     ),
                     $subject,
+                    SurveyStatusEnum::from($dto->status),
                 ),
             );
     }

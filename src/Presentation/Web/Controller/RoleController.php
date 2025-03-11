@@ -26,7 +26,7 @@ class RoleController extends BaseController
     {
         return Response::successWithPagination(
             new SuccessWithPaginationResponse(
-                new PaginatedData(array_map(
+                PaginatedData::fromArray(array_map(
                     Role::fromRole(...),
                     RoleEnum::cases(),
                 )),

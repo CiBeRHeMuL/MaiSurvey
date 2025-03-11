@@ -57,6 +57,7 @@ class CreateSurveyMSUseCase
                         $subjectId,
                         $dto->actual_to,
                         $dto->items,
+                        $dto->status,
                     ),
                 );
             } catch (ValidationException $e) {

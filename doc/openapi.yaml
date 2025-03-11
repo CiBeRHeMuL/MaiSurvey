@@ -1336,6 +1336,92 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationResponse'
+  '/surveys/{id}':
+    get:
+      tags:
+        - surveys
+      operationId: get_survey-get-by-id
+      parameters:
+        -
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '[0-9a-f]{8}-[0-9a-f]{4}-[13-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/SuccessResponse' }
+                  - { properties: { data: { $ref: '#/components/schemas/FullSurvey' } }, type: object }
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 'Not Found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: 'Unprocessable Entity'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResponse'
+    put:
+      tags:
+        - surveys
+      summary: 'Обновить опрос'
+      operationId: put_update-survey
+      parameters:
+        -
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '[0-9a-f]{8}-[0-9a-f]{4}-[13-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSurveyDto'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/SuccessResponse' }
+                  - { properties: { data: { $ref: '#/components/schemas/FullSurvey' } }, type: object }
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 'Not Found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: 'Unprocessable Entity'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResponse'
   /survey/multi-subject:
     post:
       tags:
@@ -1453,46 +1539,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationResponse'
-  '/surveys/{id}':
-    get:
-      tags:
-        - surveys
-      operationId: get_survey-get-by-id
-      parameters:
-        -
-          name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            pattern: '[0-9a-f]{8}-[0-9a-f]{4}-[13-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - { $ref: '#/components/schemas/SuccessResponse' }
-                  - { properties: { data: { $ref: '#/components/schemas/Survey' } }, type: object }
-        '401':
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '404':
-          description: 'Not Found'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '422':
-          description: 'Unprocessable Entity'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ValidationResponse'
   /surveys:
     get:
       tags:
@@ -1560,6 +1606,15 @@ paths:
             maximum: 100
             minimum: 0
             nullable: true
+        -
+          name: actual
+          in: query
+          required: false
+          schema:
+            title: 'Актуален ли опрос'
+            type: boolean
+            default: null
+            nullable: true
       responses:
         '200':
           description: OK
@@ -1568,7 +1623,7 @@ paths:
               schema:
                 allOf:
                   - { $ref: '#/components/schemas/SuccessWithPaginationResponse' }
-                  - { properties: { data: { properties: { items: { type: array, items: { $ref: '#/components/schemas/LiteSurvey' } } }, type: object } }, type: object }
+                  - { properties: { data: { properties: { items: { type: array, items: { $ref: '#/components/schemas/LiteFullSurvey' } } }, type: object } }, type: object }
         '401':
           description: Unauthorized
           content:
@@ -3284,8 +3339,8 @@ components:
       required:
         - title
         - subject_id
-        - actual_to
         - items
+        - status
       properties:
         title:
           title: Заголовок
@@ -3294,21 +3349,62 @@ components:
         subject_id:
           title: 'ID предмета'
           type: string
-        actual_to:
-          title: 'Актуален до'
-          type: string
         items:
           title: Вопросы
           type: array
           items:
             $ref: '#/components/schemas/CreateItemDto'
+        status:
+          title: Статус
+          type: string
+          enum:
+            - active
+            - draft
+            - closed
+        actual_to:
+          title: 'Актуален до'
+          type: string
+          default: null
+          nullable: true
+      type: object
+    UpdateSurveyDto:
+      required:
+        - title
+        - subject_id
+        - items
+        - status
+      properties:
+        title:
+          title: Заголовок
+          type: string
+          maxLength: 255
+        subject_id:
+          title: 'ID предмета'
+          type: string
+        items:
+          title: Вопросы
+          type: array
+          items:
+            $ref: '#/components/schemas/UpdateItemDto'
+        status:
+          title: Статус
+          type: string
+          enum:
+            - active
+            - draft
+            - closed
+        actual_to:
+          title: 'Актуален до'
+          type: string
+          default: null
+          nullable: true
       type: object
     CreateSurveyMSDto:
       required:
         - title
         - subject_ids
-        - actual_to
         - items
+        - status
       properties:
         title:
           title: Заголовок
@@ -3320,20 +3416,29 @@ components:
           items: {  }
           maxItems: 20
           minItems: 1
-        actual_to:
-          title: 'Актуален до'
-          type: string
         items:
           title: Вопросы
           type: array
           items:
             $ref: '#/components/schemas/CreateItemDto'
+        status:
+          title: Статус
+          type: string
+          enum:
+            - active
+            - draft
+            - closed
+        actual_to:
+          title: 'Время закрытия'
+          type: string
+          default: null
+          nullable: true
       type: object
     CreateFromTemplateDto:
       required:
         - template_id
         - subject_id
-        - actual_to
+        - status
       properties:
         template_id:
           title: 'ID шаблона'
@@ -3341,15 +3446,24 @@ components:
         subject_id:
           title: 'ID предмета'
           type: string
-        actual_to:
-          title: 'Актуален до'
+        status:
+          title: Статус
           type: string
+          enum:
+            - active
+            - draft
+            - closed
+        actual_to:
+          title: 'Время закрытия'
+          type: string
+          default: null
+          nullable: true
       type: object
     CreateMSFromTemplateDto:
       required:
         - template_id
         - subject_ids
-        - actual_to
+        - status
       properties:
         template_id:
           title: 'ID шаблона'
@@ -3360,9 +3474,18 @@ components:
           items: {  }
           maxItems: 20
           minItems: 1
+        status:
+          title: Статус
+          type: string
+          enum:
+            - active
+            - draft
+            - closed
         actual_to:
           title: 'Актуален до'
           type: string
+          default: null
+          nullable: true
       type: object
     GetSurveysDto:
       properties:
@@ -3402,6 +3525,11 @@ components:
           default: 100
           maximum: 100
           minimum: 0
+          nullable: true
+        actual:
+          title: 'Актуален ли опрос'
+          type: boolean
+          default: null
           nullable: true
       type: object
     GetAllSurveyTemplatesDto:
@@ -4156,11 +4284,15 @@ components:
           items:
             $ref: '#/components/schemas/SurveyItem'
       type: object
-    LiteSurvey:
+    FullSurvey:
       required:
         - id
         - title
         - subject
+        - items
+        - status
+        - created_at
+        - update_at
       properties:
         id:
           type: string
@@ -4168,6 +4300,44 @@ components:
           type: string
         subject:
           $ref: '#/components/schemas/Subject'
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/SurveyItem'
+        status:
+          type: string
+        actual_to:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+        update_at:
+          type: string
+      type: object
+    LiteFullSurvey:
+      required:
+        - id
+        - title
+        - subject
+        - status
+        - created_at
+        - update_at
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        subject:
+          $ref: '#/components/schemas/Subject'
+        status:
+          type: string
+        actual_to:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+        update_at:
+          type: string
       type: object
     SurveyStat:
       required:
@@ -4351,6 +4521,36 @@ components:
         subject_type:
           $ref: '#/components/schemas/TeacherSubjectTypeEnum'
       type: object
+    UpdateItemDto:
+      required:
+        - answer_required
+        - type
+        - text
+        - position
+        - data
+        - subject_type
+      properties:
+        answer_required:
+          title: 'Обязательность ответа'
+          type: boolean
+        type:
+          $ref: '#/components/schemas/SurveyItemTypeEnum'
+        text:
+          title: 'Текст вопроса'
+          type: string
+        position:
+          title: Позиция
+          type: integer
+        data:
+          $ref: '#/components/schemas/ItemDataInterface'
+        subject_type:
+          $ref: '#/components/schemas/TeacherSubjectTypeEnum'
+        id:
+          title: 'ID вопроса'
+          type: string
+          default: null
+          nullable: true
+      type: object
     CreateTemplateItemDto:
       required:
         - answer_required
@@ -4441,16 +4641,13 @@ components:
           default: []
         offset:
           type: integer
-          default: null
-          nullable: true
+          default: 0
         limit:
           type: integer
-          default: null
-          nullable: true
+          default: 0
         count:
           type: integer
-          default: null
-          nullable: true
+          default: 0
         sort_by:
           type: string
           default: null
@@ -4482,6 +4679,19 @@ components:
           oneOf:
             -
               $ref: '#/components/schemas/UserData'
+      type: object
+    LiteSurvey:
+      required:
+        - id
+        - title
+        - subject
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        subject:
+          $ref: '#/components/schemas/Subject'
       type: object
     SurveyItem:
       required:

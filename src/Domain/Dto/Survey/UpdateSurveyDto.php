@@ -6,12 +6,12 @@ use App\Domain\Entity\Subject;
 use App\Domain\Enum\SurveyStatusEnum;
 use DateTimeImmutable;
 
-readonly class CreateSurveyDto
+readonly class UpdateSurveyDto
 {
     /**
      * @param string $title
      * @param DateTimeImmutable|null $actualTo
-     * @param CreateItemDto[] $items
+     * @param (CreateItemDto|UpdateItemDto)[] $items
      * @param Subject $subject
      * @param SurveyStatusEnum $status
      */

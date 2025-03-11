@@ -4,14 +4,16 @@ namespace App\Domain\Dto\Survey;
 
 use App\Domain\Entity\Subject;
 use App\Domain\Entity\SurveyTemplate;
+use App\Domain\Enum\SurveyStatusEnum;
 use DateTimeImmutable;
 
 readonly class CreateSurveyFromTemplateDto
 {
     public function __construct(
         private Subject $subject,
-        private DateTimeImmutable $actualTo,
+        private DateTimeImmutable|null $actualTo,
         private SurveyTemplate $template,
+        private SurveyStatusEnum $status,
     ) {
     }
 
@@ -28,5 +30,10 @@ readonly class CreateSurveyFromTemplateDto
     public function getTemplate(): SurveyTemplate
     {
         return $this->template;
+    }
+
+    public function getStatus(): SurveyStatusEnum
+    {
+        return $this->status;
     }
 }

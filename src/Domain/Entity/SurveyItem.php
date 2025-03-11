@@ -33,6 +33,8 @@ class SurveyItem
     private ItemDataInterface $data;
     #[ORM\Column(name: 'created_at', type: 'datetime_immutable', nullable: false, options: ['default' => 'CURRENT_TIMESTAMP'])]
     private DateTimeImmutable $createdAt;
+    #[ORM\Column(name: 'updated_at', type: 'datetime_immutable', nullable: false, options: ['default' => 'CURRENT_TIMESTAMP'])]
+    private DateTimeImmutable $updatedAt;
     #[ORM\Column(name: 'subject_type', type: 'string', length: 255, nullable: true, enumType: TeacherSubjectTypeEnum::class)]
     private TeacherSubjectTypeEnum|null $subjectType;
 
@@ -125,6 +127,17 @@ class SurveyItem
     public function setCreatedAt(DateTimeImmutable $createdAt): SurveyItem
     {
         $this->createdAt = $createdAt;
+        return $this;
+    }
+
+    public function getUpdatedAt(): DateTimeImmutable
+    {
+        return $this->updatedAt;
+    }
+
+    public function setUpdatedAt(DateTimeImmutable $updatedAt): SurveyItem
+    {
+        $this->updatedAt = $updatedAt;
         return $this;
     }
 

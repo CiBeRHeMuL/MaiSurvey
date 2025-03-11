@@ -3,6 +3,7 @@
 namespace App\Domain\Dto\Survey;
 
 use App\Domain\Enum\SortTypeEnum;
+use App\Domain\Enum\SurveyStatusEnum;
 use Symfony\Component\Uid\Uuid;
 
 readonly class GetSurveysDto
@@ -15,6 +16,7 @@ readonly class GetSurveysDto
      * @param string $sortBy
      * @param SortTypeEnum $sortType
      * @param bool|null $actual
+     * @param SurveyStatusEnum[]|null $statuses
      */
     public function __construct(
         private array|null $subjectIds = null,
@@ -24,6 +26,7 @@ readonly class GetSurveysDto
         private string $sortBy = 'created_at',
         private SortTypeEnum $sortType = SortTypeEnum::Desc,
         private bool|null $actual = null,
+        private array|null $statuses = null,
     ) {
     }
 
@@ -60,5 +63,10 @@ readonly class GetSurveysDto
     public function getActual(): ?bool
     {
         return $this->actual;
+    }
+
+    public function getStatuses(): ?array
+    {
+        return $this->statuses;
     }
 }

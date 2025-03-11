@@ -225,7 +225,7 @@ class UserImporter
                 throw new Exception(sprintf(
                     'Несовпадение количества сохраненных пользователей и данных: %d -> %d',
                     $created,
-                    $userDataIds,
+                    count($userDataIds),
                 ));
             }
 

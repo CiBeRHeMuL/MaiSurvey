@@ -9,6 +9,7 @@ use App\Domain\Dto\SurveyItem\CreateSurveyItemDto;
 use App\Domain\Dto\SurveyItem\ItemDataInterface;
 use App\Domain\Dto\SurveyItem\MultiChoiceItemData;
 use App\Domain\Dto\SurveyItem\RatingItemData;
+use App\Domain\Dto\SurveyItem\UpdateSurveyItemDto;
 use App\Domain\Entity\SurveyItem;
 use App\Domain\Enum\SurveyItemTypeEnum;
 use App\Domain\Enum\ValidationErrorSlugEnum;
@@ -52,6 +53,21 @@ class SurveyItemService
     }
 
     public function validateCreateDto(CreateSurveyItemDto $dto): void
+    {
+        if ($dto->getType() !== $dto->getData()->getType()) {
+            throw ValidationException::new([
+                new ValidationError(
+                    'type',
+                    ValidationErrorSlugEnum::WrongField->getSlug(),
+                    'Тип вопроса не совпадает с типом данных',
+                ),
+            ]);
+        }
+
+        $this->validateData($dto->getData());
+    }
+
+    public function validateUpdateDto(UpdateSurveyItemDto $dto): void
     {
         if ($dto->getType() !== $dto->getData()->getType()) {
             throw ValidationException::new([
@@ -151,7 +167,36 @@ class SurveyItemService
             ->setData($dto->getData())
             ->setSubjectType($dto->getSubjectType())
             ->setCreatedAt(new DateTimeImmutable())
+            ->setUpdatedAt(new DateTimeImmutable())
             ->setSurvey($dto->getSurvey());
         return $entity;
+    }
+
+    public function update(SurveyItem $item, UpdateSurveyItemDto $dto): SurveyItem
+    {
+        $this->validateUpdateDto($dto);
+        $item->setText(trim($dto->getText()))
+            ->setPosition($dto->getPosition())
+            ->setData($dto->getData())
+            ->setSubjectType($dto->getSubjectType())
+            ->setType($dto->getType())
+            ->setSurvey($dto->getSurvey())
+            ->setUpdatedAt(new DateTimeImmutable());
+        $updated = $this
+            ->surveyItemRepository
+            ->update($item);
+        if ($updated === false) {
+            throw ErrorException::new(
+                'Не удалось создать вопрос, обратитесь в поддержку',
+            );
+        }
+        return $item;
+    }
+
+    public function delete(SurveyItem $item): bool
+    {
+        return $this
+            ->surveyItemRepository
+            ->delete($item);
     }
 }
