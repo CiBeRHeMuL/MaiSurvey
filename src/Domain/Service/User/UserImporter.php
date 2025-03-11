@@ -221,7 +221,7 @@ class UserImporter
                 throwOnError: true,
             );
 
-            if ($created !== $userDataIds) {
+            if ($created !== count($userDataIds)) {
                 throw new Exception(sprintf(
                     'Несовпадение количества сохраненных пользователей и данных: %d -> %d',
                     $created,
