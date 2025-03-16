@@ -28,6 +28,7 @@ use App\Domain\Repository\SurveyRepositoryInterface;
 use App\Domain\Service\Db\TransactionManagerInterface;
 use App\Domain\Service\Subject\SubjectService;
 use App\Domain\Service\SurveyItem\SurveyItemService;
+use App\Domain\Service\SurveyStat\StatRefresherInterface;
 use App\Domain\Service\Template\TemplateService;
 use App\Domain\Validation\ValidationError;
 use DateTimeImmutable;
@@ -49,6 +50,7 @@ class SurveyService
         private SubjectService $subjectService,
         private TransactionManagerInterface $transactionManager,
         private SurveyItemService $surveyItemService,
+        private StatRefresherInterface $statRefresher,
         LoggerInterface $logger,
     ) {
         $this->setLogger($logger);
@@ -59,6 +61,7 @@ class SurveyService
         $this->logger = $logger;
         $this->subjectService->setLogger($logger);
         $this->surveyItemService->setLogger($logger);
+        $this->statRefresher->setLogger($logger);
         return $this;
     }
 
@@ -161,6 +164,9 @@ class SurveyService
         try {
             $this->transactionManager->beginTransaction();
 
+            $surveyActivated = $dto->getStatus() === SurveyStatusEnum::Active
+                && $survey->getStatus() !== SurveyStatusEnum::Active;
+
             $survey
                 ->setTitle($dto->getTitle())
                 ->setStatus($dto->getStatus())
@@ -202,6 +208,15 @@ class SurveyService
                         $preparedItems[] = $item;
                         unset($itemsToDelete[$itemDto->getId()->toRfc4122()]);
                     } else {
+                        if ($dto->getStatus() === SurveyStatusEnum::Active && $survey->getStatus() === SurveyStatusEnum::Active) {
+                            throw ValidationException::new([
+                                new ValidationError(
+                                    'items',
+                                    ValidationErrorSlugEnum::WrongField->getSlug(),
+                                    'Нельзя добавлять вопросы активному опроса',
+                                ),
+                            ]);
+                        }
                         $createItemDto = new CreateSurveyItemDto(
                             $survey,
                             $itemDto->isAnswerRequired(),
@@ -231,6 +246,15 @@ class SurveyService
             }
 
             foreach ($itemsToDelete as $item) {
+                if ($dto->getStatus() === SurveyStatusEnum::Active && $survey->getStatus() === SurveyStatusEnum::Active) {
+                    throw ValidationException::new([
+                        new ValidationError(
+                            'items',
+                            ValidationErrorSlugEnum::WrongField->getSlug(),
+                            'Нельзя удалять вопросы активного опроса',
+                        ),
+                    ]);
+                }
                 $this
                     ->surveyItemService
                     ->delete($item);
@@ -241,6 +265,10 @@ class SurveyService
                 fn(SurveyItem $a, SurveyItem $b) => $a->getPosition() <=> $b->getPosition(),
             );
             $survey->setItems(new ArrayCollection($preparedItems));
+
+            if ($surveyActivated) {
+                $this->statRefresher->refreshStats([$survey], true);
+            }
 
             $this->transactionManager->commit();
             return $survey;

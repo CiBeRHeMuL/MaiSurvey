@@ -22,6 +22,7 @@ class SurveyStat
     #[ORM\OneToOne(targetEntity: Survey::class)]
     #[ORM\JoinColumn(name: 'id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
     private Survey $survey;
+    /** @var Collection<int, SurveyStatItem> $items */
     #[ORM\OneToMany(targetEntity: SurveyStatItem::class, mappedBy: 'survey')]
     #[ORM\OrderBy(['position' => 'ASC'])]
     private Collection $items;
@@ -75,6 +76,9 @@ class SurveyStat
         return $this;
     }
 
+    /**
+     * @return Collection<int, SurveyStatItem>
+     */
     public function getItems(): Collection
     {
         return $this->items;

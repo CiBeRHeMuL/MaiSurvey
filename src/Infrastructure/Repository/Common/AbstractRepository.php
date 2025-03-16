@@ -72,6 +72,7 @@ abstract class AbstractRepository implements RepositoryInterface
     {
         try {
             $this->entityManager->remove($entity);
+            $this->entityManager->flush();
             return true;
         } catch (Exception $e) {
             $this->logger->error($e);

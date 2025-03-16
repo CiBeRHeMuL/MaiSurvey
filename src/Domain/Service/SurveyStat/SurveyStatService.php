@@ -7,7 +7,6 @@ use App\Domain\Entity\SurveyStat;
 use App\Domain\Repository\SurveyStatItemRepositoryInterface;
 use App\Domain\Repository\SurveyStatRepositoryInterface;
 use App\Domain\Service\Db\TransactionManagerInterface;
-use App\Domain\Service\Survey\SurveyService;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Uid\Uuid;
 use Throwable;
@@ -21,7 +20,6 @@ class SurveyStatService
         private SurveyStatRepositoryInterface $surveyStatRepository,
         private SurveyStatItemRepositoryInterface $surveyStatItemRepository,
         private TransactionManagerInterface $transactionManager,
-        private SurveyService $surveyService,
     ) {
         $this->setLogger($logger);
     }
@@ -53,14 +51,14 @@ class SurveyStatService
     }
 
     /**
-     * @param Survey[] $surveys
+     * @param Survey[]|null $surveys
      * @param bool $transaction
      * @param bool $force обновить все опросы принудительно
      *
      * @return int
      * @throws Throwable
      */
-    public function refreshStats(array $surveys, bool $transaction = true, bool $force = false): int
+    public function refreshStats(array|null $surveys, bool $transaction = true, bool $force = false): int
     {
         if ($surveys === []) {
             return 0;
@@ -70,12 +68,14 @@ class SurveyStatService
         }
         try {
             if ($force === false) {
-                $surveys = array_filter(
-                    $surveys,
-                    fn(Survey $s) => $s->isActual(),
-                );
+                $surveys = $surveys !== null
+                    ? array_filter(
+                        $surveys,
+                        fn(Survey $s) => $s->isActual(),
+                    )
+                    : null;
             }
-            $surveyIds = array_map(fn(Survey $s) => $s->getId(), $surveys);
+            $surveyIds = $surveys !== null ? array_map(fn(Survey $s) => $s->getId(), $surveys) : null;
             $stats = $this
                 ->surveyStatRepository
                 ->findStatFromSurveys($surveyIds);

@@ -38,6 +38,7 @@ readonly class SurveyStatItem
             array_map(
                 SurveyStatDataFactory::fromItemData(...),
                 $item->getStats(),
+                array_fill(0, count($item->getStats()), $item),
             ),
         );
     }

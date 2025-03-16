@@ -2,7 +2,9 @@
 
 namespace App\Domain\Service\SurveyStat;
 
+use App\Domain\Dto\Survey\GetSurveysDto;
 use App\Domain\Exception\ErrorException;
+use App\Domain\Service\Survey\SurveyService;
 use Psr\Log\LoggerInterface;
 use Throwable;
 
