@@ -4127,6 +4127,7 @@ components:
         - status
         - deleted
         - permissions
+        - roles
       properties:
         id:
           type: string
@@ -4150,6 +4151,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PermissionEnum'
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoleEnum'
       type: object
     UserCredentials:
       required:
@@ -4673,6 +4678,13 @@ components:
         - survey_template.delete
         - survey_template.view_all
         - survey_stat.view
+    RoleEnum:
+      type: string
+      enum:
+        - admin
+        - student
+        - teacher
+        - survey_creator
     PaginatedData:
       properties:
         items:
@@ -4697,17 +4709,11 @@ components:
           default: null
           nullable: true
       type: object
-    RoleEnum:
-      type: string
-      enum:
-        - admin
-        - student
-        - teacher
-        - survey_creator
     LiteUser:
       required:
         - id
         - email
+        - roles
       properties:
         id:
           type: string
@@ -4719,6 +4725,10 @@ components:
           oneOf:
             -
               $ref: '#/components/schemas/UserData'
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoleEnum'
       type: object
     LiteSurvey:
       required:

@@ -19,6 +19,7 @@ readonly class User
      * @param bool $deleted
      * @param string|null $deleted_at
      * @param string[] $permissions
+     * @param string[] $roles
      */
     public function __construct(
         public string $id,
@@ -32,6 +33,8 @@ readonly class User
         public string|null $deleted_at,
         #[LOA\EnumItems(PermissionEnum::class)]
         public array $permissions,
+        #[LOA\EnumItems(RoleEnum::class)]
+        public array $roles,
     ) {
     }
 
@@ -57,6 +60,7 @@ readonly class User
                     ),
                 ),
             ),
+            array_values(array_map(fn(RoleEnum $r) => $r->value, $user->getRoles())),
         );
     }
 }

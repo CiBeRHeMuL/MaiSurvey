@@ -18,7 +18,7 @@ readonly class Role
     public static function fromRole(RoleEnum $role): self
     {
         return new self(
-            $role->value,
+            $role->getSlug(),
             $role->getName(),
             $role->importEnabled(),
         );

@@ -108,4 +108,9 @@ enum RoleEnum: string
             default => false,
         };
     }
+
+    public function getSlug(): string
+    {
+        return $this->value;
+    }
 }
