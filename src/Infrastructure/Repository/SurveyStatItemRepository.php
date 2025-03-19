@@ -473,7 +473,7 @@ class SurveyStatItemRepository extends Common\AbstractRepository implements Surv
                                             'count' => new Expr('count(*)'),
                                         ])
                                         ->from($this->getClassTable(SurveyItemAnswer::class))
-                                        ->groupBy(['id', 'teacher_subject_id'])
+                                        ->groupBy(['survey_item_id', 'teacher_subject_id'])
                                 ],
                                 [
                                     'teacher_sia.teacher_subject_id' => new Expr('teacher_msi.teacher_subject_id'),
