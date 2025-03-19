@@ -460,7 +460,7 @@ class SurveyStatItemRepository extends Common\AbstractRepository implements Surv
                                             'id' => 'survey_item_id',
                                         ])
                                         ->from($this->getClassTable(SurveyItemAnswer::class))
-                                        ->groupBy(['id'])
+                                        ->groupBy(['survey_item_id'])
                                 ],
                                 'all_sia.id = si.id',
                             )
