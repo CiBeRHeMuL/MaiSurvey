@@ -38,7 +38,13 @@ class CreateSubjectCommand extends AbstractCommand
                 'name',
                 InputArgument::REQUIRED,
                 'Название предмета',
+            )
+            ->addArgument(
+                'semester_id',
+                InputArgument::REQUIRED,
+                'ID семестра',
             );
+        parent::configure();
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -46,6 +52,7 @@ class CreateSubjectCommand extends AbstractCommand
         $group = $this->useCase->execute(
             new CreateSubjectDto(
                 $input->getArgument('name'),
+                $input->getArgument('semester_id'),
             ),
         );
         $this->io->writeln('<fg=green>Предмет успешно создана</>');

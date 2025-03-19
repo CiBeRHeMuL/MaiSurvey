@@ -50,6 +50,7 @@ class SurveysGenerateDefaultCommand extends AbstractCommand
                 'semester_ids',
                 InputArgument::REQUIRED | InputArgument::IS_ARRAY,
             );
+        parent::configure();
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int

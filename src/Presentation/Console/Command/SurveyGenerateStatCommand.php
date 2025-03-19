@@ -43,6 +43,7 @@ class SurveyGenerateStatCommand extends AbstractCommand
                 InputArgument::REQUIRED,
                 'ID опроса',
             );
+        parent::configure();
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int

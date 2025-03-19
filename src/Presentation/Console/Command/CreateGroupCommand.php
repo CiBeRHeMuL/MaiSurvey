@@ -39,6 +39,7 @@ class CreateGroupCommand extends AbstractCommand
                 InputArgument::REQUIRED,
                 'Название группы',
             );
+        parent::configure();
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int

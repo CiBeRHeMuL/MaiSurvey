@@ -11,7 +11,7 @@ abstract class AbstractCommand extends Command
 {
     protected SymfonyStyle $io;
 
-    protected function initialize(InputInterface $input, OutputInterface $output)
+    protected function initialize(InputInterface $input, OutputInterface $output): void
     {
         $this->io = new SymfonyStyle($input, $output);
         parent::initialize($input, $output);

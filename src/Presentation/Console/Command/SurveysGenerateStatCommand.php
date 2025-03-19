@@ -51,6 +51,7 @@ class SurveysGenerateStatCommand extends AbstractCommand
                 'Обновить опросы принудительно (даже если они уже завершены)',
                 false,
             );
+        parent::configure();
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int

@@ -75,6 +75,7 @@ class CreateUserCommand extends AbstractCommand
                 InputOption::VALUE_OPTIONAL,
                 'Группа',
             );
+        parent::configure();
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int

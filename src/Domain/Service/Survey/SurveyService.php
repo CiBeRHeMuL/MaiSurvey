@@ -144,6 +144,10 @@ class SurveyService
                 }
             }
 
+            if ($entity->isActual()) {
+                $this->statRefresher->refreshStats([$entity]);
+            }
+
             $this->transactionManager->commit();
             return $entity;
         } catch (ErrorException|ValidationException $e) {
