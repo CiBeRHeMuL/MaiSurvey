@@ -115,18 +115,8 @@ class SurveyStatItemRepository extends Common\AbstractRepository implements Surv
             ->select([
                 't2.id',
                 't2.survey_id',
-                'available_count' => new AnyValueFunc(
-                    new CastExpr(
-                        new Expr("t2.data ->> 'available_count'"),
-                        'integer',
-                    ),
-                ),
-                'completed_count' => new SumFunc(
-                    new CastExpr(
-                        new Expr("t2.data ->> 'completed_count'"),
-                        'integer',
-                    ),
-                ),
+                'available_count' => new AnyValueFunc(new Expr('t2.all_available_count')),
+                'completed_count' => new AnyValueFunc(new Expr('t2.all_completed_count')),
                 'stats' => new JsonbAggFunc(new Expr('t2.data')),
                 'type' => 't2.type',
                 'position' => new AnyValueFunc(new Expr('t2.position')),
@@ -145,16 +135,16 @@ class SurveyStatItemRepository extends Common\AbstractRepository implements Surv
                                 ),
                                 new JsonbBuildObjectFunc([
                                     'available_count',
-                                    new AnyValueFunc(new Expr('t.available_count')),
+                                    new AnyValueFunc(new Expr('t.teacher_available_count')),
                                     'completed_count',
-                                    new SumFunc(new Expr('t.completed_count')),
+                                    new AnyValueFunc(new Expr('t.teacher_completed_count')),
                                     'counts',
                                     new JsonbAggFunc(
                                         new JsonbBuildObjectFunc([
                                             'choice',
                                             new Expr('t.answer'),
                                             'count',
-                                            new Expr('t.completed_count'),
+                                            new Expr('t.answer_completed_count'),
                                         ]),
                                         new ArrayPositionFunc(
                                             new ArrayFromJsonbFunc(
@@ -199,16 +189,16 @@ class SurveyStatItemRepository extends Common\AbstractRepository implements Surv
                                 ),
                                 new JsonbBuildObjectFunc([
                                     'available_count',
-                                    new AnyValueFunc(new Expr('t.available_count')),
+                                    new AnyValueFunc(new Expr('t.teacher_available_count')),
                                     'completed_count',
-                                    new SumFunc(new Expr('t.completed_count')),
+                                    new AnyValueFunc(new Expr('t.teacher_completed_count')),
                                     'counts',
                                     new JsonbAggFunc(
                                         new JsonbBuildObjectFunc([
                                             'rating',
                                             new Expr('t.answer::integer'),
                                             'count',
-                                            new Expr('t.completed_count'),
+                                            new Expr('t.answer_completed_count'),
                                         ]),
                                         new Expr('t.answer ASC'),
                                         new Expr(
@@ -219,10 +209,10 @@ class SurveyStatItemRepository extends Common\AbstractRepository implements Surv
                                     'average',
                                     new CaseExpr(
                                         [[0, new Expr('0.00::numeric(3, 2)')]],
-                                        new SumFunc(new Expr('t.completed_count')),
+                                        new SumFunc(new Expr('t.answer_completed_count')),
                                         new Expr(
-                                            'round(sum(t.answer::integer * t.completed_count)'
-                                            . ' FILTER ( WHERE t.type = :dc_r ) / sum(t.completed_count), 2)',
+                                            'round(sum(t.answer::integer * t.answer_completed_count)'
+                                            . ' FILTER ( WHERE t.type = :dc_r ) / sum(t.answer_completed_count), 2)',
                                             [':dc_r' => SurveyItemTypeEnum::Rating->value],
                                         )
                                     ),
@@ -252,9 +242,9 @@ class SurveyStatItemRepository extends Common\AbstractRepository implements Surv
                                 ),
                                 new JsonbBuildObjectFunc([
                                     'available_count',
-                                    new AnyValueFunc(new Expr('t.available_count')),
+                                    new AnyValueFunc(new Expr('t.teacher_available_count')),
                                     'completed_count',
-                                    new SumFunc(new Expr('t.completed_count')),
+                                    new AnyValueFunc(new Expr('t.teacher_completed_count')),
                                     'summary',
                                     new CastExpr(
                                         new CoalesceFunc(
@@ -294,12 +284,17 @@ class SurveyStatItemRepository extends Common\AbstractRepository implements Surv
                         't.teacher_id',
                         't.survey_id',
                         'position' => new AnyValueFunc(new Expr('t.position')),
+                        'all_available_count' => new AnyValueFunc(new Expr('t.all_available_count')),
+                        'all_completed_count' => new AnyValueFunc(new Expr('t.all_completed_count')),
                     ])
                     ->from([
                         't' => Query::select()
                             ->select([
-                                'available_count' => new CoalesceFunc(new Expr('msi.count'), 0),
-                                'completed_count' => new CoalesceFunc(new Expr('sia.count'), 0),
+                                'teacher_available_count' => new CoalesceFunc(new Expr('teacher_msi.count'), 0),
+                                'teacher_completed_count' => new CoalesceFunc(new Expr('teacher_sia.count'), 0),
+                                'answer_completed_count' => new CoalesceFunc(new Expr('sia.count'), 0),
+                                'all_available_count' => new CoalesceFunc(new Expr('all_msi.count'), 0),
+                                'all_completed_count' => new CoalesceFunc(new Expr('all_sia.count'), 0),
                                 'si.id',
                                 'ts.teacher_id',
                                 'si.type',
@@ -313,7 +308,7 @@ class SurveyStatItemRepository extends Common\AbstractRepository implements Surv
                                 ),
                                 'teacher_name' => new CaseExpr([
                                     [
-                                        new Expr('msi.teacher_subject_id IS NOT NULL'),
+                                        new Expr('teacher_msi.teacher_subject_id IS NOT NULL'),
                                         new FullNameExpr('tsud'),
                                     ],
                                 ]),
@@ -353,7 +348,7 @@ class SurveyStatItemRepository extends Common\AbstractRepository implements Surv
                             ])
                             ->leftJoin(
                                 [
-                                    'msi' => Query::select()
+                                    'teacher_msi' => Query::select()
                                         ->select([
                                             'count' => new Expr('count(DISTINCT user_id)'),
                                             'id',
@@ -363,7 +358,7 @@ class SurveyStatItemRepository extends Common\AbstractRepository implements Surv
                                         ->andFilterWhere(['survey_id' => $surveyIds])
                                         ->groupBy(['id', 'teacher_subject_id'])
                                 ],
-                                'msi.id = si.id',
+                                'teacher_msi.id = si.id',
                             )
                             ->leftJoin(
                                 [
@@ -419,9 +414,9 @@ class SurveyStatItemRepository extends Common\AbstractRepository implements Surv
                                     ['si.id' => new Expr('sia.survey_item_id')],
                                     [
                                         'OR',
-                                        ['msi.teacher_subject_id' => new Expr('sia.teacher_subject_id')],
+                                        ['teacher_msi.teacher_subject_id' => new Expr('sia.teacher_subject_id')],
                                         [
-                                            'msi.teacher_subject_id' => null,
+                                            'teacher_msi.teacher_subject_id' => null,
                                             'sia.teacher_subject_id' => null,
                                         ],
                                     ],
@@ -438,11 +433,52 @@ class SurveyStatItemRepository extends Common\AbstractRepository implements Surv
                             )
                             ->leftJoin(
                                 ['ts' => $this->getClassTable(TeacherSubject::class)],
-                                'ts.id = msi.teacher_subject_id',
+                                'ts.id = teacher_msi.teacher_subject_id',
                             )
                             ->leftJoin(
                                 ['tsud' => $this->getClassTable(UserData::class)],
                                 'ts.teacher_id = tsud.user_id',
+                            )
+                            ->leftJoin(
+                                [
+                                    'all_msi' => Query::select()
+                                        ->select([
+                                            'count' => new Expr('count(DISTINCT user_id)'),
+                                            'id',
+                                        ])
+                                        ->from($this->getClassTable(MySurveyItem::class))
+//                                        ->andFilterWhere(['survey_id' => $surveyIds])
+                                        ->groupBy(['id'])
+                                ],
+                                'all_msi.id = si.id',
+                            )
+                            ->leftJoin(
+                                [
+                                    'all_sia' => Query::select()
+                                        ->select([
+                                            'count' => new Expr('count(*)'),
+                                            'id' => 'survey_item_id',
+                                        ])
+                                        ->from($this->getClassTable(SurveyItemAnswer::class))
+                                        ->groupBy(['id'])
+                                ],
+                                'all_sia.id = si.id',
+                            )
+                            ->leftJoin(
+                                [
+                                    'teacher_sia' => Query::select()
+                                        ->select([
+                                            'id' => 'survey_item_id',
+                                            'teacher_subject_id',
+                                            'count' => new Expr('count(*)'),
+                                        ])
+                                        ->from($this->getClassTable(SurveyItemAnswer::class))
+                                        ->groupBy(['id', 'teacher_subject_id'])
+                                ],
+                                [
+                                    'teacher_sia.teacher_subject_id' => new Expr('teacher_msi.teacher_subject_id'),
+                                    'teacher_sia.id' => new Expr('si.id'),
+                                ],
                             )
                     ])
                     ->groupBy(['t.id', 't.survey_id', 't.type', 't.teacher_id']),
