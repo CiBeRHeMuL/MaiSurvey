@@ -1615,6 +1615,16 @@ paths:
             type: boolean
             default: null
             nullable: true
+        -
+          name: 'statuses[]'
+          in: query
+          required: false
+          schema:
+            title: 'Статусы для фильтрации'
+            type: array
+            items: {  }
+            default: null
+            nullable: true
       responses:
         '200':
           description: OK
@@ -3569,6 +3579,12 @@ components:
         actual:
           title: 'Актуален ли опрос'
           type: boolean
+          default: null
+          nullable: true
+        statuses:
+          title: 'Статусы для фильтрации'
+          type: array
+          items: {  }
           default: null
           nullable: true
       type: object

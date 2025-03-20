@@ -189,21 +189,15 @@ class SurveyStatController extends BaseController
                         case SurveyItemTypeEnum::Comment:
                             /** @var CommentStatData $itemStat */
                             $worksheet->setCellValue("B$row", 'Комментарии');
-                            $comments = implode("\n", $itemStat->getComments());
-                            if ($comments !== '' && in_array($comments[0], ['-', '+', '='])) {
-                                $comments = "'$comments";
-                            }
-                            $worksheet->setCellValue(
-                                "C$row",
-                                $comments,
-                            );
-                            $worksheet->getStyle("C$row")
+                            $worksheet->getStyle("B$row")
                                 ->applyFromArray([
                                     'alignment' => [
                                         'horizontal' => Alignment::HORIZONTAL_LEFT,
                                         'vertical' => Alignment::VERTICAL_TOP,
                                     ],
                                 ]);
+                            $worksheet->setCellValue("C$row", implode("\n", $itemStat->getComments()));
+                            $worksheet->getStyle("C$row")->setQuotePrefix(true);
                             break;
                     }
                     $row++;
