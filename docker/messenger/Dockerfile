@@ -7,15 +7,10 @@ WORKDIR /app
 
 COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
 
-RUN install-php-extensions pgsql pdo_pgsql intl opcache soap bcmath pcntl zip xdebug-3.3.2 tidy sockets gd
+RUN install-php-extensions pgsql pdo_pgsql intl opcache soap bcmath pcntl zip xdebug-3.3.2 tidy sockets gd imap pcntl sockets pdo pdo_pgsql pgsql
 RUN  apt-get update \
-  && apt-get install -y wget \
+  && apt-get install -y  git wget libpq-dev \
   && rm -rf /var/lib/apt/lists/*
-RUN apt-get update && apt-get install -y git
-RUN install-php-extensions imap
-
-RUN apt-get update && apt-get -y install git wget libpq-dev
-RUN docker-php-ext-install pcntl sockets pdo pdo_pgsql pgsql
 
 RUN wget "http://browscap.org/stream?q=Lite_PHP_BrowsCapINI" -O /usr/local/etc/php/php_browscap.ini
 
@@ -26,4 +21,4 @@ ADD ./docker/php/zz-docker.conf /usr/local/etc/php-fpm.d/zz-docker.conf
 
 RUN rm /usr/local/etc/php/conf.d/base.ini -f
 
-ENTRYPOINT exec php /app/bin/console messenger:consume async --time-limit=3600 -vv >> /app/var/log/messenger-$(date +%Y-%m-%d).log 2>&1
+ENTRYPOINT exec php /app/bin/console messenger:consume --all --time-limit=3600 -vv >> /app/var/log/messenger-$(date +%Y-%m-%d).log 2>&1
