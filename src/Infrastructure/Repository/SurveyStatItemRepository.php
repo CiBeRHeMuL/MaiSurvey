@@ -448,8 +448,16 @@ class SurveyStatItemRepository extends Common\AbstractRepository implements Surv
                                         ->groupBy(['survey_item_id', 'teacher_subject_id'])
                                 ],
                                 [
-                                    'teacher_sia.teacher_subject_id' => new Expr('teacher_msi.teacher_subject_id'),
-                                    'teacher_sia.id' => new Expr('si.id'),
+                                    'AND',
+                                    ['teacher_sia.id' => new Expr('si.id')],
+                                    [
+                                        'OR',
+                                        ['teacher_sia.teacher_subject_id' => new Expr('teacher_msi.teacher_subject_id')],
+                                        [
+                                            'teacher_sia.teacher_subject_id' => null,
+                                            'teacher_msi.teacher_subject_id' => null,
+                                        ],
+                                    ],
                                 ],
                             )
                     ])
