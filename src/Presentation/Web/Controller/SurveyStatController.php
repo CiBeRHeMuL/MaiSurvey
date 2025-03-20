@@ -210,6 +210,9 @@ class SurveyStatController extends BaseController
                     ->setAutoSize(true);
             }
             $worksheet->calculateColumnWidths();
+            $worksheet->getColumnDimension('C')
+                ->setAutoSize(false)
+                ->setWidth(20);
 
             // Сохраняем
             if (!is_dir("$projectDir/export/$exportType")) {
