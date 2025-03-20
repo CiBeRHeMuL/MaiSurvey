@@ -16,7 +16,7 @@ readonly class CommentStatData implements StatDataInterface
      * @param string|null $teacher_name
      * @param int $completed_count
      * @param int $available_count
-     * @param string $summary
+     * @param string[] $comments
      */
     public function __construct(
         public SurveyItemTypeEnum $type,
@@ -24,7 +24,8 @@ readonly class CommentStatData implements StatDataInterface
         public string|null $teacher_name,
         public int $completed_count,
         public int $available_count,
-        public string $summary,
+        #[MA\ArrayType('string')]
+        public array $comments,
     ) {
     }
 
@@ -53,8 +54,8 @@ readonly class CommentStatData implements StatDataInterface
         return $this->available_count;
     }
 
-    public function getSummary(): string
+    public function getComments(): array
     {
-        return $this->summary;
+        return $this->comments;
     }
 }

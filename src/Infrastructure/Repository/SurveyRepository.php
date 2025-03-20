@@ -2,6 +2,7 @@
 
 namespace App\Infrastructure\Repository;
 
+use App\Domain\DataProvider\ArrayDataProvider;
 use App\Domain\DataProvider\DataProviderInterface;
 use App\Domain\DataProvider\DataSort;
 use App\Domain\DataProvider\LimitOffset;
@@ -13,7 +14,9 @@ use App\Domain\Entity\MySurvey;
 use App\Domain\Entity\Subject;
 use App\Domain\Entity\Survey;
 use App\Domain\Entity\User;
+use App\Domain\Enum\SurveyStatusEnum;
 use App\Domain\Repository\SurveyRepositoryInterface;
+use App\Infrastructure\Db\Expr\ActualSurveyExpr;
 use App\Infrastructure\Db\Expr\ILikeExpr;
 use Qstart\Db\QueryBuilder\DML\Expression\Expr;
 use Qstart\Db\QueryBuilder\DML\Expression\InExpr;
@@ -108,6 +111,9 @@ class SurveyRepository extends Common\AbstractRepository implements SurveyReposi
 
     public function findAll(GetSurveysDto $dto): DataProviderInterface
     {
+        if ($dto->getStatuses() === [] || $dto->getSubjectIds() === []) {
+            return new ArrayDataProvider([]);
+        }
         $q = Query::select()
             ->select([
                 's.*',
@@ -136,10 +142,16 @@ class SurveyRepository extends Common\AbstractRepository implements SurveyReposi
         }
         if ($dto->getActual() !== null) {
             $q->andWhere(
-                $dto->getActual()
-                    ? new Expr('s.actual_to > now()')
-                    : new Expr('s.actual_to < now()'),
+                new ActualSurveyExpr('s', $dto->getActual() === false),
             );
+        }
+        if ($dto->getStatuses() !== null) {
+            $q->andWhere([
+                's.status' => array_map(
+                    fn(SurveyStatusEnum $e) => $e->value,
+                    $dto->getStatuses(),
+                ),
+            ]);
         }
         return $this->findWithLazyBatchedProvider(
             $q,
@@ -169,9 +181,7 @@ class SurveyRepository extends Common\AbstractRepository implements SurveyReposi
             ->where(['id' => array_map(fn(Uuid $id) => $id->toRfc4122(), $ids)]);
         if ($actual !== null) {
             $q->andWhere(
-                $actual
-                    ? new Expr('t.actual_to > now()')
-                    : new Expr('t.actual_to < now()'),
+                new ActualSurveyExpr('t', $actual === false),
             );
         }
         return $this

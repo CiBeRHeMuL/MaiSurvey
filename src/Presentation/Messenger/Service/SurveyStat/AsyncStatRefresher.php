@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Infrastructure\Service\SurveyStat;
+namespace App\Presentation\Messenger\Service\SurveyStat;
 
 use App\Domain\Entity\Survey;
 use App\Domain\Exception\ErrorException;
 use App\Domain\Service\SurveyStat\StatRefresherInterface;
-use App\Infrastructure\Messenger\Message\RefreshStatsMessage;
+use App\Presentation\Messenger\Message\RefreshStatsMessage;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Throwable;

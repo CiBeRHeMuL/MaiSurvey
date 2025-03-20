@@ -1,0 +1,39 @@
+<?php
+
+namespace App\Presentation\Messenger\Handler;
+
+use App\Application\UseCase\Survey\CloseExpiredSurveysUseCase;
+use App\Presentation\Messenger\Message\CloseExpiredSurveysMessage;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use Throwable;
+
+#[AsMessageHandler]
+class CloseExpiredSurveysHandler
+{
+    private LoggerInterface $logger;
+
+    public function __construct(
+        LoggerInterface $logger,
+        private CloseExpiredSurveysUseCase $useCase,
+    ) {
+        $this->setLogger($logger);
+    }
+
+    public function setLogger(LoggerInterface $logger): CloseExpiredSurveysHandler
+    {
+        $this->logger = $logger;
+        $this->useCase->setLogger($logger);
+        return $this;
+    }
+
+    public function __invoke(CloseExpiredSurveysMessage $message): void
+    {
+        try {
+            $closed = $this->useCase->execute();
+            $this->logger->info(sprintf('Закрыто %d истекших опросов', $closed));
+        } catch (Throwable $e) {
+            $this->logger->error($e);
+        }
+    }
+}

@@ -2,7 +2,6 @@
 
 namespace App\Infrastructure\Repository;
 
-use App\Domain\Dto\SurveyStatItem\CommentStatData;
 use App\Domain\Entity\MySurveyItem;
 use App\Domain\Entity\SurveyItem;
 use App\Domain\Entity\SurveyItemAnswer;
@@ -15,7 +14,6 @@ use App\Infrastructure\Db\Expr\AnyValueFunc;
 use App\Infrastructure\Db\Expr\ArrayFromJsonbFunc;
 use App\Infrastructure\Db\Expr\ArrayPositionFunc;
 use App\Infrastructure\Db\Expr\CaseExpr;
-use App\Infrastructure\Db\Expr\CastExpr;
 use App\Infrastructure\Db\Expr\CoalesceFunc;
 use App\Infrastructure\Db\Expr\FullNameExpr;
 use App\Infrastructure\Db\Expr\JsonbAggFunc;
@@ -24,7 +22,6 @@ use App\Infrastructure\Db\Expr\JsonbBuildObjectFunc;
 use App\Infrastructure\Db\Expr\JsonbPathQueryArrayFunc;
 use App\Infrastructure\Db\Expr\JsonbPathQueryFunc;
 use App\Infrastructure\Db\Expr\SumFunc;
-use App\Infrastructure\Service\SurveyStat\CommentsSummaryGeneratorInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Qstart\Db\QueryBuilder\DML\Expression\Expr;
@@ -37,9 +34,7 @@ class SurveyStatItemRepository extends Common\AbstractRepository implements Surv
     public function __construct(
         EntityManagerInterface $entityManager,
         LoggerInterface $logger,
-        private CommentsSummaryGeneratorInterface $commentsSummaryGenerator,
     ) {
-        $this->commentsSummaryGenerator->setLogger($logger);
         parent::__construct($entityManager, $logger);
     }
 
@@ -60,26 +55,6 @@ class SurveyStatItemRepository extends Common\AbstractRepository implements Surv
                 $q,
                 SurveyStatItem::class,
             );
-        foreach ($allItems as $item) {
-            if ($item->getType() === SurveyItemTypeEnum::Comment) {
-                $stats = $item->getStats();
-                foreach ($stats as &$stat) {
-                    if ($stat instanceof CommentStatData) {
-                        $comments = json_decode($stat->getSummary());
-                        $summary = $this->commentsSummaryGenerator->generateSummary($comments);
-                        $stat = new CommentStatData(
-                            $stat->getType(),
-                            $stat->getTeacherId(),
-                            $stat->getTeacherName(),
-                            $stat->getCompletedCount(),
-                            $stat->getAvailableCount(),
-                            $summary,
-                        );
-                    }
-                }
-                $item->setStats($stats);
-            }
-        }
         return $allItems;
     }
 
@@ -245,19 +220,16 @@ class SurveyStatItemRepository extends Common\AbstractRepository implements Surv
                                     new AnyValueFunc(new Expr('t.teacher_available_count')),
                                     'completed_count',
                                     new AnyValueFunc(new Expr('t.teacher_completed_count')),
-                                    'summary',
-                                    new CastExpr(
-                                        new CoalesceFunc(
-                                            new JsonbAggFunc(
-                                                new Expr('t.answer'),
-                                                filterWhere: new Expr(
-                                                    't.type = :dc_com',
-                                                    [':dc_com' => SurveyItemTypeEnum::Comment->value],
-                                                ),
+                                    'comments',
+                                    new CoalesceFunc(
+                                        new JsonbAggFunc(
+                                            new Expr('t.answer'),
+                                            filterWhere: new Expr(
+                                                't.type = :dc_com AND t.answer IS NOT NULL',
+                                                [':dc_com' => SurveyItemTypeEnum::Comment->value],
                                             ),
-                                            new Expr("'[]'::jsonb"),
                                         ),
-                                        'text',
+                                        new Expr("'[]'::jsonb"),
                                     ),
                                     'type',
                                     new Expr('t.type'),

@@ -86,7 +86,7 @@ class SurveyStatDataFactory
                     $data->getTeacherName(),
                     $data->getCompletedCount(),
                     $data->getAvailableCount(),
-                    $data->getSummary(),
+                    'Просмотр комментариев доступен в файле после скачивания статистики',
                 );
         }
     }

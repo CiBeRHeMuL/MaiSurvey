@@ -38,19 +38,6 @@ class SurveyStatService
     }
 
     /**
-     * @param Survey $survey
-     * @param bool $transaction
-     * @param bool $force обновить все опросы принудительно
-     *
-     * @return void
-     * @throws Throwable
-     */
-    public function refreshStat(Survey $survey, bool $transaction = true, bool $force = false): void
-    {
-        $this->refreshStats([$survey], $transaction, $force);
-    }
-
-    /**
      * @param Survey[]|null $surveys
      * @param bool $transaction
      * @param bool $force обновить все опросы принудительно

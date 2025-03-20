@@ -4,6 +4,7 @@ namespace App\Application\Dto\Survey;
 
 use App\Application\Validator\Constraints as LAssert;
 use App\Domain\Enum\SortTypeEnum;
+use App\Domain\Enum\SurveyStatusEnum;
 use App\Domain\Service\Survey\SurveyService;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -39,6 +40,13 @@ readonly class GetSurveysDto
         /** Актуален ли опрос */
         #[Assert\Type('boolean', message: 'Значение должно быть булевым')]
         public bool|null $actual = null,
+        /** Статусы для фильтрации */
+        #[Assert\All([
+            new Assert\Type('string', message: 'Значение должно быть строкой'),
+            new Assert\NotBlank(message: 'Значение не должно быть пустым'),
+            new LAssert\EnumChoice(SurveyStatusEnum::class),
+        ])]
+        public array|null $statuses = null,
     ) {
     }
 }

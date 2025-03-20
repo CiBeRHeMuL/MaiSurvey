@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Infrastructure\Messenger\Message;
+namespace App\Presentation\Messenger\Message;
 
 use DateTimeImmutable;
 use Symfony\Component\Messenger\Attribute\AsMessage;

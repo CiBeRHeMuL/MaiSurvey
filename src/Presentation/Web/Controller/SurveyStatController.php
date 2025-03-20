@@ -137,8 +137,7 @@ class SurveyStatController extends BaseController
                         "B$row",
                         $itemStat->getTeacherName() ?? 'Общая статистика',
                     );
-                    $worksheet
-                        ->getStyle("B$row")
+                    $worksheet->getStyle("B$row")
                         ->applyFromArray([
                             'fill' => [
                                 'fillType' => Fill::FILL_SOLID,
@@ -162,8 +161,7 @@ class SurveyStatController extends BaseController
                             $worksheet->setCellValue('B' . ($row + 1), 'Количество');
                             $worksheet->setCellValue('B' . ($row + 2), 'Среднее');
                             $worksheet->setCellValue('C' . ($row + 2), round($itemStat->getAverage(), 2));
-                            $worksheet
-                                ->getStyle('C' . ($row + 2))
+                            $worksheet->getStyle('C' . ($row + 2))
                                 ->applyFromArray(['numberFormat' => ['formatCode' => NumberFormat::FORMAT_NUMBER_00]]);
                             $column = 'C';
                             foreach ($itemStat->getCounts() as $count) {
@@ -190,8 +188,22 @@ class SurveyStatController extends BaseController
                             break;
                         case SurveyItemTypeEnum::Comment:
                             /** @var CommentStatData $itemStat */
-                            $worksheet->setCellValue("B$row", 'Сводный комментарий');
-                            $worksheet->setCellValue("C$row", $itemStat->getSummary());
+                            $worksheet->setCellValue("B$row", 'Комментарии');
+                            $comments = implode("\n", $itemStat->getComments());
+                            if ($comments !== '' && in_array($comments[0], ['-', '+', '='])) {
+                                $comments = "'$comments";
+                            }
+                            $worksheet->setCellValue(
+                                "C$row",
+                                $comments,
+                            );
+                            $worksheet->getStyle("C$row")
+                                ->applyFromArray([
+                                    'alignment' => [
+                                        'horizontal' => Alignment::HORIZONTAL_LEFT,
+                                        'vertical' => Alignment::VERTICAL_TOP,
+                                    ],
+                                ]);
                             break;
                     }
                     $row++;

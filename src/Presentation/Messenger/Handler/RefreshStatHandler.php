@@ -1,13 +1,14 @@
 <?php
 
-namespace App\Infrastructure\Messenger\Handler;
+namespace App\Presentation\Messenger\Handler;
 
-use App\Domain\Dto\Survey\GetSurveysDto;
+use App\Application\Dto\Survey\GetSurveysDto;
+use App\Application\UseCase\Survey\GetSurveysByIdsUseCase;
+use App\Application\UseCase\Survey\GetSurveysUseCase;
+use App\Application\UseCase\SurveyStat\GenerateForSurveysUseCase;
 use App\Domain\Entity\Survey;
 use App\Domain\Exception\ErrorException;
-use App\Domain\Service\Survey\SurveyService;
-use App\Domain\Service\SurveyStat\SurveyStatService;
-use App\Infrastructure\Messenger\Message\RefreshStatsMessage;
+use App\Presentation\Messenger\Message\RefreshStatsMessage;
 use DateTimeImmutable;
 use Psr\Cache\CacheItemInterface;
 use Psr\Log\LoggerInterface;
@@ -22,9 +23,10 @@ class RefreshStatHandler
 
     public function __construct(
         LoggerInterface $logger,
-        private SurveyStatService $surveyStatService,
-        private SurveyService $surveyService,
         private CacheInterface $cache,
+        private GetSurveysByIdsUseCase $surveysByIdsUseCase,
+        private GetSurveysUseCase $surveysUseCase,
+        private GenerateForSurveysUseCase $generateForSurveysUseCase,
     ) {
         $this->setLogger($logger);
     }
@@ -32,8 +34,9 @@ class RefreshStatHandler
     public function setLogger(LoggerInterface $logger): RefreshStatHandler
     {
         $this->logger = $logger;
-        $this->surveyStatService->setLogger($logger);
-        $this->surveyService->setLogger($logger);
+        $this->surveysByIdsUseCase->setLogger($logger);
+        $this->surveysUseCase->setLogger($logger);
+        $this->generateForSurveysUseCase->setLogger($logger);
         return $this;
     }
 
@@ -41,15 +44,15 @@ class RefreshStatHandler
     {
         $surveys = [];
         if ($message->getSurveyIds() !== null) {
-            $surveys = $this->surveyService->getByIds(
+            $surveys = $this->surveysByIdsUseCase->execute(
                 $message->getSurveyIds(),
                 $message->isForce() === false,
             );
         } else {
             $surveys = iterator_to_array(
                 $this
-                    ->surveyService
-                    ->getAll(new GetSurveysDto())
+                    ->surveysUseCase
+                    ->execute(new GetSurveysDto())
                     ->getItems(),
             );
         }
@@ -79,7 +82,8 @@ class RefreshStatHandler
         }
 
         try {
-            $this->surveyStatService->refreshStats($surveys, false, $message->isForce());
+            $refreshed = $this->generateForSurveysUseCase->execute($surveys, $message->isForce());
+            $this->logger->info(sprintf('Статистка успешно обновлена для %d опросов', $refreshed));
             foreach ($surveys as $survey) {
                 $this
                     ->cache

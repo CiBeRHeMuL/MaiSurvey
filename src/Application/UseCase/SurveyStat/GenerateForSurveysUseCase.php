@@ -3,7 +3,7 @@
 namespace App\Application\UseCase\SurveyStat;
 
 use App\Domain\Entity\Survey;
-use App\Domain\Service\SurveyStat\StatRefresherInterface;
+use App\Domain\Service\SurveyStat\SurveyStatService;
 use Psr\Log\LoggerInterface;
 use Throwable;
 
@@ -13,7 +13,7 @@ class GenerateForSurveysUseCase
 
     public function __construct(
         LoggerInterface $logger,
-        private StatRefresherInterface $statRefresher,
+        private SurveyStatService $statService,
     ) {
         $this->setLogger($logger);
     }
@@ -21,7 +21,7 @@ class GenerateForSurveysUseCase
     public function setLogger(LoggerInterface $logger): GenerateForSurveysUseCase
     {
         $this->logger = $logger;
-        $this->statRefresher->setLogger($logger);
+        $this->statService->setLogger($logger);
         return $this;
     }
 
@@ -29,13 +29,13 @@ class GenerateForSurveysUseCase
      * @param Survey[]|null $surveys
      * @param bool $force обновить все опросы принудительно
      *
-     * @return void
+     * @return int
      * @throws Throwable
      */
-    public function execute(array|null $surveys = null, bool $force = false): void
+    public function execute(array|null $surveys = null, bool $force = false): int
     {
-        $this
-            ->statRefresher
-            ->refreshStats($surveys, $force);
+        return $this
+            ->statService
+            ->refreshStats($surveys, true, $force);
     }
 }

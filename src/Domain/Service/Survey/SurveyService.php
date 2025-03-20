@@ -526,4 +526,25 @@ class SurveyService
             throw ErrorException::new('Не удалось создать опрос из шаблона, обратитесь в поддержку');
         }
     }
+
+    /**
+     * Закрывает истекшие опросы
+     *
+     * @return int
+     */
+    public function closeExpired(): int
+    {
+        $surveys = $this
+            ->surveyRepository
+            ->findAll(new GetSurveysDto(
+                limit: null,
+                actual: false,
+                statuses: [SurveyStatusEnum::Active],
+            ));
+        $surveys = iterator_to_array($surveys->getItems());
+        foreach ($surveys as $survey) {
+            $survey->setStatus(SurveyStatusEnum::Closed);
+        }
+        return $this->surveyRepository->updateMulti($surveys);
+    }
 }

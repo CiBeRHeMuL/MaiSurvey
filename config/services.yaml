@@ -52,17 +52,10 @@ services:
   stat_refresher.sync:
     class: App\Domain\Service\SurveyStat\SyncStatRefresher
   stat_refresher.async:
-    class: App\Infrastructure\Service\SurveyStat\AsyncStatRefresher
-
-  summary_generator.mock:
-    class: App\Infrastructure\Service\SurveyStat\MockCommentsSummaryGenerator
-  summary_generator.gpt:
-    class: App\Infrastructure\Service\SurveyStat\GptCommentsSummaryGenerator
+    class: App\Presentation\Messenger\Service\SurveyStat\AsyncStatRefresher
 
   App\Domain\Service\SurveyStat\StatRefresherInterface:
     factory: '@=env("STAT_REFRESH_TYPE") == "async" ? service("stat_refresher.async") : service("stat_refresher.sync")'
-  App\Infrastructure\Service\SurveyStat\CommentsSummaryGeneratorInterface:
-    factory: '@=env("SUMMARY_GENERATION_TYPE") == "gpt" ? service("summary_generator.gpt") : service("summary_generator.mock")'
   # --- end services
 
   # --- start repositories
