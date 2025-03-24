@@ -142,7 +142,7 @@ class SurveyStatRepository extends Common\AbstractRepository implements SurveySt
         return $this->findWithLazyBatchedProvider(
             $q,
             SurveyStat::class,
-            ['survey', 'items'],
+            ['survey', 'items', 'survey.subject', 'items.item'],
             new LimitOffset(
                 $dto->getLimit(),
                 $dto->getOffset(),
