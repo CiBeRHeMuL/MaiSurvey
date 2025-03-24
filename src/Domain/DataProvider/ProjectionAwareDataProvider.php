@@ -40,7 +40,7 @@ class ProjectionAwareDataProvider implements DataProviderInterface
     }
 
     /**
-     * @inheritDoc
+     * @return Iterator<int, TProj>
      */
     public function getItems(): Iterator
     {

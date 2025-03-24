@@ -2,11 +2,14 @@
 
 namespace App\Presentation\Web\Controller;
 
+use App\Application\Dto\Survey\GetSurveysDto;
+use App\Application\UseCase\SurveyStat\GetSurveysStatUseCase;
 use App\Application\UseCase\SurveyStat\GetSurveyStatByIdUseCase;
 use App\Domain\Dto\SurveyStatItem\ChoiceStatData;
 use App\Domain\Dto\SurveyStatItem\CommentStatData;
 use App\Domain\Dto\SurveyStatItem\MultiChoiceStatData;
 use App\Domain\Dto\SurveyStatItem\RatingStatData;
+use App\Domain\Entity\SurveyStat as DomainSurveyStat;
 use App\Domain\Enum\PermissionEnum;
 use App\Domain\Enum\SurveyItemTypeEnum;
 use App\Presentation\Web\Enum\ErrorSlugEnum;
@@ -18,16 +21,17 @@ use App\Presentation\Web\Response\Model\Common\SuccessResponse;
 use App\Presentation\Web\Response\Model\SurveyStat;
 use App\Presentation\Web\Response\Response;
 use OpenApi\Attributes as OA;
-use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpKernel\Attribute\MapQueryString;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Requirement\Requirement;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
@@ -85,134 +89,8 @@ class SurveyStatController extends BaseController
             $exportType = 'xlsx';
             $spreadsheet = new Spreadsheet();
             $writer = new Xlsx($spreadsheet);
-            $worksheet = $spreadsheet->getSheet(0);
-            [$startColumn, $startRow] = Coordinate::coordinateFromString('A1');
-            $worksheet->setCellValue(
-                'A1',
-                "Статистика по опросу по предмету \"{$stat->getSurvey()->getSubject()->getName()}\"",
-            );
-            $worksheet->mergeCells('A1:G1');
-
-            $worksheet->setCellValue('A2', 'Вопрос');
-            $worksheet
-                ->getStyle('A2')
-                ->applyFromArray([
-                    'fill' => [
-                        'fillType' => Fill::FILL_SOLID,
-                        'color' => ['rgb' => 'FFFF00'],
-                    ],
-                    'alignment' => [
-                        'horizontal' => Alignment::HORIZONTAL_CENTER,
-                        'vertical' => Alignment::VERTICAL_CENTER,
-                    ],
-                ]);
-            $worksheet->setCellValue('B2', 'Преподаватель');
-            $worksheet
-                ->getStyle('B2')
-                ->applyFromArray([
-                    'fill' => [
-                        'fillType' => Fill::FILL_SOLID,
-                        'color' => ['rgb' => 'FFFF00'],
-                    ],
-                    'alignment' => [
-                        'horizontal' => Alignment::HORIZONTAL_LEFT,
-                        'vertical' => Alignment::VERTICAL_CENTER,
-                    ],
-                ]);
-
-            $row = 3;
-            foreach ($stat->getItems() as $item) {
-                $worksheet->setCellValue(
-                    "A$row",
-                    $item->getItem()->getText(),
-                );
-                $worksheet->setCellValue(
-                    "C$row",
-                    "Ответило {$item->getCompletedCount()} / {$item->getAvailableCount()}",
-                );
-                $row += 2;
-
-                foreach ($item->getStats() as $itemStat) {
-                    $worksheet->setCellValue(
-                        "B$row",
-                        $itemStat->getTeacherName() ?? 'Общая статистика',
-                    );
-                    $worksheet->getStyle("B$row")
-                        ->applyFromArray([
-                            'fill' => [
-                                'fillType' => Fill::FILL_SOLID,
-                                'color' => ['rgb' => '00FF00'],
-                            ],
-                            'alignment' => [
-                                'horizontal' => Alignment::HORIZONTAL_LEFT,
-                                'vertical' => Alignment::VERTICAL_CENTER,
-                            ],
-                        ]);
-                    $worksheet->setCellValue(
-                        "C$row",
-                        "Ответило {$itemStat->getCompletedCount()} / {$itemStat->getAvailableCount()}",
-                    );
-                    $row++;
-
-                    switch ($itemStat->getType()) {
-                        case SurveyItemTypeEnum::Rating:
-                            /** @var RatingStatData $itemStat */
-                            $worksheet->setCellValue("B$row", 'Рейтинг');
-                            $worksheet->setCellValue('B' . ($row + 1), 'Количество');
-                            $worksheet->setCellValue('B' . ($row + 2), 'Среднее');
-                            $worksheet->setCellValue('C' . ($row + 2), round($itemStat->getAverage(), 2));
-                            $worksheet->getStyle('C' . ($row + 2))
-                                ->applyFromArray(['numberFormat' => ['formatCode' => NumberFormat::FORMAT_NUMBER_00]]);
-                            $column = 'C';
-                            foreach ($itemStat->getCounts() as $count) {
-                                $worksheet->setCellValue("$column$row", $count->getRating());
-                                $worksheet->setCellValue($column . ($row + 1), $count->getCount());
-                                $column++;
-                            }
-
-                            $row += 3;
-                            break;
-                        case SurveyItemTypeEnum::Choice:
-                        case SurveyItemTypeEnum::MultiChoice:
-                            /** @var ChoiceStatData|MultiChoiceStatData $itemStat */
-                            $worksheet->setCellValue("B$row", 'Выбор');
-                            $worksheet->setCellValue('B' . ($row + 1), 'Количество');
-                            $column = 'C';
-                            foreach ($itemStat->getCounts() as $count) {
-                                $worksheet->setCellValue("$column$row", $count->getChoice());
-                                $worksheet->setCellValue($column . ($row + 1), $count->getCount());
-                                $column++;
-                            }
-
-                            $row += 2;
-                            break;
-                        case SurveyItemTypeEnum::Comment:
-                            /** @var CommentStatData $itemStat */
-                            $worksheet->setCellValue("B$row", 'Комментарии');
-                            $worksheet->getStyle("B$row")
-                                ->applyFromArray([
-                                    'alignment' => [
-                                        'horizontal' => Alignment::HORIZONTAL_LEFT,
-                                        'vertical' => Alignment::VERTICAL_TOP,
-                                    ],
-                                ]);
-                            $worksheet->setCellValue("C$row", implode("\n", $itemStat->getComments()));
-                            $worksheet->getStyle("C$row")->setQuotePrefix(true);
-                            break;
-                    }
-                    $row++;
-                }
-            }
-
-            foreach ($worksheet->getColumnIterator() as $column) {
-                $worksheet
-                    ->getColumnDimension($column->getColumnIndex())
-                    ->setAutoSize(true);
-            }
-            $worksheet->calculateColumnWidths();
-            $worksheet->getColumnDimension('C')
-                ->setAutoSize(false)
-                ->setWidth(20);
+            $spreadsheet->removeSheetByIndex(0);
+            $spreadsheet->addSheet($this->generateStatWorksheet($stat, $spreadsheet));
 
             // Сохраняем
             if (!is_dir("$projectDir/export/$exportType")) {
@@ -235,5 +113,190 @@ class SurveyStatController extends BaseController
                 HttpStatusCodeEnum::InternalServerError,
             );
         }
+    }
+
+    /** Выгрузить статистику по нескольким опросам */
+    #[Route('/surveys/stat/export/xlsx', 'export-survey-stat-all', methods: ['GET'])]
+    #[IsGranted(PermissionEnum::SurveyStatView->value, statusCode: 404, exceptionCode: 404)]
+    #[OA\Tag('survey-stats')]
+    #[LOA\FileResponse(['xlsx'])]
+    #[LOA\ErrorResponse(401)]
+    #[LOA\ErrorResponse(404)]
+    #[LOA\ErrorResponse(500)]
+    public function exportAll(
+        GetSurveysStatUseCase $useCase,
+        LoggerInterface $logger,
+        #[Autowire('%kernel.project_dir%')]
+        string $projectDir,
+        #[MapQueryString(validationFailedStatusCode: 422)]
+        GetSurveysDto $dto = new GetSurveysDto(),
+    ): BinaryFileResponse {
+        $useCase->setLogger($logger);
+        $statProvider = $useCase->execute($dto);
+        $exportType = 'xlsx';
+        $spreadsheet = new Spreadsheet();
+        $writer = new Xlsx($spreadsheet);
+        $spreadsheet->removeSheetByIndex(0);
+
+        foreach ($statProvider->getItems() as $stat) {
+            $this->generateStatWorksheet($stat, $spreadsheet);
+        }
+
+        // Сохраняем
+        if (!is_dir("$projectDir/export/$exportType")) {
+            mkdir("$projectDir/export/$exportType", 0777, true);
+        }
+        $exportFileName = 'survey_stat_all_' . (string)time() . ".$exportType";
+        $fullExportFileName = "$projectDir/export/$exportType/$exportFileName";
+        $writer->save($fullExportFileName);
+
+        return $this->file($fullExportFileName, $exportFileName);
+    }
+
+    /**
+     * @param DomainSurveyStat $stat
+     * @param Spreadsheet $spreadsheet
+     * @return Worksheet
+     */
+    public function generateStatWorksheet(DomainSurveyStat $stat, Spreadsheet $spreadsheet): Worksheet
+    {
+        $title = $stat->getSurvey()->getSubject()->getName();
+        $title = mb_strlen($title) > 25
+            ? mb_substr($title, 0, 25) . '...'
+            : $title;
+        $worksheet = new Worksheet($spreadsheet, $title);
+        $spreadsheet->addSheet($worksheet, retitleIfNeeded: true);
+
+        $worksheet->setCellValue(
+            'A1',
+            "Статистика по опросу по предмету \"{$stat->getSurvey()->getSubject()->getName()}\"",
+        );
+        $worksheet->mergeCells('A1:G1');
+
+        $worksheet->setCellValue('A2', 'Вопрос');
+        $worksheet
+            ->getStyle('A2')
+            ->applyFromArray([
+                'fill' => [
+                    'fillType' => Fill::FILL_SOLID,
+                    'color' => ['rgb' => 'FFFF00'],
+                ],
+                'alignment' => [
+                    'horizontal' => Alignment::HORIZONTAL_CENTER,
+                    'vertical' => Alignment::VERTICAL_CENTER,
+                ],
+            ]);
+        $worksheet->setCellValue('B2', 'Преподаватель');
+        $worksheet
+            ->getStyle('B2')
+            ->applyFromArray([
+                'fill' => [
+                    'fillType' => Fill::FILL_SOLID,
+                    'color' => ['rgb' => 'FFFF00'],
+                ],
+                'alignment' => [
+                    'horizontal' => Alignment::HORIZONTAL_LEFT,
+                    'vertical' => Alignment::VERTICAL_CENTER,
+                ],
+            ]);
+
+        $row = 3;
+        foreach ($stat->getItems() as $item) {
+            $worksheet->setCellValue(
+                "A$row",
+                $item->getItem()->getText(),
+            );
+            $worksheet->setCellValue(
+                "C$row",
+                "Ответило {$item->getCompletedCount()} / {$item->getAvailableCount()}",
+            );
+            $row += 2;
+
+            foreach ($item->getStats() as $itemStat) {
+                $worksheet->setCellValue(
+                    "B$row",
+                    $itemStat->getTeacherName() ?? 'Общая статистика',
+                );
+                $worksheet
+                    ->getStyle("B$row")
+                    ->applyFromArray([
+                        'fill' => [
+                            'fillType' => Fill::FILL_SOLID,
+                            'color' => ['rgb' => '00FF00'],
+                        ],
+                        'alignment' => [
+                            'horizontal' => Alignment::HORIZONTAL_LEFT,
+                            'vertical' => Alignment::VERTICAL_CENTER,
+                        ],
+                    ]);
+                $worksheet->setCellValue(
+                    "C$row",
+                    "Ответило {$itemStat->getCompletedCount()} / {$itemStat->getAvailableCount()}",
+                );
+                $row++;
+
+                switch ($itemStat->getType()) {
+                    case SurveyItemTypeEnum::Rating:
+                        /** @var RatingStatData $itemStat */
+                        $worksheet->setCellValue("B$row", 'Рейтинг');
+                        $worksheet->setCellValue('B' . ($row + 1), 'Количество');
+                        $worksheet->setCellValue('B' . ($row + 2), 'Среднее');
+                        $worksheet->setCellValue('C' . ($row + 2), round($itemStat->getAverage(), 2));
+                        $worksheet
+                            ->getStyle('C' . ($row + 2))
+                            ->applyFromArray(['numberFormat' => ['formatCode' => NumberFormat::FORMAT_NUMBER_00]]);
+                        $column = 'C';
+                        foreach ($itemStat->getCounts() as $count) {
+                            $worksheet->setCellValue("$column$row", $count->getRating());
+                            $worksheet->setCellValue($column . ($row + 1), $count->getCount());
+                            $column++;
+                        }
+
+                        $row += 3;
+                        break;
+                    case SurveyItemTypeEnum::Choice:
+                    case SurveyItemTypeEnum::MultiChoice:
+                        /** @var ChoiceStatData|MultiChoiceStatData $itemStat */
+                        $worksheet->setCellValue("B$row", 'Выбор');
+                        $worksheet->setCellValue('B' . ($row + 1), 'Количество');
+                        $column = 'C';
+                        foreach ($itemStat->getCounts() as $count) {
+                            $worksheet->setCellValue("$column$row", $count->getChoice());
+                            $worksheet->setCellValue($column . ($row + 1), $count->getCount());
+                            $column++;
+                        }
+
+                        $row += 2;
+                        break;
+                    case SurveyItemTypeEnum::Comment:
+                        /** @var CommentStatData $itemStat */
+                        $worksheet->setCellValue("B$row", 'Комментарии');
+                        $worksheet
+                            ->getStyle("B$row")
+                            ->applyFromArray([
+                                'alignment' => [
+                                    'horizontal' => Alignment::HORIZONTAL_LEFT,
+                                    'vertical' => Alignment::VERTICAL_TOP,
+                                ],
+                            ]);
+                        $worksheet->setCellValue("C$row", implode("\n", $itemStat->getComments()));
+                        $worksheet->getStyle("C$row")->setQuotePrefix(true);
+                        break;
+                }
+                $row++;
+            }
+        }
+
+        foreach ($worksheet->getColumnIterator() as $column) {
+            $worksheet
+                ->getColumnDimension($column->getColumnIndex())
+                ->setAutoSize(true);
+        }
+        $worksheet->calculateColumnWidths();
+        $worksheet
+            ->getColumnDimension('C')
+            ->setAutoSize(false)
+            ->setWidth(20);
+        return $worksheet;
     }
 }

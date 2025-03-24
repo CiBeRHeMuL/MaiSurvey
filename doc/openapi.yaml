@@ -1732,6 +1732,119 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+  /surveys/stat/export/xlsx:
+    get:
+      tags:
+        - survey-stats
+      summary: 'Выгрузить статистику по нескольким опросам'
+      operationId: get_export-survey-stat-all
+      parameters:
+        -
+          name: 'subject_ids[]'
+          in: query
+          required: false
+          schema:
+            title: 'Предметы для фильтрации'
+            type: array
+            items: {  }
+            default: null
+            maxItems: 50
+            nullable: true
+        -
+          name: title
+          in: query
+          required: false
+          schema:
+            title: 'Название опроса'
+            type: string
+            default: null
+            nullable: true
+        -
+          name: sort_by
+          in: query
+          required: false
+          schema:
+            title: 'Сортировка по'
+            type: string
+            default: name
+            enum:
+              - name
+              - completed
+              - created_at
+        -
+          name: sort_type
+          in: query
+          required: false
+          schema:
+            title: 'Тип сортировки'
+            type: string
+            default: asc
+            enum:
+              - asc
+              - desc
+        -
+          name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+        -
+          name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 100
+            maximum: 100
+            minimum: 0
+            nullable: true
+        -
+          name: actual
+          in: query
+          required: false
+          schema:
+            title: 'Актуален ли опрос'
+            type: boolean
+            default: null
+            nullable: true
+        -
+          name: 'statuses[]'
+          in: query
+          required: false
+          schema:
+            title: 'Статусы для фильтрации'
+            type: array
+            items: {  }
+            default: null
+            nullable: true
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 'Not Found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: 'Internal Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /survey-templates:
     get:
       tags:

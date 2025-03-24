@@ -40,7 +40,7 @@ use Throwable;
 class SurveyService
 {
     public const array GET_MY_SORT = ['name', 'completed', 'created_at'];
-    public const array GET_ALL_SORT = ['name', 'title', 'created_at'];
+    public const array GET_ALL_SORT = ['name', 'title', 'created_at', 'status'];
 
     private LoggerInterface $logger;
 
@@ -468,7 +468,7 @@ class SurveyService
                 new ValidationError(
                     'sort_by',
                     ValidationErrorSlugEnum::WrongField->getSlug(),
-                    sprintf('Сортировка доступна по полям: %s', implode(', ', self::GET_MY_SORT)),
+                    sprintf('Сортировка доступна по полям: %s', implode(', ', self::GET_ALL_SORT)),
                 ),
             ]);
         }

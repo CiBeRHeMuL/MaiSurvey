@@ -2,13 +2,24 @@
 
 namespace App\Infrastructure\Repository;
 
+use App\Domain\DataProvider\ArrayDataProvider;
+use App\Domain\DataProvider\DataProviderInterface;
+use App\Domain\DataProvider\DataSort;
+use App\Domain\DataProvider\LimitOffset;
+use App\Domain\DataProvider\SortColumn;
+use App\Domain\Dto\Survey\GetSurveysDto;
 use App\Domain\Entity\CompletedSurvey;
 use App\Domain\Entity\MySurvey;
+use App\Domain\Entity\Subject;
 use App\Domain\Entity\Survey;
 use App\Domain\Entity\SurveyStat;
+use App\Domain\Enum\SurveyStatusEnum;
 use App\Domain\Repository\SurveyStatRepositoryInterface;
+use App\Infrastructure\Db\Expr\ActualSurveyExpr;
 use App\Infrastructure\Db\Expr\CoalesceFunc;
+use App\Infrastructure\Db\Expr\ILikeExpr;
 use Qstart\Db\QueryBuilder\DML\Expression\Expr;
+use Qstart\Db\QueryBuilder\DML\Expression\InExpr;
 use Qstart\Db\QueryBuilder\DML\Query\SelectQuery;
 use Qstart\Db\QueryBuilder\Query;
 use Symfony\Component\Uid\Uuid;
@@ -67,6 +78,83 @@ class SurveyStatRepository extends Common\AbstractRepository implements SurveySt
                 ->where(['id' => array_map(fn(SurveyStat $e) => $e->getId()->toRfc4122(), $stats)]),
         );
         $this->createMulti($stats);
+    }
+
+    /**
+     * @param GetSurveysDto $dto
+     * @return DataProviderInterface<SurveyStat>
+     */
+    public function findAll(GetSurveysDto $dto): DataProviderInterface
+    {
+        if ($dto->getStatuses() === [] || $dto->getSubjectIds() === []) {
+            return new ArrayDataProvider([]);
+        }
+        $q = Query::select()
+            ->select([
+                's.*',
+                'name' => 'ss.name',
+            ])
+            ->from(['s' => $this->getClassTable(Survey::class)])
+            ->innerJoin(
+                ['ss' => $this->getClassTable(Subject::class)],
+                'ss.id = s.subject_id',
+            );
+        if ($dto->getTitle() !== null) {
+            $q->andWhere([
+                'OR',
+                new ILikeExpr(new Expr('s.title'), $dto->getTitle()),
+                new ILikeExpr(new Expr('ss.name'), $dto->getTitle()),
+            ]);
+        }
+        if ($dto->getSubjectIds() !== null) {
+            $q->andWhere(
+                new InExpr(
+                    's.subject_id',
+                    array_map(
+                        fn(Uuid $uuid) => $uuid->toRfc4122(),
+                        $dto->getSubjectIds(),
+                    ),
+                ),
+            );
+        }
+        if ($dto->getActual() !== null) {
+            $q->andWhere(
+                new ActualSurveyExpr('s', $dto->getActual() === false),
+            );
+        }
+        if ($dto->getStatuses() !== null) {
+            $q->andWhere([
+                's.status' => array_map(
+                    fn(SurveyStatusEnum $e) => $e->value,
+                    $dto->getStatuses(),
+                ),
+            ]);
+        }
+
+        $q = Query::select()
+            ->select(['t.*'])
+            ->from(['t' => $this->getClassTable(SurveyStat::class)])
+            ->innerJoin(
+                ['s' => $q],
+                's.id = t.id',
+            );
+
+        return $this->findWithLazyBatchedProvider(
+            $q,
+            SurveyStat::class,
+            ['survey', 'items'],
+            new LimitOffset(
+                $dto->getLimit(),
+                $dto->getOffset(),
+            ),
+            new DataSort([
+                new SortColumn(
+                    "s.{$dto->getSortBy()}",
+                    $dto->getSortBy(),
+                    $dto->getSortType()->getPhpSort(),
+                ),
+            ]),
+        );
     }
 
     /**

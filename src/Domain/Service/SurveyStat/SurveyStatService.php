@@ -2,11 +2,17 @@
 
 namespace App\Domain\Service\SurveyStat;
 
+use App\Domain\DataProvider\DataProviderInterface;
+use App\Domain\Dto\Survey\GetSurveysDto;
 use App\Domain\Entity\Survey;
 use App\Domain\Entity\SurveyStat;
+use App\Domain\Enum\ValidationErrorSlugEnum;
+use App\Domain\Exception\ValidationException;
 use App\Domain\Repository\SurveyStatItemRepositoryInterface;
 use App\Domain\Repository\SurveyStatRepositoryInterface;
 use App\Domain\Service\Db\TransactionManagerInterface;
+use App\Domain\Service\Survey\SurveyService;
+use App\Domain\Validation\ValidationError;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Uid\Uuid;
 use Throwable;
@@ -87,5 +93,35 @@ class SurveyStatService
             }
             throw $e;
         }
+    }
+
+    /**
+     * @param GetSurveysDto $dto
+     * @return DataProviderInterface<SurveyStat>
+     */
+    public function getForSurveys(GetSurveysDto $dto): DataProviderInterface
+    {
+        if ($dto->getTitle() !== null && mb_strlen($dto->getTitle()) < 3) {
+            throw ValidationException::new([
+                new ValidationError(
+                    'title',
+                    ValidationErrorSlugEnum::WrongField->getSlug(),
+                    'Для поиска по названию название должно быть длиннее 3 символов',
+                ),
+            ]);
+        }
+        if (!in_array($dto->getSortBy(), SurveyService::GET_ALL_SORT, true)) {
+            throw ValidationException::new([
+                new ValidationError(
+                    'sort_by',
+                    ValidationErrorSlugEnum::WrongField->getSlug(),
+                    sprintf('Сортировка доступна по полям: %s', implode(', ', SurveyService::GET_ALL_SORT)),
+                ),
+            ]);
+        }
+
+        return $this
+            ->surveyStatRepository
+            ->findAll($dto);
     }
 }

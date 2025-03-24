@@ -13,6 +13,7 @@ use App\Domain\DataProvider\ProjectionAwareDataProvider;
 use App\Domain\Entity\Subject;
 use App\Domain\Entity\Survey;
 use App\Domain\Enum\SurveyItemTypeEnum;
+use App\Domain\Enum\SurveyStatusEnum;
 use App\Domain\Enum\TeacherSubjectTypeEnum;
 use DateTimeImmutable;
 use Psr\Log\LoggerInterface;
@@ -155,8 +156,9 @@ class SurveysGenerateDefaultCommand extends AbstractCommand
                 return new CreateSurveyDto(
                     sprintf('Выскажи свое мнение о курсе'),
                     $subject->getId()->toRfc4122(),
-                    (new DateTimeImmutable())->modify('+1 month')->format(DATE_RFC3339),
                     $createItemDtos,
+                    SurveyStatusEnum::Active->value,
+                    (new DateTimeImmutable())->modify('+1 month')->format(DATE_RFC3339),
                 );
             },
         );

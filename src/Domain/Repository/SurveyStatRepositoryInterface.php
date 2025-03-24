@@ -2,6 +2,8 @@
 
 namespace App\Domain\Repository;
 
+use App\Domain\DataProvider\DataProviderInterface;
+use App\Domain\Dto\Survey\GetSurveysDto;
 use App\Domain\Entity\SurveyStat;
 use App\Domain\Repository\Common\RepositoryInterface;
 use Symfony\Component\Uid\Uuid;
@@ -39,4 +41,10 @@ interface SurveyStatRepositoryInterface extends RepositoryInterface
      * @return void
      */
     public function createOrUpdate(array $stats): void;
+
+    /**
+     * @param GetSurveysDto $dto
+     * @return DataProviderInterface<SurveyStat>
+     */
+    public function findAll(GetSurveysDto $dto): DataProviderInterface;
 }
