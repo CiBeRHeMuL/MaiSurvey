@@ -23,6 +23,8 @@ use App\Presentation\Web\Response\Response;
 use OpenApi\Attributes as OA;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Color;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
@@ -175,12 +177,11 @@ class SurveyStatController extends BaseController
         $worksheet->mergeCells('A1:G1');
 
         $worksheet->setCellValue('A2', 'Вопрос');
-        $worksheet
-            ->getStyle('A2')
+        $worksheet->getStyle('A2')
             ->applyFromArray([
                 'fill' => [
                     'fillType' => Fill::FILL_SOLID,
-                    'color' => ['rgb' => 'FFFF00'],
+                    'color' => ['argb' => Color::COLOR_YELLOW],
                 ],
                 'alignment' => [
                     'horizontal' => Alignment::HORIZONTAL_CENTER,
@@ -188,12 +189,11 @@ class SurveyStatController extends BaseController
                 ],
             ]);
         $worksheet->setCellValue('B2', 'Преподаватель');
-        $worksheet
-            ->getStyle('B2')
+        $worksheet->getStyle('B2')
             ->applyFromArray([
                 'fill' => [
                     'fillType' => Fill::FILL_SOLID,
-                    'color' => ['rgb' => 'FFFF00'],
+                    'color' => ['argb' => Color::COLOR_YELLOW],
                 ],
                 'alignment' => [
                     'horizontal' => Alignment::HORIZONTAL_LEFT,
@@ -218,12 +218,11 @@ class SurveyStatController extends BaseController
                     "B$row",
                     $itemStat->getTeacherName() ?? 'Общая статистика',
                 );
-                $worksheet
-                    ->getStyle("B$row")
+                $worksheet->getStyle("B$row")
                     ->applyFromArray([
                         'fill' => [
                             'fillType' => Fill::FILL_SOLID,
-                            'color' => ['rgb' => '00FF00'],
+                            'color' => ['argb' => Color::COLOR_GREEN],
                         ],
                         'alignment' => [
                             'horizontal' => Alignment::HORIZONTAL_LEFT,
@@ -243,8 +242,7 @@ class SurveyStatController extends BaseController
                         $worksheet->setCellValue('B' . ($row + 1), 'Количество');
                         $worksheet->setCellValue('B' . ($row + 2), 'Среднее');
                         $worksheet->setCellValue('C' . ($row + 2), round($itemStat->getAverage(), 2));
-                        $worksheet
-                            ->getStyle('C' . ($row + 2))
+                        $worksheet->getStyle('C' . ($row + 2))
                             ->applyFromArray(['numberFormat' => ['formatCode' => NumberFormat::FORMAT_NUMBER_00]]);
                         $column = 'C';
                         foreach ($itemStat->getCounts() as $count) {
@@ -272,8 +270,7 @@ class SurveyStatController extends BaseController
                     case SurveyItemTypeEnum::Comment:
                         /** @var CommentStatData $itemStat */
                         $worksheet->setCellValue("B$row", 'Комментарии');
-                        $worksheet
-                            ->getStyle("B$row")
+                        $worksheet->getStyle("B$row")
                             ->applyFromArray([
                                 'alignment' => [
                                     'horizontal' => Alignment::HORIZONTAL_LEFT,
@@ -282,10 +279,75 @@ class SurveyStatController extends BaseController
                             ]);
                         $worksheet->setCellValue("C$row", implode("\n", $itemStat->getComments()));
                         $worksheet->getStyle("C$row")->setQuotePrefix(true);
+                        $row += 1;
                         break;
                 }
                 $row++;
             }
+        }
+
+        $worksheet->setCellValue('J2', 'Пользователи не прошедшие опрос');
+        $worksheet->getStyle('J2')
+            ->applyFromArray([
+                'fill' => [
+                    'fillType' => Fill::FILL_SOLID,
+                    'color' => ['argb' => Color::COLOR_YELLOW],
+                ],
+            ]);
+        $worksheet->mergeCells('J2:K2');
+        $worksheet->setCellValue('J3', 'Группа');
+        $worksheet->getStyle('J3')
+            ->applyFromArray([
+                'fill' => [
+                    'fillType' => Fill::FILL_SOLID,
+                    'color' => ['argb' => Color::COLOR_GREEN],
+                ],
+            ]);
+        $worksheet->setCellValue('K3', 'Студент');
+        $worksheet->getStyle('K3')
+            ->applyFromArray([
+                'fill' => [
+                    'fillType' => Fill::FILL_SOLID,
+                    'color' => ['argb' => Color::COLOR_GREEN],
+                ],
+            ]);
+
+        $topBorderStyle = [
+            'borders' => [
+                'top' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['argb' => Color::COLOR_BLACK],
+                ],
+            ],
+        ];
+        $bottomBorderStyle = [
+            'borders' => [
+                'bottom' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['argb' => Color::COLOR_BLACK],
+                ],
+            ],
+        ];
+
+        $row = 4;
+        $lastGroup = null;
+        foreach ($stat->getNotCompletedUsers() as $notCompletedUser) {
+            $worksheet->setCellValue("J$row", $notCompletedUser->getGroup());
+            $worksheet->setCellValue("K$row", $notCompletedUser->getName());
+
+            if ($notCompletedUser->getGroup() !== $lastGroup) {
+                $lastGroup = $notCompletedUser->getGroup();
+                $worksheet->getStyle("J$row")
+                    ->applyFromArray($topBorderStyle);
+                $worksheet->getStyle('J' . ($row - 1))
+                    ->applyFromArray($bottomBorderStyle);
+                $worksheet->getStyle("K$row")
+                    ->applyFromArray($topBorderStyle);
+                $worksheet->getStyle('K' . ($row - 1))
+                    ->applyFromArray($bottomBorderStyle);
+            }
+
+            $row++;
         }
 
         foreach ($worksheet->getColumnIterator() as $column) {

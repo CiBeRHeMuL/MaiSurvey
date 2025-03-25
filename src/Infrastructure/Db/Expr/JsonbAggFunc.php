@@ -7,9 +7,14 @@ use Qstart\Db\QueryBuilder\DML\Expression\ExprInterface;
 
 class JsonbAggFunc extends AbstractFunc
 {
+    /**
+     * @param bool|int|float|string|ExprInterface|null $input
+     * @param ExprInterface|ExprInterface[]|null $orderBy
+     * @param ExprInterface|null $filterWhere
+     */
     public function __construct(
         null|bool|int|float|string|ExprInterface $input,
-        ExprInterface|null $orderBy = null,
+        ExprInterface|array|null $orderBy = null,
         private ExprInterface|null $filterWhere = null,
     ) {
         $oid = 'oid_' . spl_object_id($this);
@@ -21,11 +26,23 @@ class JsonbAggFunc extends AbstractFunc
             $input = new Expr(":{$oid}_input", [":{$oid}_input" => $input]);
         }
         if ($orderBy !== null) {
+            $orderByParams = [];
+            if ($orderBy instanceof ExprInterface) {
+                $orderByParams = $orderBy->getParams();
+                $orderBy = $orderBy->getExpression();
+            } else {
+                $orderByTexts = [];
+                foreach ($orderBy as $expr) {
+                    $orderByTexts[] = $expr->getExpression();
+                    $orderByParams = [...$orderByParams, ...$expr->getParams()];
+                }
+                $orderBy = implode(', ', $orderByTexts);
+            }
             $input = new Expr(
-                "{$input->getExpression()} ORDER BY {$orderBy->getExpression()}",
+                "{$input->getExpression()} ORDER BY $orderBy",
                 array_merge(
                     $input->getParams(),
-                    $orderBy->getParams(),
+                    $orderByParams,
                 ),
             );
         }

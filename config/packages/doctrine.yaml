@@ -14,6 +14,7 @@ doctrine:
       item_data: App\Infrastructure\Db\Dbal\Types\ItemDataType
       answer_data: App\Infrastructure\Db\Dbal\Types\AnswerDataType
       stat_data[]: App\Infrastructure\Db\Dbal\Types\StatDataArrayType
+      stat_nc_user[]: App\Infrastructure\Db\Dbal\Types\StatNCUserArrayType
   orm:
     auto_generate_proxy_classes: true
     enable_lazy_ghost_objects: true

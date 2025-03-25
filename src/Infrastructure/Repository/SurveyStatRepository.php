@@ -9,15 +9,21 @@ use App\Domain\DataProvider\LimitOffset;
 use App\Domain\DataProvider\SortColumn;
 use App\Domain\Dto\Survey\GetSurveysDto;
 use App\Domain\Entity\CompletedSurvey;
+use App\Domain\Entity\Group;
 use App\Domain\Entity\MySurvey;
 use App\Domain\Entity\Subject;
 use App\Domain\Entity\Survey;
 use App\Domain\Entity\SurveyStat;
+use App\Domain\Entity\UserData;
+use App\Domain\Entity\UserDataGroup;
 use App\Domain\Enum\SurveyStatusEnum;
 use App\Domain\Repository\SurveyStatRepositoryInterface;
 use App\Infrastructure\Db\Expr\ActualSurveyExpr;
 use App\Infrastructure\Db\Expr\CoalesceFunc;
+use App\Infrastructure\Db\Expr\FullNameExpr;
 use App\Infrastructure\Db\Expr\ILikeExpr;
+use App\Infrastructure\Db\Expr\JsonbAggFunc;
+use App\Infrastructure\Db\Expr\JsonbBuildObjectFunc;
 use Qstart\Db\QueryBuilder\DML\Expression\Expr;
 use Qstart\Db\QueryBuilder\DML\Expression\InExpr;
 use Qstart\Db\QueryBuilder\DML\Query\SelectQuery;
@@ -172,6 +178,7 @@ class SurveyStatRepository extends Common\AbstractRepository implements SurveySt
                 's.id',
                 'available_count' => new CoalesceFunc(new Expr('ms.count'), 0),
                 'completed_count' => new CoalesceFunc(new Expr('cs.count'), 0),
+                'not_completed_users' => new CoalesceFunc(new Expr('ncuds.names'), new Expr("'[]'::jsonb")),
             ])
             ->from(['s' => $this->getClassTable(Survey::class)])
             ->leftJoin(
@@ -197,6 +204,40 @@ class SurveyStatRepository extends Common\AbstractRepository implements SurveySt
                         ->groupBy(['id']),
                 ],
                 'ms.id = s.id',
+            )
+            ->leftJoin(
+                [
+                    'ncuds' => Query::select()
+                        ->select([
+                            'names' => new JsonbAggFunc(
+                                new JsonbBuildObjectFunc([
+                                    'group',
+                                    new Expr('g.name'),
+                                    'name',
+                                    new FullNameExpr('ncud'),
+                                ]),
+                                [new Expr('g.name'), new FullNameExpr('ncud')],
+                                new Expr('ncud.id IS NOT NULL'),
+                            ),
+                            'ncums.id',
+                        ])
+                        ->from(['ncums' => $this->getClassTable(MySurvey::class)])
+                        ->leftJoin(
+                            ['ncud' => $this->getClassTable(UserData::class)],
+                            'ncud.user_id = ncums.user_id',
+                        )
+                        ->leftJoin(
+                            ['udg' => $this->getClassTable(UserDataGroup::class)],
+                            'ncud.id = udg.user_data_id',
+                        )
+                        ->leftJoin(
+                            ['g' => $this->getClassTable(Group::class)],
+                            'g.id = udg.group_id',
+                        )
+                        ->where(['ncums.completed' => false])
+                        ->groupBy(['ncums.id'])
+                ],
+                'ncuds.id = s.id',
             )
             ->filterWhere(['s.id' => $surveyIds]);
     }

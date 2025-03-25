@@ -2,6 +2,7 @@
 
 namespace App\Domain\Entity;
 
+use App\Domain\Dto\SurveyStat\StatNCUser;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -18,6 +19,9 @@ class SurveyStat
     private int $availableCount;
     #[ORM\Column(name: 'completed_count', type: 'integer', nullable: false)]
     private int $completedCount;
+    /** @var StatNCUser[] */
+    #[ORM\Column(name: 'not_completed_users', type: 'stat_nc_user[]', nullable: false, options: ['default' => '[]', 'jsonb' => true])]
+    private array $notCompletedUsers;
 
     #[ORM\OneToOne(targetEntity: Survey::class)]
     #[ORM\JoinColumn(name: 'id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
@@ -62,6 +66,17 @@ class SurveyStat
     public function setCompletedCount(int $completedCount): SurveyStat
     {
         $this->completedCount = $completedCount;
+        return $this;
+    }
+
+    public function getNotCompletedUsers(): array
+    {
+        return $this->notCompletedUsers;
+    }
+
+    public function setNotCompletedUsers(array $notCompletedUsers): SurveyStat
+    {
+        $this->notCompletedUsers = $notCompletedUsers;
         return $this;
     }
 
