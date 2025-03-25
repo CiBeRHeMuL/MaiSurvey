@@ -7,7 +7,9 @@ use App\Domain\DataProvider\DataProviderInterface;
 use App\Domain\DataProvider\DataSortInterface;
 use App\Domain\Dto\User\CreateUserDto;
 use App\Domain\Dto\User\GetAllUsersDto;
+use App\Domain\Dto\User\UpdateUserDto;
 use App\Domain\Entity\User;
+use App\Domain\Enum\RoleEnum;
 use App\Domain\Enum\ValidationErrorSlugEnum;
 use App\Domain\Exception\ErrorException;
 use App\Domain\Exception\ValidationException;
@@ -101,10 +103,9 @@ class UserService
             ->findByEmail($email);
     }
 
-    public function update(User $user): bool
+    public function saveUpdates(User $user): bool
     {
-        $user
-            ->setUpdatedAt(new DateTimeImmutable());
+        $user->setUpdatedAt(new DateTimeImmutable());
         return $this->userRepository->update($user);
     }
 
@@ -293,5 +294,74 @@ class UserService
         return $this
             ->userRepository
             ->findLastN($count, $sort);
+    }
+
+    public function updateUser(User $user, UpdateUserDto $dto, User $updater): User
+    {
+        if ($updater->isAdmin() === false) {
+            throw ErrorException::new('Вам запрещено выполнять это действие');
+        }
+
+        $availableRoles = array_values(
+            array_unique(
+                array_merge(
+                    $user->getRoles(),
+                    ...array_map(
+                        fn(RoleEnum $r) => $r->getAvailableAdditionalRoles(),
+                        $user->getRoles(),
+                    ),
+                ),
+                SORT_REGULAR,
+            ),
+        );
+
+        foreach ($dto->getRoles() as $role) {
+            if (!in_array($role, $availableRoles, true)) {
+                throw ValidationException::new([
+                    new ValidationError(
+                        'roles',
+                        ValidationErrorSlugEnum::WrongField->getSlug(),
+                        sprintf(
+                            'Нельзя присвоить роль %s пользователю. Выберите одну из следующих ролей: %s',
+                            $role->getName(),
+                            implode(', ', array_map(fn(RoleEnum $r) => $r->getName(), $availableRoles)),
+                        ),
+                    ),
+                ]);
+            }
+        }
+
+        $availableStatuses = array_values(
+            array_unique(
+                array_merge(
+                    $user->getStatus()->getAvailableStatuses(),
+                    [$user->getStatus()],
+                ),
+                SORT_REGULAR,
+            ),
+        );
+        if (!in_array($dto->getStatus(), $availableStatuses, true)) {
+            throw ValidationException::new([
+                new ValidationError(
+                    'status',
+                    ValidationErrorSlugEnum::WrongField->getSlug(),
+                    'Нельзя поменять статус пользователя на выбранный',
+                ),
+            ]);
+        }
+
+        $user->setStatus($dto->getStatus())
+            ->setRoles($dto->getRoles())
+            ->setDeleted($dto->isDeleted())
+            ->setDeletedAt($dto->isDeleted() ? new DateTimeImmutable() : $user->getDeletedAt())
+            ->setUpdaterId($updater->getId())
+            ->setUpdater($updater)
+            ->setUpdatedAt(new DateTimeImmutable());
+
+        $updated = $this->userRepository->update($user);
+        if (!$updated) {
+            throw ErrorException::new('Не удалось обновить пользователя');
+        }
+        return $user;
     }
 }

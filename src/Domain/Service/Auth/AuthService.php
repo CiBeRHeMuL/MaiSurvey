@@ -196,13 +196,9 @@ class AuthService
                     if (
                         $this
                             ->userService
-                            ->update($user)
+                            ->saveUpdates($user)
                     ) {
-                        if (
-                            $this
-                                ->userDataService
-                                ->update($userData)
-                        ) {
+                        if ($this->userDataService->saveUpdates($userData)) {
                             return $user;
                         }
                     }

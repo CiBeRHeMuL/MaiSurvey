@@ -2257,18 +2257,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-  /user:
-    post:
+  '/users/{id}':
+    put:
       tags:
         - users
       summary: 'Создание пользователя'
-      operationId: post_create-full-user
+      operationId: put_create-full-user
+      parameters:
+        -
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '[0-9a-f]{8}-[0-9a-f]{4}-[13-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}'
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateFullUserDto'
+              $ref: '#/components/schemas/UpdateUserDto'
       responses:
         '200':
           description: OK
@@ -3855,45 +3863,31 @@ components:
           type: string
           default: E
       type: object
-    CreateFullUserDto:
+    UpdateUserDto:
       required:
-        - email
-        - password
-        - role
-        - first_name
-        - last_name
+        - roles
+        - status
+        - deleted
       properties:
-        email:
-          title: Почта
-          type: string
-        password:
-          title: Пароль
-          type: string
-        role:
-          title: Роль
+        roles:
+          title: Роли
+          type: array
+          items:
+            type: string
+            enum:
+              - admin
+              - student
+              - teacher
+              - survey_creator
+        status:
+          title: Статус
           type: string
           enum:
-            - admin
-            - student
-            - teacher
-            - survey_creator
-        first_name:
-          title: Имя
-          type: string
-          maxLength: 255
-        last_name:
-          title: Фамилия
-          type: string
-          maxLength: 255
-        patronymic:
-          title: Отчество
-          type: string
-          maxLength: 255
-          nullable: true
-        group_id:
-          title: Группа
-          type: string
-          nullable: true
+            - draft
+            - active
+        deleted:
+          title: Удален
+          type: boolean
       type: object
     GetAllUsersDto:
       properties:

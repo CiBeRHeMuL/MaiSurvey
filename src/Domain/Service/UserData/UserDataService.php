@@ -100,7 +100,7 @@ class UserDataService
         return $this->userDataRepository->findAll($dto);
     }
 
-    public function update(UserData $userData): bool
+    public function saveUpdates(UserData $userData): bool
     {
         $userData
             ->setUpdatedAt(new DateTimeImmutable());

@@ -47,6 +47,8 @@ class User
     private bool $deleted;
     #[ORM\Column(name: 'deleted_at', type: 'datetime_immutable', nullable: true)]
     private DateTimeImmutable|null $deletedAt = null;
+    #[ORM\Column(name: 'updater_id', type: 'uuid', nullable: true)]
+    private Uuid|null $updaterId = null;
 
     #[ORM\OneToOne(targetEntity: UserData::class, mappedBy: 'user', cascade: ['persist'])]
     private UserData|null $data = null;
@@ -56,6 +58,9 @@ class User
     /** @var Collection<TeacherSubject> $teachingSubjects */
     #[ORM\OneToMany(targetEntity: TeacherSubject::class, mappedBy: 'teacher')]
     private Collection $teachingSubjects;
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(name: 'updater_id', referencedColumnName: 'id', nullable: true)]
+    private User|null $updater = null;
 
     public function __construct()
     {
@@ -195,6 +200,17 @@ class User
         return $this;
     }
 
+    public function getUpdaterId(): ?Uuid
+    {
+        return $this->updaterId;
+    }
+
+    public function setUpdaterId(?Uuid $updaterId): User
+    {
+        $this->updaterId = $updaterId;
+        return $this;
+    }
+
     public function getRoles(): array
     {
         return $this->roles;
@@ -255,6 +271,11 @@ class User
         return in_array(RoleEnum::Teacher, $this->getRoles(), true);
     }
 
+    public function isAdmin(): bool
+    {
+        return in_array(RoleEnum::Admin, $this->getRoles(), true);
+    }
+
     public function getStudyingSubjects(): Collection
     {
         return $this->studyingSubjects;
@@ -274,6 +295,17 @@ class User
     public function setTeachingSubjects(Collection $teachingSubjects): User
     {
         $this->teachingSubjects = $teachingSubjects;
+        return $this;
+    }
+
+    public function getUpdater(): ?User
+    {
+        return $this->updater;
+    }
+
+    public function setUpdater(?User $updater): User
+    {
+        $this->updater = $updater;
         return $this;
     }
 }

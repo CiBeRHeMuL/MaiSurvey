@@ -113,4 +113,17 @@ enum RoleEnum: string
     {
         return $this->value;
     }
+
+    /**
+     * @return RoleEnum[]
+     */
+    public function getAvailableAdditionalRoles(): array
+    {
+        return match ($this) {
+            self::Admin => [],
+            self::Student => [self::SurveyCreator],
+            self::Teacher => [self::SurveyCreator],
+            default => [],
+        };
+    }
 }

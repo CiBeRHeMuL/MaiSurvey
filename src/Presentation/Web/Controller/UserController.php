@@ -4,10 +4,12 @@ namespace App\Presentation\Web\Controller;
 
 use App\Application\Dto\User\CreateFullUserDto;
 use App\Application\Dto\User\GetAllUsersDto;
+use App\Application\Dto\User\UpdateUserDto;
 use App\Application\UseCase\User\CreateUserUseCase;
 use App\Application\UseCase\User\GetAllUseCase;
 use App\Application\UseCase\User\ImportUsersUseCase;
 use App\Application\UseCase\User\MultiUpdateUseCase;
+use App\Application\UseCase\User\UpdateUserUseCase;
 use App\Domain\Dto\User\ImportDto as DomainImportDto;
 use App\Domain\Dto\User\MultiUpdateDto;
 use App\Domain\Enum\PermissionEnum;
@@ -38,6 +40,7 @@ use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\HttpKernel\Attribute\MapUploadedFile;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Routing\Requirement\Requirement;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Uid\Uuid;
 use Throwable;
@@ -62,6 +65,32 @@ class UserController extends BaseController
     ): JsonResponse {
         $useCase->setLogger($logger);
         $user = $useCase->execute($dto);
+        return Response::success(
+            new SuccessResponse(
+                User::fromUser($user),
+            ),
+        );
+    }
+
+    /** Создание пользователя */
+    #[Route('/users/{id}', 'create-full-user', requirements: ['id' => Requirement::UUID], methods: ['PUT'])]
+    #[IsGranted(PermissionEnum::UserCreate->value, statusCode: 404, exceptionCode: 404)]
+    #[OA\Tag('users')]
+    #[LOA\SuccessResponse(User::class)]
+    #[LOA\ErrorResponse(400)]
+    #[LOA\ErrorResponse(401)]
+    #[LOA\ErrorResponse(404)]
+    #[LOA\ValidationResponse]
+    #[LOA\ErrorResponse(500)]
+    public function update(
+        Uuid $id,
+        #[MapRequestPayload('json')]
+        UpdateUserDto $dto,
+        UpdateUserUseCase $useCase,
+        LoggerInterface $logger,
+    ): JsonResponse {
+        $useCase->setLogger($logger);
+        $user = $useCase->execute($id, $dto, $this->getUser()->getUser());
         return Response::success(
             new SuccessResponse(
                 User::fromUser($user),

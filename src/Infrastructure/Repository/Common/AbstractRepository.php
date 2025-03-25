@@ -480,10 +480,6 @@ abstract class AbstractRepository implements RepositoryInterface
      */
     public function findOneByQuery(SelectQuery $query, string|null $entityClassName = null, array|null $relations = null): mixed
     {
-        $count = $this->queryCount($query);
-        if ($count === 0) {
-            return null;
-        }
         if ($entityClassName) {
             if ($relations) {
                 return $this->findWithRelations($query, $entityClassName, $relations, true);
@@ -505,10 +501,6 @@ abstract class AbstractRepository implements RepositoryInterface
      */
     public function findAllByQuery(SelectQuery $query, string|null $entityClassName = null, array|null $relations = null): array
     {
-        $count = $this->queryCount($query);
-        if ($count === 0) {
-            return [];
-        }
         if ($entityClassName) {
             if ($relations) {
                 return $this->findWithRelations($query, $entityClassName, $relations);
