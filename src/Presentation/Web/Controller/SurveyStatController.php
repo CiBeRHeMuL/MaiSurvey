@@ -141,6 +141,7 @@ class SurveyStatController extends BaseController
         foreach ($statProvider->getItems() as $stat) {
             $this->generateStatWorksheet($stat, $spreadsheet);
         }
+        $spreadsheet->setActiveSheetIndex(0);
 
         // Сохраняем
         if (!is_dir("$projectDir/export/$exportType")) {
