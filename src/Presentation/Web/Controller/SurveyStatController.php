@@ -20,6 +20,7 @@ use App\Presentation\Web\Response\Model\Common\ErrorResponse;
 use App\Presentation\Web\Response\Model\Common\SuccessResponse;
 use App\Presentation\Web\Response\Model\SurveyStat;
 use App\Presentation\Web\Response\Response;
+use DateTimeImmutable;
 use OpenApi\Attributes as OA;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
@@ -98,7 +99,10 @@ class SurveyStatController extends BaseController
             if (!is_dir("$projectDir/export/$exportType")) {
                 mkdir("$projectDir/export/$exportType", 0777, true);
             }
-            $exportFileName = "survey_stat_{$id->toRfc4122()}_" . (string)time() . ".$exportType";
+            $exportFileName = $stat->getSurvey()->getSubject()->getName()
+                . ' '
+                . (new DateTimeImmutable())->format('Y-m-d H:i:s')
+                . ".$exportType";
             $fullExportFileName = "$projectDir/export/$exportType/$exportFileName";
             $writer->save($fullExportFileName);
 
@@ -149,7 +153,9 @@ class SurveyStatController extends BaseController
         if (!is_dir("$projectDir/export/$exportType")) {
             mkdir("$projectDir/export/$exportType", 0777, true);
         }
-        $exportFileName = 'survey_stat_all_' . (string)time() . ".$exportType";
+        $exportFileName = 'Статистика по опросам '
+            . (new DateTimeImmutable())->format('Y-m-d H:i:s')
+            . ".$exportType";
         $fullExportFileName = "$projectDir/export/$exportType/$exportFileName";
         $writer->save($fullExportFileName);
 

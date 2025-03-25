@@ -29,6 +29,7 @@ use App\Presentation\Web\Response\Model\UpdatedUsersInfo;
 use App\Presentation\Web\Response\Model\User;
 use App\Presentation\Web\Response\Response;
 use App\Presentation\Web\Service\DataExport\FileDataExportFactoryInterface;
+use DateTimeImmutable;
 use OpenApi\Attributes as OA;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -150,7 +151,9 @@ class UserController extends BaseController
             if (!is_dir("$projectDir/export/$exportType")) {
                 mkdir("$projectDir/export/$exportType", 0777, true);
             }
-            $exportFileName = 'users_' . (string)time() . ".$exportType";
+            $exportFileName = 'Пользователи '
+                . (new DateTimeImmutable())->format('Y-m-d H:i:s')
+                . ".$exportType";
             $fullExportFileName = "$projectDir/export/$exportType/$exportFileName";
             $dataExport->setFile($fullExportFileName);
         } catch (Throwable $e) {
