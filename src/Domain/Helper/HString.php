@@ -29,7 +29,7 @@ class HString
      *
      * @return string
      */
-    public static function rusToEnd(string $rus): string
+    public static function rusToEng(string $rus): string
     {
         $map = [
             'А' => 'A',

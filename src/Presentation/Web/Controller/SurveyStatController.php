@@ -12,6 +12,7 @@ use App\Domain\Dto\SurveyStatItem\RatingStatData;
 use App\Domain\Entity\SurveyStat as DomainSurveyStat;
 use App\Domain\Enum\PermissionEnum;
 use App\Domain\Enum\SurveyItemTypeEnum;
+use App\Domain\Helper\HString;
 use App\Presentation\Web\Enum\ErrorSlugEnum;
 use App\Presentation\Web\Enum\HttpStatusCodeEnum;
 use App\Presentation\Web\OpenApi\Attribute as LOA;
@@ -99,8 +100,8 @@ class SurveyStatController extends BaseController
             if (!is_dir("$projectDir/export/$exportType")) {
                 mkdir("$projectDir/export/$exportType", 0777, true);
             }
-            $exportFileName = $stat->getSurvey()->getSubject()->getName()
-                . ' '
+            $exportFileName = HString::rusToEng($stat->getSurvey()->getSubject()->getName())
+                . '_'
                 . (new DateTimeImmutable())->format('Y-m-d H:i:s')
                 . ".$exportType";
             $fullExportFileName = "$projectDir/export/$exportType/$exportFileName";
@@ -153,13 +154,13 @@ class SurveyStatController extends BaseController
         if (!is_dir("$projectDir/export/$exportType")) {
             mkdir("$projectDir/export/$exportType", 0777, true);
         }
-        $exportFileName = 'Статистика по опросам '
+        $exportFileName = 'survey_stat_all_'
             . (new DateTimeImmutable())->format('Y-m-d H:i:s')
             . ".$exportType";
         $fullExportFileName = "$projectDir/export/$exportType/$exportFileName";
         $writer->save($fullExportFileName);
 
-        return $this->file($fullExportFileName, $exportFileName);
+        return $this->file($fullExportFileName, HString::rusToEng($exportFileName));
     }
 
     /**

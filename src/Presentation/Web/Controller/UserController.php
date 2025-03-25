@@ -151,7 +151,7 @@ class UserController extends BaseController
             if (!is_dir("$projectDir/export/$exportType")) {
                 mkdir("$projectDir/export/$exportType", 0777, true);
             }
-            $exportFileName = 'Пользователи '
+            $exportFileName = 'users_'
                 . (new DateTimeImmutable())->format('Y-m-d H:i:s')
                 . ".$exportType";
             $fullExportFileName = "$projectDir/export/$exportType/$exportFileName";

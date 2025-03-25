@@ -173,7 +173,7 @@ class UserImporter
                     }
                     $email = null;
                     if ($presetEmail === null) {
-                        $emailUser = HString::rusToEnd(
+                        $emailUser = HString::rusToEng(
                             $userData->getLastName()
                             . mb_substr($userData->getFirstName(), 0, 1)
                             . mb_substr($userData->getPatronymic() ?? '', 0, 1),
