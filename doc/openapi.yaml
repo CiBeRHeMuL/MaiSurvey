@@ -2257,12 +2257,63 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+  /user:
+    post:
+      tags:
+        - users
+      summary: 'Создание пользователя'
+      operationId: post_create-full-user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateFullUserDto'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/SuccessResponse' }
+                  - { properties: { data: { $ref: '#/components/schemas/User' } }, type: object }
+        '400':
+          description: 'Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 'Not Found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: 'Unprocessable Entity'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResponse'
+        '500':
+          description: 'Internal Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   '/users/{id}':
     put:
       tags:
         - users
-      summary: 'Создание пользователя'
-      operationId: put_create-full-user
+      summary: 'Обновление пользователя'
+      operationId: put_update-full-user
       parameters:
         -
           name: id
@@ -3862,6 +3913,46 @@ components:
           title: 'Столбец с семестром'
           type: string
           default: E
+      type: object
+    CreateFullUserDto:
+      required:
+        - email
+        - password
+        - role
+        - first_name
+        - last_name
+      properties:
+        email:
+          title: Почта
+          type: string
+        password:
+          title: Пароль
+          type: string
+        role:
+          title: Роль
+          type: string
+          enum:
+            - admin
+            - student
+            - teacher
+            - survey_creator
+        first_name:
+          title: Имя
+          type: string
+          maxLength: 255
+        last_name:
+          title: Фамилия
+          type: string
+          maxLength: 255
+        patronymic:
+          title: Отчество
+          type: string
+          maxLength: 255
+          nullable: true
+        group_id:
+          title: Группа
+          type: string
+          nullable: true
       type: object
     UpdateUserDto:
       required:

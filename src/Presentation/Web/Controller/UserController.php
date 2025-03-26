@@ -74,7 +74,7 @@ class UserController extends BaseController
     }
 
     /** Обновление пользователя */
-    #[Route('/users/{id}', 'create-full-user', requirements: ['id' => Requirement::UUID], methods: ['PUT'])]
+    #[Route('/users/{id}', 'update-full-user', requirements: ['id' => Requirement::UUID], methods: ['PUT'])]
     #[IsGranted(PermissionEnum::UserCreate->value, statusCode: 404, exceptionCode: 404)]
     #[OA\Tag('users')]
     #[LOA\SuccessResponse(User::class)]
