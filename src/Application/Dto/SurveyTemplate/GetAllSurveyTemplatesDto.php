@@ -2,6 +2,7 @@
 
 namespace App\Application\Dto\SurveyTemplate;
 
+use App\Application\OpenApi\Attribute as LOA;
 use App\Application\Validator\Constraints as LAssert;
 use App\Domain\Enum\SortTypeEnum;
 use App\Domain\Service\SurveyTemplate\SurveyTemplateService;
@@ -18,6 +19,7 @@ readonly class GetAllSurveyTemplatesDto
         #[Assert\Choice(choices: SurveyTemplateService::GET_ALL_SORT, message: 'Значение должно входить в список допустимых')]
         public string $sort_by = 'name',
         /** Тип сортировки */
+        #[LOA\Enum(SortTypeEnum::class)]
         #[Assert\Type('string', message: 'Значение должно быть строкой')]
         #[LAssert\EnumChoice(enum: SortTypeEnum::class, message: 'Значение должно входить в список допустимых')]
         public string $sort_type = SortTypeEnum::Asc->value,

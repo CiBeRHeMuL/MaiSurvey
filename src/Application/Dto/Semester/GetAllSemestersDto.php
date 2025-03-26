@@ -2,12 +2,13 @@
 
 namespace App\Application\Dto\Semester;
 
+use App\Application\OpenApi\Attribute as LOA;
 use App\Application\Validator\Constraints as LAssert;
 use App\Domain\Enum\SortTypeEnum;
 use App\Domain\Service\Semester\SemesterService;
 use Symfony\Component\Validator\Constraints as Assert;
 
-class GetAllSemestersDto
+readonly class GetAllSemestersDto
 {
     public function __construct(
         /** Сортировка по */
@@ -16,6 +17,7 @@ class GetAllSemestersDto
         #[Assert\NotBlank(message: 'Значение не должно быть пустым')]
         public string $sort_by = 'year',
         /** Тип сортировки */
+        #[LOA\Enum(SortTypeEnum::class)]
         #[Assert\Type('string', message: 'Значение должно быть строкой')]
         #[LAssert\EnumChoice(enum: SortTypeEnum::class, message: 'Значение должно входить в список допустимых')]
         #[Assert\NotBlank(message: 'Значение не должно быть пустым')]

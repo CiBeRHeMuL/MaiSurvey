@@ -2,6 +2,7 @@
 
 namespace App\Application\Dto\User;
 
+use App\Application\OpenApi\Attribute as LOA;
 use App\Application\Validator\Constraints as LAssert;
 use App\Domain\Enum\RoleEnum;
 use SensitiveParameter;
@@ -21,6 +22,7 @@ readonly class CreateFullUserDto
         #[Assert\Type('string', message: 'Значение должно быть строкой')]
         public string $password,
         /** Роль */
+        #[LOA\Enum(RoleEnum::class)]
         #[Assert\Type('string', message: 'Значение должно быть строкой')]
         #[Assert\NotBlank(message: 'Значение не должно быть пустым')]
         #[LAssert\EnumChoice(enum: RoleEnum::class, message: 'Значение должно входить в список допустимых')]

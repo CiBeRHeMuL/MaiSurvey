@@ -214,12 +214,7 @@ paths:
           in: query
           required: false
           schema:
-            title: 'Тип сортировки'
-            type: string
-            default: asc
-            enum:
-              - asc
-              - desc
+            $ref: '#/components/schemas/SortTypeEnum'
         -
           name: offset
           in: query
@@ -498,12 +493,7 @@ paths:
           in: query
           required: false
           schema:
-            title: 'Тип сортировки'
-            type: string
-            default: asc
-            enum:
-              - asc
-              - desc
+            $ref: '#/components/schemas/SortTypeEnum'
         -
           name: offset
           in: query
@@ -628,12 +618,7 @@ paths:
           in: query
           required: false
           schema:
-            title: 'Тип сортировки'
-            type: string
-            default: asc
-            enum:
-              - asc
-              - desc
+            $ref: '#/components/schemas/SortTypeEnum'
         -
           name: offset
           in: query
@@ -746,12 +731,7 @@ paths:
           in: query
           required: false
           schema:
-            title: 'Тип сортировки'
-            type: string
-            default: asc
-            enum:
-              - asc
-              - desc
+            $ref: '#/components/schemas/SortTypeEnum'
         -
           name: offset
           in: query
@@ -955,12 +935,7 @@ paths:
           in: query
           required: false
           schema:
-            title: 'Тип сортировки'
-            type: string
-            default: asc
-            enum:
-              - asc
-              - desc
+            $ref: '#/components/schemas/SortTypeEnum'
         -
           name: offset
           in: query
@@ -1150,12 +1125,7 @@ paths:
           in: query
           required: false
           schema:
-            title: 'Тип сортировки'
-            type: string
-            default: asc
-            enum:
-              - asc
-              - desc
+            $ref: '#/components/schemas/SortTypeEnum'
         -
           name: offset
           in: query
@@ -1582,12 +1552,7 @@ paths:
           in: query
           required: false
           schema:
-            title: 'Тип сортировки'
-            type: string
-            default: asc
-            enum:
-              - asc
-              - desc
+            $ref: '#/components/schemas/SortTypeEnum'
         -
           name: offset
           in: query
@@ -1622,7 +1587,8 @@ paths:
           schema:
             title: 'Статусы для фильтрации'
             type: array
-            items: {  }
+            items:
+              $ref: '#/components/schemas/SurveyStatusEnum'
             default: null
             nullable: true
       responses:
@@ -1776,12 +1742,7 @@ paths:
           in: query
           required: false
           schema:
-            title: 'Тип сортировки'
-            type: string
-            default: asc
-            enum:
-              - asc
-              - desc
+            $ref: '#/components/schemas/SortTypeEnum'
         -
           name: offset
           in: query
@@ -1816,7 +1777,8 @@ paths:
           schema:
             title: 'Статусы для фильтрации'
             type: array
-            items: {  }
+            items:
+              $ref: '#/components/schemas/SurveyStatusEnum'
             default: null
             nullable: true
       responses:
@@ -1877,12 +1839,7 @@ paths:
           in: query
           required: false
           schema:
-            title: 'Тип сортировки'
-            type: string
-            default: asc
-            enum:
-              - asc
-              - desc
+            $ref: '#/components/schemas/SortTypeEnum'
         -
           name: offset
           in: query
@@ -2047,12 +2004,7 @@ paths:
           in: query
           required: false
           schema:
-            title: 'Тип сортировки'
-            type: string
-            default: asc
-            enum:
-              - asc
-              - desc
+            $ref: '#/components/schemas/SortTypeEnum'
         -
           name: offset
           in: query
@@ -2144,12 +2096,7 @@ paths:
           in: query
           required: false
           schema:
-            title: 'Тип сортировки'
-            type: string
-            default: asc
-            enum:
-              - asc
-              - desc
+            $ref: '#/components/schemas/SortTypeEnum'
         -
           name: offset
           in: query
@@ -2330,7 +2277,8 @@ paths:
           schema:
             title: 'Роли для фильтрации'
             type: array
-            items: {  }
+            items:
+              $ref: '#/components/schemas/RoleEnum'
             default: null
             maxItems: 50
             nullable: true
@@ -2370,13 +2318,15 @@ paths:
           in: query
           required: false
           schema:
+            oneOf:
+              -
+                $ref: '#/components/schemas/UserStatusEnum'
+            nullable: true
             title: 'Статус для фильтрации'
-            type: string
             default: null
             enum:
               - draft
               - active
-            nullable: true
         -
           name: 'group_ids[]'
           in: query
@@ -2433,12 +2383,7 @@ paths:
           in: query
           required: false
           schema:
-            title: 'Тип сортировки'
-            type: string
-            default: asc
-            enum:
-              - asc
-              - desc
+            $ref: '#/components/schemas/SortTypeEnum'
         -
           name: offset
           in: query
@@ -2520,7 +2465,8 @@ paths:
           schema:
             title: 'Роли для фильтрации'
             type: array
-            items: {  }
+            items:
+              $ref: '#/components/schemas/RoleEnum'
             default: null
             maxItems: 50
             nullable: true
@@ -2560,13 +2506,15 @@ paths:
           in: query
           required: false
           schema:
+            oneOf:
+              -
+                $ref: '#/components/schemas/UserStatusEnum'
+            nullable: true
             title: 'Статус для фильтрации'
-            type: string
             default: null
             enum:
               - draft
               - active
-            nullable: true
         -
           name: 'group_ids[]'
           in: query
@@ -2623,12 +2571,7 @@ paths:
           in: query
           required: false
           schema:
-            title: 'Тип сортировки'
-            type: string
-            default: asc
-            enum:
-              - asc
-              - desc
+            $ref: '#/components/schemas/SortTypeEnum'
         -
           name: offset
           in: query
@@ -2817,12 +2760,7 @@ paths:
           in: query
           required: false
           schema:
-            title: 'Тип сортировки'
-            type: string
-            default: asc
-            enum:
-              - asc
-              - desc
+            $ref: '#/components/schemas/SortTypeEnum'
         -
           name: offset
           in: query
@@ -2846,15 +2784,18 @@ paths:
           in: query
           required: false
           schema:
+            oneOf:
+              -
+                $ref: '#/components/schemas/RoleEnum'
+            nullable: true
             title: 'Роль, для которой фильтруем значения'
-            type: string
             default: null
             enum:
               - admin
               - student
               - teacher
               - survey_creator
-            nullable: true
+              - student_leader
       responses:
         '500':
           description: 'Internal Server Error'
@@ -2942,12 +2883,7 @@ paths:
           in: query
           required: false
           schema:
-            title: 'Тип сортировки'
-            type: string
-            default: asc
-            enum:
-              - asc
-              - desc
+            $ref: '#/components/schemas/SortTypeEnum'
         -
           name: offset
           in: query
@@ -2971,15 +2907,18 @@ paths:
           in: query
           required: false
           schema:
+            oneOf:
+              -
+                $ref: '#/components/schemas/RoleEnum'
+            nullable: true
             title: 'Роль, для которой фильтруем значения'
-            type: string
             default: null
             enum:
               - admin
               - student
               - teacher
               - survey_creator
-            nullable: true
+              - student_leader
       responses:
         '500':
           description: 'Internal Server Error'
@@ -3125,12 +3064,7 @@ components:
           enum:
             - name
         sort_type:
-          title: 'Тип сортировки'
-          type: string
-          default: asc
-          enum:
-            - asc
-            - desc
+          $ref: '#/components/schemas/SortTypeEnum'
         offset:
           type: integer
           default: 0
@@ -3183,12 +3117,7 @@ components:
           enum:
             - year
         sort_type:
-          title: 'Тип сортировки'
-          type: string
-          default: asc
-          enum:
-            - asc
-            - desc
+          $ref: '#/components/schemas/SortTypeEnum'
         offset:
           type: integer
           default: 0
@@ -3240,12 +3169,7 @@ components:
             - actual_from
             - actual_to
         sort_type:
-          title: 'Тип сортировки'
-          type: string
-          default: asc
-          enum:
-            - asc
-            - desc
+          $ref: '#/components/schemas/SortTypeEnum'
         offset:
           type: integer
           default: 0
@@ -3287,12 +3211,7 @@ components:
             - actual_from
             - actual_to
         sort_type:
-          title: 'Тип сортировки'
-          type: string
-          default: asc
-          enum:
-            - asc
-            - desc
+          $ref: '#/components/schemas/SortTypeEnum'
         offset:
           type: integer
           default: 0
@@ -3397,12 +3316,7 @@ components:
           enum:
             - name
         sort_type:
-          title: 'Тип сортировки'
-          type: string
-          default: asc
-          enum:
-            - asc
-            - desc
+          $ref: '#/components/schemas/SortTypeEnum'
         offset:
           type: integer
           default: 0
@@ -3469,12 +3383,7 @@ components:
             - completed
             - created_at
         sort_type:
-          title: 'Тип сортировки'
-          type: string
-          default: asc
-          enum:
-            - asc
-            - desc
+          $ref: '#/components/schemas/SortTypeEnum'
         offset:
           type: integer
           default: 0
@@ -3526,12 +3435,7 @@ components:
           items:
             $ref: '#/components/schemas/CreateItemDto'
         status:
-          title: Статус
-          type: string
-          enum:
-            - active
-            - draft
-            - closed
+          $ref: '#/components/schemas/SurveyStatusEnum'
         actual_to:
           title: 'Актуален до'
           type: string
@@ -3558,12 +3462,7 @@ components:
           items:
             $ref: '#/components/schemas/UpdateItemDto'
         status:
-          title: Статус
-          type: string
-          enum:
-            - active
-            - draft
-            - closed
+          $ref: '#/components/schemas/SurveyStatusEnum'
         actual_to:
           title: 'Актуален до'
           type: string
@@ -3593,12 +3492,7 @@ components:
           items:
             $ref: '#/components/schemas/CreateItemDto'
         status:
-          title: Статус
-          type: string
-          enum:
-            - active
-            - draft
-            - closed
+          $ref: '#/components/schemas/SurveyStatusEnum'
         actual_to:
           title: 'Время закрытия'
           type: string
@@ -3618,12 +3512,7 @@ components:
           title: 'ID предмета'
           type: string
         status:
-          title: Статус
-          type: string
-          enum:
-            - active
-            - draft
-            - closed
+          $ref: '#/components/schemas/SurveyStatusEnum'
         actual_to:
           title: 'Время закрытия'
           type: string
@@ -3646,12 +3535,7 @@ components:
           maxItems: 20
           minItems: 1
         status:
-          title: Статус
-          type: string
-          enum:
-            - active
-            - draft
-            - closed
+          $ref: '#/components/schemas/SurveyStatusEnum'
         actual_to:
           title: 'Актуален до'
           type: string
@@ -3681,12 +3565,7 @@ components:
             - completed
             - created_at
         sort_type:
-          title: 'Тип сортировки'
-          type: string
-          default: asc
-          enum:
-            - asc
-            - desc
+          $ref: '#/components/schemas/SortTypeEnum'
         offset:
           type: integer
           default: 0
@@ -3705,7 +3584,8 @@ components:
         statuses:
           title: 'Статусы для фильтрации'
           type: array
-          items: {  }
+          items:
+            $ref: '#/components/schemas/SurveyStatusEnum'
           default: null
           nullable: true
       type: object
@@ -3724,12 +3604,7 @@ components:
             - name
             - created_at
         sort_type:
-          title: 'Тип сортировки'
-          type: string
-          default: asc
-          enum:
-            - asc
-            - desc
+          $ref: '#/components/schemas/SortTypeEnum'
         offset:
           type: integer
           default: 0
@@ -3785,12 +3660,7 @@ components:
             - name
             - created_at
         sort_type:
-          title: 'Тип сортировки'
-          type: string
-          default: asc
-          enum:
-            - asc
-            - desc
+          $ref: '#/components/schemas/SortTypeEnum'
         offset:
           type: integer
           default: 0
@@ -3819,12 +3689,7 @@ components:
             - name
             - created_at
         sort_type:
-          title: 'Тип сортировки'
-          type: string
-          default: asc
-          enum:
-            - asc
-            - desc
+          $ref: '#/components/schemas/SortTypeEnum'
         offset:
           type: integer
           default: 0
@@ -3873,18 +3738,9 @@ components:
           title: Роли
           type: array
           items:
-            type: string
-            enum:
-              - admin
-              - student
-              - teacher
-              - survey_creator
+            $ref: '#/components/schemas/RoleEnum'
         status:
-          title: Статус
-          type: string
-          enum:
-            - draft
-            - active
+          $ref: '#/components/schemas/UserStatusEnum'
         deleted:
           title: Удален
           type: boolean
@@ -3894,7 +3750,8 @@ components:
         roles:
           title: 'Роли для фильтрации'
           type: array
-          items: {  }
+          items:
+            $ref: '#/components/schemas/RoleEnum'
           default: null
           maxItems: 50
           nullable: true
@@ -3918,13 +3775,15 @@ components:
           default: null
           nullable: true
         status:
+          oneOf:
+            -
+              $ref: '#/components/schemas/UserStatusEnum'
+          nullable: true
           title: 'Статус для фильтрации'
-          type: string
           default: null
           enum:
             - draft
             - active
-          nullable: true
         group_ids:
           title: 'Группы для фильтрации'
           type: array
@@ -3957,12 +3816,7 @@ components:
             - deleted
             - email
         sort_type:
-          title: 'Тип сортировки'
-          type: string
-          default: asc
-          enum:
-            - asc
-            - desc
+          $ref: '#/components/schemas/SortTypeEnum'
         offset:
           type: integer
           default: 0
@@ -4014,6 +3868,7 @@ components:
             - student
             - teacher
             - survey_creator
+            - student_leader
         password:
           title: Пароль
           type: string
@@ -4076,12 +3931,7 @@ components:
           enum:
             - name
         sort_type:
-          title: 'Тип сортировки'
-          type: string
-          default: asc
-          enum:
-            - asc
-            - desc
+          $ref: '#/components/schemas/SortTypeEnum'
         offset:
           type: integer
           default: 0
@@ -4093,15 +3943,18 @@ components:
           minimum: 0
           nullable: true
         for_role:
+          oneOf:
+            -
+              $ref: '#/components/schemas/RoleEnum'
+          nullable: true
           title: 'Роль, для которой фильтруем значения'
-          type: string
           default: null
           enum:
             - admin
             - student
             - teacher
             - survey_creator
-          nullable: true
+            - student_leader
       type: object
     GetAvailableUserDataDto:
       properties:
@@ -4132,12 +3985,7 @@ components:
           enum:
             - name
         sort_type:
-          title: 'Тип сортировки'
-          type: string
-          default: asc
-          enum:
-            - asc
-            - desc
+          $ref: '#/components/schemas/SortTypeEnum'
         offset:
           type: integer
           default: 0
@@ -4149,15 +3997,18 @@ components:
           minimum: 0
           nullable: true
         for_role:
+          oneOf:
+            -
+              $ref: '#/components/schemas/RoleEnum'
+          nullable: true
           title: 'Роль, для которой фильтруем значения'
-          type: string
           default: null
           enum:
             - admin
             - student
             - teacher
             - survey_creator
-          nullable: true
+            - student_leader
       type: object
     ImportUserDataDto:
       required:
@@ -4171,6 +4022,7 @@ components:
             - student
             - teacher
             - survey_creator
+            - student_leader
         headers_in_first_row:
           title: 'Находятся ли в первой строке файла заголовки для столбцов'
           type: boolean
@@ -4322,12 +4174,20 @@ components:
         - slug
         - name
         - import_enabled
+        - available_additional_roles
+        - main
       properties:
         slug:
           $ref: '#/components/schemas/RoleEnum'
         name:
           type: string
         import_enabled:
+          type: boolean
+        available_additional_roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoleEnum'
+        main:
           type: boolean
       type: object
     Semester:
@@ -4641,6 +4501,11 @@ components:
         created:
           type: integer
       type: object
+    SortTypeEnum:
+      type: string
+      enum:
+        - asc
+        - desc
     AnswerDataDtoInterface:
       required:
         - type
@@ -4689,6 +4554,12 @@ components:
         subject_type:
           $ref: '#/components/schemas/TeacherSubjectTypeEnum'
       type: object
+    SurveyStatusEnum:
+      type: string
+      enum:
+        - active
+        - draft
+        - closed
     UpdateItemDto:
       required:
         - answer_required
@@ -4744,6 +4615,19 @@ components:
         subject_type:
           $ref: '#/components/schemas/TeacherSubjectTypeEnum'
       type: object
+    RoleEnum:
+      type: string
+      enum:
+        - admin
+        - student
+        - teacher
+        - survey_creator
+        - student_leader
+    UserStatusEnum:
+      type: string
+      enum:
+        - draft
+        - active
     Meta:
       required:
         - mode
@@ -4761,11 +4645,6 @@ components:
         message:
           type: string
       type: object
-    UserStatusEnum:
-      type: string
-      enum:
-        - draft
-        - active
     PermissionEnum:
       type: string
       enum:
@@ -4801,13 +4680,6 @@ components:
         - survey_template.delete
         - survey_template.view_all
         - survey_stat.view
-    RoleEnum:
-      type: string
-      enum:
-        - admin
-        - student
-        - teacher
-        - survey_creator
     PaginatedData:
       properties:
         items:

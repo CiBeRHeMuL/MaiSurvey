@@ -2,6 +2,7 @@
 
 namespace App\Application\Dto\Survey\Create;
 
+use App\Application\OpenApi\Attribute as LOA;
 use App\Application\Validator\Constraints as LAssert;
 use App\Domain\Enum\SurveyStatusEnum;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -24,6 +25,7 @@ readonly class CreateMSFromTemplateDto
         ])]
         public array $subject_ids,
         /** Статус */
+        #[LOA\Enum(SurveyStatusEnum::class)]
         #[LAssert\EnumChoice(SurveyStatusEnum::class)]
         public string $status,
         /** Актуален до */

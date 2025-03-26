@@ -2,6 +2,7 @@
 
 namespace App\Application\Dto\TeacherSubject;
 
+use App\Application\OpenApi\Attribute as LOA;
 use App\Application\Validator\Constraints as LAssert;
 use App\Domain\Enum\SortTypeEnum;
 use App\Domain\Service\TeacherSubject\TeacherSubjectService;
@@ -32,6 +33,7 @@ readonly class GetAllTeacherSubjectsDto
         #[Assert\NotBlank(message: 'Значение не должно быть пустым')]
         public string $sort_by = 'name',
         /** Тип сортировки */
+        #[LOA\Enum(SortTypeEnum::class)]
         #[Assert\Type('string', message: 'Значение должно быть строкой')]
         #[LAssert\EnumChoice(enum: SortTypeEnum::class, message: 'Значение должно входить в список допустимых')]
         #[Assert\NotBlank(message: 'Значение не должно быть пустым')]

@@ -2,6 +2,7 @@
 
 namespace App\Application\Dto\UserData;
 
+use App\Application\OpenApi\Attribute as LOA;
 use App\Application\Validator\Constraints as LAssert;
 use App\Domain\Enum\RoleEnum;
 use App\Domain\Enum\SortTypeEnum;
@@ -47,6 +48,7 @@ readonly class GetAllUserDataDto
         #[Assert\NotBlank(message: 'Значение не должно быть пустым')]
         public string $sort_by = 'name',
         /** Тип сортировки */
+        #[LOA\Enum(SortTypeEnum::class)]
         #[Assert\Type('string', message: 'Значение должно быть строкой')]
         #[LAssert\EnumChoice(enum: SortTypeEnum::class, message: 'Значение должно входить в список допустимых')]
         #[Assert\NotBlank(message: 'Значение не должно быть пустым')]
@@ -59,6 +61,7 @@ readonly class GetAllUserDataDto
         #[Assert\LessThanOrEqual(100, message: 'Значение должно быть меньше или равно 100')]
         public int|null $limit = 20,
         /** Роль, для которой фильтруем значения */
+        #[LOA\Enum(RoleEnum::class)]
         #[Assert\Type('string', message: 'Значение должно быть строкой')]
         #[LAssert\EnumChoice(enum: RoleEnum::class, message: 'Значение должно входить в список допустимых')]
         #[Assert\NotBlank(message: 'Значение не должно быть пустым', allowNull: true)]

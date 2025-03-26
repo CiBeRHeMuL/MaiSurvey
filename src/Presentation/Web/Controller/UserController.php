@@ -160,6 +160,23 @@ class UserController extends BaseController
             return Response::notFound();
         }
 
+        if ($this->getUser()->getUser()->isStudentLeader()) {
+            $dto = new GetAllUsersDto(
+                $dto->roles,
+                $dto->name,
+                $dto->email,
+                $dto->deleted,
+                $dto->status,
+                [$this->getUser()->getUser()->getData()?->getGroup()->getGroupId()->toRfc4122()],
+                $dto->with_group,
+                $dto->created_from,
+                $dto->created_to,
+                $dto->sort_by,
+                $dto->sort_type,
+                $dto->offset,
+                $dto->limit,
+            );
+        }
         $dataProvider = $useCase->execute($dto, true);
         if ($dataProvider->getTotal() === 0) {
             return Response::notFound();

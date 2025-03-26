@@ -2,6 +2,7 @@
 
 namespace App\Application\Dto\User;
 
+use App\Application\OpenApi\Attribute as LOA;
 use App\Application\Validator\Constraints as LAssert;
 use App\Domain\Enum\RoleEnum;
 use App\Domain\Enum\UserStatusEnum;
@@ -16,6 +17,7 @@ readonly class UpdateUserDto
      */
     public function __construct(
         /** Роли */
+        #[LOA\EnumItems(RoleEnum::class)]
         #[Assert\All([
             new Assert\Type('string'),
             new Assert\NotBlank(),
@@ -24,6 +26,7 @@ readonly class UpdateUserDto
         #[Assert\NotBlank]
         public array $roles,
         /** Статус */
+        #[LOA\Enum(UserStatusEnum::class)]
         #[Assert\Type('string')]
         #[Assert\NotBlank]
         #[LAssert\EnumChoice(UserStatusEnum::class)]

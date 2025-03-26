@@ -276,6 +276,11 @@ class User
         return in_array(RoleEnum::Admin, $this->getRoles(), true);
     }
 
+    public function isStudentLeader(): bool
+    {
+        return in_array(RoleEnum::StudentLeader, $this->getRoles(), true);
+    }
+
     public function getStudyingSubjects(): Collection
     {
         return $this->studyingSubjects;

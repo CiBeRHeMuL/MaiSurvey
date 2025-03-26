@@ -2,6 +2,7 @@
 
 namespace App\Application\Dto\User;
 
+use App\Application\OpenApi\Attribute as LOA;
 use App\Application\Validator\Constraints as LAssert;
 use App\Domain\Enum\RoleEnum;
 use App\Domain\Enum\SortTypeEnum;
@@ -13,6 +14,7 @@ readonly class GetAllUsersDto
 {
     public function __construct(
         /** Роли для фильтрации */
+        #[LOA\EnumItems(RoleEnum::class)]
         #[Assert\All([
             new Assert\Type('string', message: 'Значение должно быть строкой'),
             new Assert\NotBlank(message: 'Значение не должно быть пустым'),
@@ -34,6 +36,7 @@ readonly class GetAllUsersDto
         #[Assert\Type('boolean', message: 'Значение должно быть булевым значением')]
         public bool|null $deleted = null,
         /** Статус для фильтрации */
+        #[LOA\Enum(UserStatusEnum::class)]
         #[Assert\Type('string', message: 'Значение должно быть строкой')]
         #[LAssert\EnumChoice(enum: UserStatusEnum::class, message: 'Значение должно входить в список допустимых')]
         #[Assert\NotBlank(message: 'Значение не должно быть пустым', allowNull: true)]
@@ -63,6 +66,7 @@ readonly class GetAllUsersDto
         #[Assert\NotBlank(message: 'Значение не должно быть пустым')]
         public string $sort_by = 'name',
         /** Тип сортировки */
+        #[LOA\Enum(SortTypeEnum::class)]
         #[Assert\Type('string', message: 'Значение должно быть строкой')]
         #[LAssert\EnumChoice(enum: SortTypeEnum::class, message: 'Значение должно входить в список допустимых')]
         #[Assert\NotBlank(message: 'Значение не должно быть пустым')]
