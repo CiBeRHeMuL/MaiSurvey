@@ -94,7 +94,8 @@ class SurveyStatController extends BaseController
             $spreadsheet = new Spreadsheet();
             $writer = new Xlsx($spreadsheet);
             $spreadsheet->removeSheetByIndex(0);
-            $spreadsheet->addSheet($this->generateStatWorksheet($stat, $spreadsheet));
+            $this->generateStatWorksheet($stat, $spreadsheet);
+            $spreadsheet->setActiveSheetIndex(0);
 
             // Сохраняем
             if (!is_dir("$projectDir/export/$exportType")) {
