@@ -70,6 +70,10 @@ enum RoleEnum: string
                 PermissionEnum::SurveyCreate,
                 PermissionEnum::SurveyUpdate,
                 PermissionEnum::SurveyViewAll,
+                PermissionEnum::SurveyTemplateView,
+                PermissionEnum::SurveyTemplateCreate,
+                PermissionEnum::SurveyTemplateUpdate,
+                PermissionEnum::SurveyTemplateViewAll,
             ],
             self::StudentLeader => [
                 PermissionEnum::UserExport,
