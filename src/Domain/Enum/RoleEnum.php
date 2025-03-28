@@ -73,6 +73,7 @@ enum RoleEnum: string
             ],
             self::StudentLeader => [
                 PermissionEnum::UserExport,
+                PermissionEnum::UserView,
             ],
         };
     }

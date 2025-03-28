@@ -402,6 +402,44 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+    put:
+      tags:
+        - me
+      summary: 'Обновить себя.'
+      operationId: put_update-me
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateMeDto'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/SuccessResponse' }
+                  - { properties: { data: { $ref: '#/components/schemas/User' } }, type: object }
+        '400':
+          description: 'Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: 'Unprocessable Entity'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResponse'
+        '500':
+          description: 'Internal Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /roles:
     get:
       tags:
@@ -3147,6 +3185,29 @@ components:
           type: string
           default: A
       type: object
+    UpdateMeDto:
+      required:
+        - first_name
+        - last_name
+        - deleted
+      properties:
+        first_name:
+          title: Имя
+          type: string
+          maxLength: 255
+        last_name:
+          title: Фамилия
+          type: string
+          maxLength: 255
+        patronymic:
+          title: Отчество
+          type: string
+          maxLength: 255
+          nullable: true
+        deleted:
+          title: Удален
+          type: boolean
+      type: object
     CreateSemesterDto:
       required:
         - year
@@ -3794,13 +3855,7 @@ components:
           title: Пароль
           type: string
         role:
-          title: Роль
-          type: string
-          enum:
-            - admin
-            - student
-            - teacher
-            - survey_creator
+          $ref: '#/components/schemas/RoleEnum'
         first_name:
           title: Имя
           type: string

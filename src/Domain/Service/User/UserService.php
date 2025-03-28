@@ -5,9 +5,11 @@ namespace App\Domain\Service\User;
 use App\Domain\DataProvider\ArrayDataProvider;
 use App\Domain\DataProvider\DataProviderInterface;
 use App\Domain\DataProvider\DataSortInterface;
+use App\Domain\Dto\Me\UpdateMeDto;
 use App\Domain\Dto\User\CreateUserDto;
 use App\Domain\Dto\User\GetAllUsersDto;
 use App\Domain\Dto\User\UpdateUserDto;
+use App\Domain\Dto\UserData\UpdateUserDataDto;
 use App\Domain\Entity\User;
 use App\Domain\Enum\RoleEnum;
 use App\Domain\Enum\ValidationErrorSlugEnum;
@@ -18,6 +20,7 @@ use App\Domain\Service\Db\TransactionManagerInterface;
 use App\Domain\Service\Security\EmailCheckerServiceInterface;
 use App\Domain\Service\Security\PasswordHasherServiceInterface;
 use App\Domain\Service\Security\SecurityService;
+use App\Domain\Service\UserData\UserDataService;
 use App\Domain\Validation\ValidationError;
 use App\Domain\ValueObject\Email;
 use DateTimeImmutable;
@@ -37,6 +40,7 @@ class UserService
         private SecurityService $securityService,
         private PasswordHasherServiceInterface $passwordHasherService,
         private TransactionManagerInterface $transactionManager,
+        private UserDataService $userDataService,
         LoggerInterface $logger,
     ) {
         $this->setLogger($logger);
@@ -45,6 +49,7 @@ class UserService
     public function setLogger(LoggerInterface $logger): UserService
     {
         $this->logger = $logger;
+        $this->userDataService->setLogger($logger);
         return $this;
     }
 
@@ -363,5 +368,50 @@ class UserService
             throw ErrorException::new('Не удалось обновить пользователя');
         }
         return $user;
+    }
+
+    public function updateMe(User $me, UpdateMeDto $dto): User
+    {
+        if (!$me->isActive()) {
+            throw ErrorException::new('Действие запрещено', 403);
+        }
+
+        try {
+            $this->transactionManager->beginTransaction();
+
+            $me->setDeleted($dto->isDeleted())
+                ->setDeletedAt($dto->isDeleted() ? new DateTimeImmutable() : $me->getDeletedAt())
+                ->setUpdatedAt(new DateTimeImmutable())
+                ->setUpdater($me)
+                ->setUpdaterId($me->getId());
+            $updated = $this->userRepository->update($me);
+            if (!$updated) {
+                throw ErrorException::new('Не удалось обновить запись');
+            }
+
+            $data = $me->getData();
+
+            $data = $this->userDataService
+                ->update(
+                    $data,
+                    new UpdateUserDataDto(
+                        $dto->getFirstName(),
+                        $dto->getFirstName(),
+                        $dto->getPatronymic(),
+                        $data->getGroup()?->getGroup(),
+                    ),
+                );
+            $me->setData($data);
+
+            $this->transactionManager->commit();
+            return $me;
+        } catch (ErrorException|ValidationException $e) {
+            $this->transactionManager->rollback();
+            throw $e;
+        } catch (Throwable $e) {
+            $this->transactionManager->rollback();
+            $this->logger->error($e);
+            throw ErrorException::new('Не удалось обновить запись');
+        }
     }
 }

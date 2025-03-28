@@ -115,6 +115,23 @@ class UserController extends BaseController
         #[MapQueryString(validationFailedStatusCode: 422)]
         GetAllUsersDto $dto = new GetAllUsersDto(),
     ): JsonResponse {
+        if ($this->getUser()->getUser()->isStudentLeader()) {
+            $dto = new GetAllUsersDto(
+                $dto->roles,
+                $dto->name,
+                $dto->email,
+                $dto->deleted,
+                $dto->status,
+                [$this->getUser()->getUser()->getData()?->getGroup()->getGroupId()->toRfc4122()],
+                $dto->with_group,
+                $dto->created_from,
+                $dto->created_to,
+                $dto->sort_by,
+                $dto->sort_type,
+                $dto->offset,
+                $dto->limit,
+            );
+        }
         $useCase->setLogger($logger);
         $dataProvider = $useCase->execute($dto);
         return Response::successWithPagination(

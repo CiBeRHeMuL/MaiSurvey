@@ -433,6 +433,22 @@ class UserDataService
             ->findAllByIdsWithIdsOrder($ids);
     }
 
+    public function update(UserData $data, UpdateUserDataDto $dto): UserData
+    {
+        $this->validateUpdateDto($data, $dto);
+
+        $data->setPatronymic($dto->getPatronymic())
+            ->setFirstName($dto->getFirstName())
+            ->setLastName($dto->getLastName())
+            ->setUpdatedAt(new DateTimeImmutable());
+        $updated = $this->userDataRepository
+            ->update($data);
+        if (!$updated) {
+            throw ErrorException::new('Не удалось обновить запись');
+        }
+        return $data;
+    }
+
     private function entityFromDto(CreateUserDataDto $dto): UserData
     {
         $userData = new UserData();
