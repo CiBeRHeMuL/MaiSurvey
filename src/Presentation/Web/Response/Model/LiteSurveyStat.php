@@ -18,7 +18,7 @@ readonly class LiteSurveyStat
         return new self(
             $stat->getAvailableCount(),
             $stat->getCompletedCount(),
-            $stat->getRatingAvg(),
+            round($stat->getRatingAvg(), 2),
         );
     }
 }
