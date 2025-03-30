@@ -44,6 +44,8 @@ class Survey
     #[ORM\OneToMany(targetEntity: SurveyItem::class, mappedBy: 'survey')]
     #[ORM\OrderBy(['position' => 'ASC'])]
     private Collection $items;
+    #[ORM\OneToOne(targetEntity: SurveyStat::class, mappedBy: 'survey')]
+    private SurveyStat|null $stat;
 
     public function __construct()
     {
@@ -141,6 +143,17 @@ class Survey
     public function getItems(): Collection
     {
         return $this->items;
+    }
+
+    public function getStat(): ?SurveyStat
+    {
+        return $this->stat;
+    }
+
+    public function setStat(?SurveyStat $stat): Survey
+    {
+        $this->stat = $stat;
+        return $this;
     }
 
     public function setItems(Collection $items): Survey

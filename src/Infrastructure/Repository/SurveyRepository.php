@@ -156,7 +156,7 @@ class SurveyRepository extends Common\AbstractRepository implements SurveyReposi
         return $this->findWithLazyBatchedProvider(
             $q,
             Survey::class,
-            ['subject', 'subject.semester'],
+            ['subject', 'subject.semester', 'stat'],
             new LimitOffset(
                 $dto->getLimit(),
                 $dto->getOffset(),

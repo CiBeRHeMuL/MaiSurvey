@@ -2,6 +2,7 @@
 
 namespace App\Domain\Entity;
 
+use App\Domain\Enum\PermissionEnum;
 use App\Domain\Enum\RoleEnum;
 use App\Domain\Enum\UserStatusEnum;
 use App\Domain\ValueObject\Email;
@@ -312,5 +313,14 @@ class User
     {
         $this->updater = $updater;
         return $this;
+    }
+
+    public function hasPermission(PermissionEnum $permission): bool
+    {
+        return array_reduce(
+            $this->getRoles(),
+            fn(bool $k, RoleEnum $v) => in_array($permission, $v->getPermissions(), true) || $k,
+            false,
+        );
     }
 }

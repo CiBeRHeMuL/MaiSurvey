@@ -13,9 +13,12 @@ use App\Domain\Entity\Group;
 use App\Domain\Entity\MySurvey;
 use App\Domain\Entity\Subject;
 use App\Domain\Entity\Survey;
+use App\Domain\Entity\SurveyItem;
+use App\Domain\Entity\SurveyItemAnswer;
 use App\Domain\Entity\SurveyStat;
 use App\Domain\Entity\UserData;
 use App\Domain\Entity\UserDataGroup;
+use App\Domain\Enum\SurveyItemTypeEnum;
 use App\Domain\Enum\SurveyStatusEnum;
 use App\Domain\Repository\SurveyStatRepositoryInterface;
 use App\Infrastructure\Db\Expr\ActualSurveyExpr;
@@ -179,6 +182,7 @@ class SurveyStatRepository extends Common\AbstractRepository implements SurveySt
                 'available_count' => new CoalesceFunc(new Expr('ms.count'), 0),
                 'completed_count' => new CoalesceFunc(new Expr('cs.count'), 0),
                 'not_completed_users' => new CoalesceFunc(new Expr('ncuds.names'), new Expr("'[]'::jsonb")),
+                'rating_avg' => new CoalesceFunc(new Expr('r_avg.avg'), 0),
             ])
             ->from(['s' => $this->getClassTable(Survey::class)])
             ->leftJoin(
@@ -238,6 +242,23 @@ class SurveyStatRepository extends Common\AbstractRepository implements SurveySt
                         ->groupBy(['ncums.id'])
                 ],
                 'ncuds.id = s.id',
+            )
+            ->leftJoin(
+                [
+                    'r_avg' => Query::select()
+                        ->select([
+                            'avg' =>  new Expr("avg((a.answer->>'rating')::integer)"),
+                            'id' => 'si.survey_id',
+                        ])
+                        ->from(['a' => $this->getClassTable(SurveyItemAnswer::class)])
+                        ->innerJoin(
+                            ['si' => $this->getClassTable(SurveyItem::class)],
+                            'si.id = a.survey_item_id',
+                        )
+                        ->where(['a.type' => SurveyItemTypeEnum::Rating->value])
+                        ->groupBy(['si.survey_id']),
+                ],
+                'r_avg.id = s.id',
             )
             ->filterWhere(['s.id' => $surveyIds]);
     }

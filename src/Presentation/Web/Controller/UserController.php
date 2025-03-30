@@ -14,6 +14,7 @@ use App\Domain\Dto\User\ImportDto as DomainImportDto;
 use App\Domain\Dto\User\MultiUpdateDto;
 use App\Domain\Enum\PermissionEnum;
 use App\Domain\Enum\RoleEnum;
+use App\Domain\Helper\HString;
 use App\Presentation\Web\Dto\User\ImportUsersDto;
 use App\Presentation\Web\Dto\User\UpdateUsersDto;
 use App\Presentation\Web\Enum\ErrorSlugEnum;
@@ -215,7 +216,7 @@ class UserController extends BaseController
         if ($dataExport->exportArray($rows)) {
             return $this->file(
                 $fullExportFileName,
-                $exportFileName,
+                str_replace(':', '.', HString::rusToEng($exportFileName)),
             );
         }
         return Response::error(

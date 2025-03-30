@@ -297,11 +297,12 @@ class SurveyController extends BaseController
     ): JsonResponse {
         $useCase->setLogger($logger);
         $provider = $useCase->execute($dto);
+        $withStat = $this->getUser()->getUser()->hasPermission(PermissionEnum::SurveyStatView);
         return Response::successWithPagination(
             new SuccessWithPaginationResponse(
                 PaginatedData::fromDataProvider(
                     $provider,
-                    LiteFullSurvey::fromSurvey(...),
+                    fn($s) => LiteFullSurvey::fromSurvey($s, $withStat),
                 ),
             ),
         );

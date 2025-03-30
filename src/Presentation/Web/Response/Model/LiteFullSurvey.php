@@ -2,7 +2,6 @@
 
 namespace App\Presentation\Web\Response\Model;
 
-use App\Domain\Entity\MySurvey as DomainMySurvey;
 use App\Domain\Entity\Survey as DomainSurvey;
 use App\Domain\Enum\SurveyStatusEnum;
 
@@ -16,6 +15,7 @@ readonly class LiteFullSurvey
      * @param string|null $actual_to
      * @param string $created_at
      * @param string $update_at
+     * @param LiteSurveyStat|null $stat
      */
     public function __construct(
         public string $id,
@@ -25,10 +25,11 @@ readonly class LiteFullSurvey
         public string|null $actual_to,
         public string $created_at,
         public string $update_at,
+        public LiteSurveyStat|null $stat = null,
     ) {
     }
 
-    public static function fromSurvey(DomainSurvey $survey): self
+    public static function fromSurvey(DomainSurvey $survey, bool $withStat = true): self
     {
         return new self(
             $survey->getId()->toRfc4122(),
@@ -38,6 +39,9 @@ readonly class LiteFullSurvey
             $survey->getActualTo()?->format(DATE_RFC3339),
             $survey->getCreatedAt()->format(DATE_RFC3339),
             $survey->getUpdatedAt()->format(DATE_RFC3339),
+            $withStat && $survey->getStat()
+                ? LiteSurveyStat::fromStat($survey->getStat())
+                : null,
         );
     }
 }

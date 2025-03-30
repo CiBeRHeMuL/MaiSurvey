@@ -4512,6 +4512,12 @@ components:
           type: string
         update_at:
           type: string
+        stat:
+          default: null
+          nullable: true
+          oneOf:
+            -
+              $ref: '#/components/schemas/LiteSurveyStat'
       type: object
     SurveyStat:
       required:
@@ -4911,6 +4917,20 @@ components:
           $ref: '#/components/schemas/ItemDataInterface2'
         subject_type:
           $ref: '#/components/schemas/TeacherSubjectTypeEnum'
+      type: object
+    LiteSurveyStat:
+      required:
+        - available_count
+        - completed_count
+        - rating_average
+      properties:
+        available_count:
+          type: integer
+        completed_count:
+          type: integer
+        rating_average:
+          type: number
+          format: float
       type: object
     SurveyStatItem:
       required:
