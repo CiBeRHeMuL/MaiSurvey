@@ -108,7 +108,7 @@ class SurveyStatController extends BaseController
             $fullExportFileName = "$projectDir/export/$exportType/$exportFileName";
             $writer->save($fullExportFileName);
 
-            return $this->file($fullExportFileName, $exportFileName);
+            return $this->file($fullExportFileName, str_replace(':', '.', HString::rusToEng($exportFileName)));
         } catch (Throwable $e) {
             $logger->error($e);
             return Response::error(
