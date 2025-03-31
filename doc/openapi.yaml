@@ -1182,6 +1182,16 @@ paths:
             maximum: 100
             minimum: 0
             nullable: true
+        -
+          name: name
+          in: query
+          required: false
+          schema:
+            title: 'Название предмета'
+            type: string
+            default: null
+            minLength: 3
+            nullable: true
       responses:
         '200':
           description: OK
@@ -3505,6 +3515,12 @@ components:
           default: 100
           maximum: 100
           minimum: 0
+          nullable: true
+        name:
+          title: 'Название предмета'
+          type: string
+          default: null
+          minLength: 3
           nullable: true
       type: object
     GetMySurveyByIdDto:

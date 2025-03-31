@@ -15,6 +15,7 @@ readonly class GetMySurveysDto
      * @param string $sortBy
      * @param SortTypeEnum $sortType
      * @param bool|null $actual
+     * @param string|null $name
      */
     public function __construct(
         private array|null $subjectIds = null,
@@ -24,6 +25,7 @@ readonly class GetMySurveysDto
         private string $sortBy = 'created_at',
         private SortTypeEnum $sortType = SortTypeEnum::Desc,
         private bool|null $actual = true,
+        private string|null $name = null,
     ) {
     }
 
@@ -60,5 +62,10 @@ readonly class GetMySurveysDto
     public function getActual(): bool|null
     {
         return $this->actual;
+    }
+
+    public function getName(): ?string
+    {
+        return $this->name;
     }
 }

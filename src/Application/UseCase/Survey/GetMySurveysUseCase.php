@@ -52,6 +52,7 @@ class GetMySurveysUseCase
                     $dto->sort_by,
                     SortTypeEnum::from($dto->sort_type),
                     true,
+                    $dto->name,
                 ),
             );
     }

@@ -46,6 +46,9 @@ class SurveyRepository extends Common\AbstractRepository implements SurveyReposi
                 ),
             ));
         }
+        if ($dto->getName() !== null) {
+            $q->andWhere(new ILikeExpr(new Expr('ss.name'), $dto->getName()));
+        }
         return $this->findWithLazyBatchedProvider(
             $q,
             MySurvey::class,

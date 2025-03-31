@@ -38,6 +38,10 @@ readonly class GetMySurveysDto
         #[Assert\GreaterThanOrEqual(0, message: 'Значение должно быть больше или равно 0')]
         #[Assert\LessThanOrEqual(100, message: 'Значение должно быть меньше или равно 100')]
         public int|null $limit = 100,
+        /** Название предмета */
+        #[Assert\Type('string', message: 'Значение должно быть строкой')]
+        #[Assert\Length(min: 3, minMessage: 'Значение должно быть длиннее 2 символов')]
+        public string|null $name = null,
     ) {
     }
 }

@@ -83,6 +83,16 @@ class SurveyService
             ]);
         }
 
+        if ($dto->getName() !== null && mb_strlen($dto->getName()) < 3) {
+            throw ValidationException::new([
+                new ValidationError(
+                    'name',
+                    ValidationErrorSlugEnum::WrongField->getSlug(),
+                    'Поиск возможен для значений длиннее 2 символов',
+                ),
+            ]);
+        }
+
         return new ProjectionAwareDataProvider(
             $this
                 ->surveyRepository
