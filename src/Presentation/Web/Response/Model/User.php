@@ -35,6 +35,9 @@ readonly class User
         public array $permissions,
         #[LOA\EnumItems(RoleEnum::class)]
         public array $roles,
+        public bool $need_change_password,
+        #[OA\Property(format: 'date-time')]
+        public string|null $password_changed_at,
     ) {
     }
 
@@ -61,6 +64,8 @@ readonly class User
                 ),
             ),
             array_values(array_map(fn(RoleEnum $r) => $r->value, $user->getRoles())),
+            $user->isNeedChangePassword(),
+            $user->getPasswordChangedAt()?->format(DATE_RFC3339),
         );
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Presentation\Web\Security\Voter;
 
 use App\Domain\Enum\PermissionEnum;
+use App\Domain\Exception\ErrorException;
 use App\Presentation\Web\Security\User\SymfonyUser;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\CacheableVoterInterface;
@@ -36,6 +37,9 @@ class PermissionVoter implements CacheableVoterInterface
             $result = self::ACCESS_DENIED;
             $user = $token->getUser();
             if ($user instanceof SymfonyUser) {
+                if ($user->getUser()->isNeedChangePassword()) {
+                    throw ErrorException::new('Для продолжения необходимо сменить пароль', 403);
+                }
                 if (in_array(PermissionEnum::from($attribute)->value, $user->getRoles(), true)) {
                     return self::ACCESS_GRANTED;
                 }

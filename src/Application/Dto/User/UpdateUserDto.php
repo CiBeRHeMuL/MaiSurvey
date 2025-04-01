@@ -14,6 +14,7 @@ readonly class UpdateUserDto
      * @param string[] $roles
      * @param value-of<UserStatusEnum> $status
      * @param bool $deleted
+     * @param bool $need_change_password
      */
     public function __construct(
         /** Роли */
@@ -34,6 +35,9 @@ readonly class UpdateUserDto
         /** Удален */
         #[Assert\Type('boolean')]
         public bool $deleted,
+        /** Необходимо сменить пароль */
+        #[Assert\Type('boolean')]
+        public bool $need_change_password,
     ) {
     }
 }

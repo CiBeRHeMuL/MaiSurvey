@@ -2,6 +2,7 @@
 
 namespace App\Domain\Service\Auth;
 
+use App\Domain\Dto\Auth\ChangePasswordDto;
 use App\Domain\Dto\Auth\RefreshCredentialsDto;
 use App\Domain\Dto\Auth\SignInDto;
 use App\Domain\Dto\Auth\SignUpStep1Dto;
@@ -13,6 +14,7 @@ use App\Domain\Enum\ValidationErrorSlugEnum;
 use App\Domain\Exception\ErrorException;
 use App\Domain\Exception\ValidationException;
 use App\Domain\Service\Security\PasswordCheckerServiceInterface;
+use App\Domain\Service\Security\PasswordHasherServiceInterface;
 use App\Domain\Service\Security\PasswordVerificationServiceInterface;
 use App\Domain\Service\User\UserService;
 use App\Domain\Service\UserData\UserDataService;
@@ -28,6 +30,7 @@ class AuthService
         LoggerInterface $logger,
         private UserService $userService,
         private PasswordVerificationServiceInterface $passwordVerificationService,
+        private PasswordHasherServiceInterface $passwordHasherService,
         private UserDataService $userDataService,
         private PasswordCheckerServiceInterface $passwordCheckerService,
     ) {
@@ -244,5 +247,69 @@ class AuthService
         return $this
             ->userService
             ->refreshCredentials($user);
+    }
+
+    public function changePassword(User $user, ChangePasswordDto $dto): User
+    {
+        $passwordVerified = $this
+            ->passwordVerificationService
+            ->verifyPassword($dto->getOldPassword(), $user->getPassword());
+        if ($passwordVerified === false) {
+            throw ValidationException::new(
+                [
+                    new ValidationError(
+                        'old_password',
+                        ValidationErrorSlugEnum::WrongField->getSlug(),
+                        'Некорректный пароль',
+                    ),
+                ],
+            );
+        }
+
+        try {
+            $this->passwordCheckerService->checkPasswordStrength($dto->getNewPassword());
+        } catch (ValidationException $e) {
+            throw ValidationException::new(
+                array_map(
+                    fn(ValidationError $ve) => new ValidationError(
+                        'new_password',
+                        $ve->getSlug(),
+                        $ve->getMessage(),
+                    ),
+                    $e->getErrors(),
+                ),
+            );
+        }
+        if ($dto->getNewPassword() !== $dto->getRepeatPassword()) {
+            throw ValidationException::new([
+                new ValidationError(
+                    'new_password',
+                    ValidationErrorSlugEnum::WrongField->getSlug(),
+                    'Пароли не совпадают',
+                ),
+                new ValidationError(
+                    'repeat_password',
+                    ValidationErrorSlugEnum::WrongField->getSlug(),
+                    'Пароли не совпадают',
+                ),
+            ]);
+        }
+
+        if ($dto->getOldPassword() === $dto->getNewPassword()) {
+            throw ValidationException::new([
+                new ValidationError(
+                    'new_password',
+                    ValidationErrorSlugEnum::WrongField->getSlug(),
+                    'Старый и новый пароли не должны совпадать',
+                ),
+                new ValidationError(
+                    'old_password',
+                    ValidationErrorSlugEnum::WrongField->getSlug(),
+                    'Старый и новый пароли не должны совпадать',
+                ),
+            ]);
+        }
+
+        return $this->userService->changePassword($user, $dto->getNewPassword());
     }
 }

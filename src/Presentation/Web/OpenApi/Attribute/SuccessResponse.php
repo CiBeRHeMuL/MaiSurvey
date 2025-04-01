@@ -16,6 +16,17 @@ class SuccessResponse extends Response
     public function __construct(
         string|null $dataModel = null,
     ) {
+        $isTypedData = !in_array(
+            $dataModel,
+            [
+                'boolean',
+                'integer',
+                'number',
+                'string',
+                'array',
+                'object',
+            ],
+        );
         parent::__construct(
             response: 200,
             description: 'OK',
@@ -30,7 +41,8 @@ class SuccessResponse extends Response
                             properties: [
                                 new Property(
                                     'data',
-                                    ref: new Model(type: $dataModel),
+                                    ref: $isTypedData ? new Model(type: $dataModel) : null,
+                                    type: $isTypedData ? null : $dataModel,
                                 ),
                             ],
                             type: 'object',

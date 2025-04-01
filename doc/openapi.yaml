@@ -181,6 +181,51 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
       security: []
+  /auth/change-password:
+    post:
+      tags:
+        - auth
+      summary: 'Сменить пароль'
+      operationId: post_change-password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePasswordDto'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/SuccessResponse' }
+                  - { properties: { data: { type: boolean } }, type: object }
+        '400':
+          description: 'Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: 'Unprocessable Entity'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResponse'
+        '500':
+          description: 'Internal Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /groups:
     get:
       tags:
@@ -3147,6 +3192,22 @@ components:
           title: 'Токен для обновления'
           type: string
       type: object
+    ChangePasswordDto:
+      required:
+        - old_password
+        - new_password
+        - repeat_password
+      properties:
+        old_password:
+          title: 'Старый пароль'
+          type: string
+        new_password:
+          title: 'Новый пароль'
+          type: string
+        repeat_password:
+          title: 'Новый пароль еще раз'
+          type: string
+      type: object
     GetAllGroupsDto:
       properties:
         name:
@@ -3895,6 +3956,7 @@ components:
         - roles
         - status
         - deleted
+        - need_change_password
       properties:
         roles:
           title: Роли
@@ -3905,6 +3967,9 @@ components:
           $ref: '#/components/schemas/UserStatusEnum'
         deleted:
           title: Удален
+          type: boolean
+        need_change_password:
+          title: 'Необходимо сменить пароль'
           type: boolean
       type: object
     GetAllUsersDto:
@@ -4265,6 +4330,7 @@ components:
         - deleted
         - permissions
         - roles
+        - need_change_password
       properties:
         id:
           type: string
@@ -4292,6 +4358,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/RoleEnum'
+        need_change_password:
+          type: boolean
+        password_changed_at:
+          type: string
+          format: date-time
+          nullable: true
       type: object
     UserCredentials:
       required:

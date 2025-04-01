@@ -10,6 +10,7 @@ use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use SensitiveParameter;
 use Symfony\Bridge\Doctrine\IdGenerator\UuidGenerator;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
@@ -50,6 +51,10 @@ class User
     private DateTimeImmutable|null $deletedAt = null;
     #[ORM\Column(name: 'updater_id', type: 'uuid', nullable: true)]
     private Uuid|null $updaterId = null;
+    #[ORM\Column(name: 'need_change_password', type: 'boolean', nullable: false, options: ['default' => false])]
+    private bool $needChangePassword = false;
+    #[ORM\Column(name: 'password_changed_at', type: 'datetime_immutable', nullable: true)]
+    private DateTimeImmutable|null $passwordChangedAt = null;
 
     #[ORM\OneToOne(targetEntity: UserData::class, mappedBy: 'user', cascade: ['persist'])]
     private UserData|null $data = null;
@@ -107,7 +112,7 @@ class User
         return $this->password;
     }
 
-    public function setPassword(string $password): User
+    public function setPassword(#[SensitiveParameter] string $password): User
     {
         $this->password = $password;
         return $this;
@@ -118,7 +123,7 @@ class User
         return $this->accessToken;
     }
 
-    public function setAccessToken(string $accessToken): User
+    public function setAccessToken(#[SensitiveParameter] string $accessToken): User
     {
         $this->accessToken = $accessToken;
         return $this;
@@ -140,7 +145,7 @@ class User
         return $this->refreshToken;
     }
 
-    public function setRefreshToken(string $refreshToken): User
+    public function setRefreshToken(#[SensitiveParameter] string $refreshToken): User
     {
         $this->refreshToken = $refreshToken;
         return $this;
@@ -322,5 +327,27 @@ class User
             fn(bool $k, RoleEnum $v) => in_array($permission, $v->getPermissions(), true) || $k,
             false,
         );
+    }
+
+    public function isNeedChangePassword(): bool
+    {
+        return $this->needChangePassword;
+    }
+
+    public function setNeedChangePassword(bool $needChangePassword): User
+    {
+        $this->needChangePassword = $needChangePassword;
+        return $this;
+    }
+
+    public function getPasswordChangedAt(): ?DateTimeImmutable
+    {
+        return $this->passwordChangedAt;
+    }
+
+    public function setPasswordChangedAt(?DateTimeImmutable $passwordChangedAt): User
+    {
+        $this->passwordChangedAt = $passwordChangedAt;
+        return $this;
     }
 }

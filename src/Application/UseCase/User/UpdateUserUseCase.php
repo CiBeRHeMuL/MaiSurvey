@@ -45,6 +45,7 @@ class UpdateUserUseCase
                     array_map(RoleEnum::from(...), $dto->roles),
                     UserStatusEnum::from($dto->status),
                     $dto->deleted,
+                    $dto->need_change_password,
                 ),
                 $updater,
             );

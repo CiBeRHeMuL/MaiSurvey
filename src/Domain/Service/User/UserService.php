@@ -25,6 +25,7 @@ use App\Domain\Validation\ValidationError;
 use App\Domain\ValueObject\Email;
 use DateTimeImmutable;
 use Psr\Log\LoggerInterface;
+use SensitiveParameter;
 use Symfony\Component\Uid\Uuid;
 use Throwable;
 
@@ -355,13 +356,24 @@ class UserService
             ]);
         }
 
+        if ($user->isNeedChangePassword() && $dto->isNeedChangePassword() === false) {
+            throw ValidationException::new([
+                new ValidationError(
+                    'need_change_password',
+                    ValidationErrorSlugEnum::WrongField->getSlug(),
+                    'Нельзя отменить необходимость сменить пароль',
+                )
+            ]);
+        }
+
         $user->setStatus($dto->getStatus())
             ->setRoles($dto->getRoles())
             ->setDeleted($dto->isDeleted())
             ->setDeletedAt($dto->isDeleted() ? new DateTimeImmutable() : $user->getDeletedAt())
             ->setUpdaterId($updater->getId())
             ->setUpdater($updater)
-            ->setUpdatedAt(new DateTimeImmutable());
+            ->setUpdatedAt(new DateTimeImmutable())
+            ->setNeedChangePassword($dto->isNeedChangePassword());
 
         $updated = $this->userRepository->update($user);
         if (!$updated) {
@@ -413,5 +425,19 @@ class UserService
             $this->logger->error($e);
             throw ErrorException::new('Не удалось обновить запись');
         }
+    }
+
+    public function changePassword(User $user, #[SensitiveParameter] string $newPassword): User
+    {
+        $user->setPassword($this->passwordHasherService->hashPassword($newPassword))
+            ->setUpdatedAt(new DateTimeImmutable())
+            ->setPasswordChangedAt(new DateTimeImmutable())
+            ->setNeedChangePassword(false);
+
+        $updated = $this->userRepository->update($user);
+        if (!$updated) {
+            throw ErrorException::new('Не удалось обновить запись');
+        }
+        return $this->refreshCredentials($user);
     }
 }

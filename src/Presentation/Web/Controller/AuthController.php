@@ -2,15 +2,18 @@
 
 namespace App\Presentation\Web\Controller;
 
+use App\Application\Dto\Auth\ChangePasswordDto;
 use App\Application\Dto\Auth\SignInDto;
 use App\Application\Dto\Auth\SignUpStep1Dto;
 use App\Application\Dto\Auth\SignUpStep2Dto;
+use App\Application\UseCase\Auth\ChangePasswordUseCase;
 use App\Application\UseCase\Auth\RefreshCredentialsUseCase;
 use App\Application\UseCase\Auth\SignInUseCase;
 use App\Application\UseCase\Auth\SignUpStep1UseCase;
 use App\Application\UseCase\Auth\SignUpStep2UseCase;
 use App\Domain\Dto\Auth\RefreshCredentialsDto as DomainRefreshCredentialsDto;
 use App\Domain\Enum\UserStatusEnum;
+use App\Domain\Exception\ErrorException;
 use App\Domain\Service\Jwt\JwtServiceInterface;
 use App\Domain\Service\Jwt\UserJwtClaims;
 use App\Presentation\Web\Dto\Auth\RefreshCredentialsDto;
@@ -158,5 +161,32 @@ class AuthController extends BaseController
                 $securityService->getCredentialsForUser($user),
             ),
         );
+    }
+
+    /** Сменить пароль */
+    #[Route('/auth/change-password', 'change-password', methods: ['POST'])]
+    #[IsGranted(UserStatusEnum::Active->value, exceptionCode: 401)]
+    #[OA\Tag('auth')]
+    #[LOA\SuccessResponse('boolean')]
+    #[LOA\ErrorResponse(400)]
+    #[LOA\ErrorResponse(401)]
+    #[LOA\ValidationResponse]
+    #[LOA\ErrorResponse(500)]
+    public function changePassword(
+        ChangePasswordUseCase $useCase,
+        LoggerInterface $logger,
+        #[MapRequestPayload('json')]
+        ChangePasswordDto $dto,
+    ): JsonResponse {
+        if ($this->getUser() === null) {
+            throw ErrorException::new(ErrorSlugEnum::Unauthorized->getSlug(), 401);
+        }
+        if ($this->getUser()->getUser()->isActive() === false) {
+            throw ErrorException::new(ErrorSlugEnum::Unauthorized->getSlug(), 404);
+        }
+
+        $useCase->setLogger($logger);
+        $useCase->execute($this->getUser()->getUser(), $dto);
+        return Response::success(new SuccessResponse(true));
     }
 }
