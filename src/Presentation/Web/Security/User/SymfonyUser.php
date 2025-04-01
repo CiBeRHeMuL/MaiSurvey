@@ -24,6 +24,9 @@ class SymfonyUser implements UserInterface
      */
     public function getRoles(): array
     {
+        if ($this->user->isActive() === false) {
+            return [];
+        }
         $roles = $this->user->getRoles();
         return array_values(
             array_unique(

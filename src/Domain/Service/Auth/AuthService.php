@@ -105,9 +105,7 @@ class AuthService
             ->userService
             ->getByEmail($dto->getEmail());
         if ($existingUser === null) {
-            if (
-                $dto->getPassword() !== $dto->getRepeatPassword()
-            ) {
+            if ($dto->getPassword() !== $dto->getRepeatPassword()) {
                 throw ValidationException::new([
                     new ValidationError(
                         'password',
@@ -134,7 +132,7 @@ class AuthService
                     false,
                 );
         } elseif ($existingUser->isDraft()) {
-            return $existingUser;
+            return $this->userService->refreshCredentialsIfNeeded($existingUser);
         } else {
             throw ValidationException::new([
                 new ValidationError(
