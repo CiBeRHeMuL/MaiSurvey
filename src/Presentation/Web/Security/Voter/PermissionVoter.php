@@ -38,7 +38,7 @@ class PermissionVoter implements CacheableVoterInterface
             $user = $token->getUser();
             if ($user instanceof SymfonyUser) {
                 if ($user->getUser()->isNeedChangePassword()) {
-                    throw ErrorException::new('Для продолжения необходимо сменить пароль', 403);
+                    throw ErrorException::new('Для продолжения необходимо сменить пароль', 401);
                 }
                 if (in_array(PermissionEnum::from($attribute)->value, $user->getRoles(), true)) {
                     return self::ACCESS_GRANTED;

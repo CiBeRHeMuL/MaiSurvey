@@ -243,6 +243,12 @@ class AuthService
                 401,
             );
         }
+        if ($user->isNeedChangePassword()) {
+            throw ErrorException::new(
+                'Для продолжения необходимо сменить пароль',
+                401,
+            );
+        }
 
         return $this
             ->userService
