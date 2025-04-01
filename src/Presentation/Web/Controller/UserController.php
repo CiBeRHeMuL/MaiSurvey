@@ -14,6 +14,7 @@ use App\Domain\Dto\User\ImportDto as DomainImportDto;
 use App\Domain\Dto\User\MultiUpdateDto;
 use App\Domain\Enum\PermissionEnum;
 use App\Domain\Enum\RoleEnum;
+use App\Domain\Enum\UserStatusEnum;
 use App\Domain\Helper\HString;
 use App\Presentation\Web\Dto\User\ImportUsersDto;
 use App\Presentation\Web\Dto\User\UpdateUsersDto;
@@ -117,14 +118,20 @@ class UserController extends BaseController
         GetAllUsersDto $dto = new GetAllUsersDto(),
     ): JsonResponse {
         if ($this->getUser()->getUser()->isStudentLeader()) {
+            $roles = [RoleEnum::Student->value];
+            $groupIds = [$this->getUser()->getUser()->getData()?->getGroup()->getGroupId()->toRfc4122()];
+            if (in_array(RoleEnum::Teacher->value, $dto->roles)) {
+                $roles = [RoleEnum::Teacher->value];
+                $groupIds = [];
+            }
             $dto = new GetAllUsersDto(
-                $dto->roles,
+                $roles,
                 $dto->name,
                 $dto->email,
-                $dto->deleted,
-                $dto->status,
-                [$this->getUser()->getUser()->getData()?->getGroup()->getGroupId()->toRfc4122()],
-                $dto->with_group,
+                false,
+                UserStatusEnum::Active->value,
+                $groupIds,
+                true,
                 $dto->created_from,
                 $dto->created_to,
                 $dto->sort_by,
@@ -179,14 +186,20 @@ class UserController extends BaseController
         }
 
         if ($this->getUser()->getUser()->isStudentLeader()) {
+            $roles = [RoleEnum::Student->value];
+            $groupIds = [$this->getUser()->getUser()->getData()?->getGroup()->getGroupId()->toRfc4122()];
+            if (in_array(RoleEnum::Teacher->value, $dto->roles)) {
+                $roles = [RoleEnum::Teacher->value];
+                $groupIds = [];
+            }
             $dto = new GetAllUsersDto(
-                $dto->roles,
+                $roles,
                 $dto->name,
                 $dto->email,
-                $dto->deleted,
-                $dto->status,
-                [$this->getUser()->getUser()->getData()?->getGroup()->getGroupId()->toRfc4122()],
-                $dto->with_group,
+                false,
+                UserStatusEnum::Active->value,
+                $groupIds,
+                true,
                 $dto->created_from,
                 $dto->created_to,
                 $dto->sort_by,
