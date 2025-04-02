@@ -2,14 +2,37 @@
 
 namespace App\Infrastructure\Db\Expr;
 
+use App\Domain\Helper\HString;
 use Qstart\Db\QueryBuilder\DML\Expression\ExprInterface;
 
 class ILikeExpr implements ExprInterface
 {
+    private array $params = [];
+
     public function __construct(
-        private string|ExprInterface|null $left,
-        private string|ExprInterface|null $right,
+        private ExprInterface $left,
+        private string|ExprInterface $right,
     ) {
+        if (!$this->right instanceof ExprInterface) {
+            $rus = HString::changeEngKeyboardLayoutToRus($this->right);
+            $eng = HString::changeRusKeyboardLayoutToEng($this->right);
+
+            $escapedChars = '.^$*+?()[{}]|';
+            $rus = addcslashes($rus, $escapedChars);
+            $eng = addcslashes($eng, $escapedChars);
+
+            $right = [
+                $eng,
+                $rus,
+                preg_replace('/[еёЕЁ]/u', '[еёЕЁ]', $rus),
+            ];
+
+            $oid = spl_object_id($this);
+            $this->params = array_combine(
+                array_map(fn($i) => ":ile_{$oid}_$i", range(0, count($right) - 1)),
+                $right,
+            );
+        }
     }
 
     /**
@@ -17,9 +40,17 @@ class ILikeExpr implements ExprInterface
      */
     public function getExpression($dialect = null): string
     {
-        $leftExpr = $this->left instanceof ExprInterface ? $this->left->getExpression($dialect) : "'$this->left'";
-        $rightExpr = $this->right instanceof ExprInterface ? $this->right->getExpression($dialect) : "'$this->right'";
-        return "($leftExpr) ILIKE concat('%', ($rightExpr), '%')";
+        if ($this->right instanceof ExprInterface) {
+            return "({$this->left->getExpression($dialect)}) ILIKE ({$this->right->getExpression($dialect)})";
+        } else {
+            return implode(
+                ' OR ',
+                array_map(
+                    fn($e) => "({$this->left->getExpression($dialect)}) ~* $e",
+                    array_keys($this->params),
+                ),
+            );
+        }
     }
 
     /**
@@ -27,9 +58,15 @@ class ILikeExpr implements ExprInterface
      */
     public function getParams(): array
     {
+        if ($this->right instanceof ExprInterface) {
+            return array_merge(
+                $this->left->getParams(),
+                $this->right->getParams(),
+            );
+        }
         return array_merge(
-            $this->left instanceof ExprInterface ? $this->left->getParams() : [],
-            $this->right instanceof ExprInterface ? $this->right->getParams() : [],
+            $this->left->getParams(),
+            $this->params,
         );
     }
 
@@ -38,8 +75,6 @@ class ILikeExpr implements ExprInterface
      */
     public function isEmpty(): bool
     {
-        $leftIsEmpty = !$this->left || ($this->left instanceof ExprInterface && $this->left->isEmpty());
-        $rightIsEmpty = !$this->right || ($this->right instanceof ExprInterface && $this->right->isEmpty());
-        return $leftIsEmpty || $rightIsEmpty;
+        return false;
     }
 }

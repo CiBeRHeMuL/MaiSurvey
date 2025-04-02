@@ -101,4 +101,34 @@ class HString
         ];
         return str_replace(array_keys($map), array_values($map), $rus);
     }
+
+    /**
+     * Меняет раскладку клавиатуры используя раскладку мака
+     *
+     * @param string $str
+     *
+     * @return string
+     */
+    public static function changeEngKeyboardLayoutToRus(string $str): string
+    {
+        $eng = '`1234567890-=qwertyuiop[]\\asdfghjkl;\'zxcvbnm,./~!@#$%^&*()_+QWERTYUIOP{}|ASDFGHJKL:"ZXCVBNM<>?';
+        $rus = ']1234567890-=йцукенгшщзхъёфывапролджэячсмитьбю/[!"№%:,.;()_+ЙЦУКЕНГШЩЗХЪЁФЫВАПРОЛДЖЭЯЧСМИТЬБЮ?';
+
+        return str_replace(mb_str_split($eng), mb_str_split($rus), $str);
+    }
+
+    /**
+     * Меняет раскладку клавиатуры используя раскладку мака
+     *
+     * @param string $str
+     *
+     * @return string
+     */
+    public static function changeRusKeyboardLayoutToEng(string $str): string
+    {
+        $eng = '`1234567890-=qwertyuiop[]\\asdfghjkl;\'zxcvbnm,./~!@#$%^&*()_+QWERTYUIOP{}|ASDFGHJKL:"ZXCVBNM<>?';
+        $rus = ']1234567890-=йцукенгшщзхъёфывапролджэячсмитьбю/[!"№%:,.;()_+ЙЦУКЕНГШЩЗХЪЁФЫВАПРОЛДЖЭЯЧСМИТЬБЮ?';
+
+        return str_replace(mb_str_split($rus), mb_str_split($eng), $str);
+    }
 }
