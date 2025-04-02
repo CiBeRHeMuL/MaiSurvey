@@ -2,6 +2,9 @@ version: "3.9"
 services:
   mai-survey-postgresql:
     image: postgres:17
+    build:
+      dockerfile: ./docker/postgresql/Dockerfile
+      context: .
     container_name: mai-survey-postgresql-container
     hostname: mai-survey-postgresql
     restart: always
