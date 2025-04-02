@@ -131,7 +131,7 @@ class UserController extends BaseController
                 false,
                 UserStatusEnum::Active->value,
                 $groupIds,
-                true,
+                count($groupIds) > 0,
                 $dto->created_from,
                 $dto->created_to,
                 $dto->sort_by,
