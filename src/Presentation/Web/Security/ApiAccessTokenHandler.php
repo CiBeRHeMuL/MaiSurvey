@@ -7,6 +7,7 @@ use App\Domain\Service\Jwt\JwtServiceInterface;
 use App\Domain\Service\Jwt\UserJwtClaims;
 use App\Presentation\Web\Security\User\SymfonyUser;
 use DateTimeImmutable;
+use Psr\Log\LoggerInterface;
 use SensitiveParameter;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Http\AccessToken\AccessTokenHandlerInterface;
@@ -17,6 +18,7 @@ class ApiAccessTokenHandler implements AccessTokenHandlerInterface
     public function __construct(
         private JwtServiceInterface $jwtService,
         private GetUserUseCase $useCase,
+        private LoggerInterface $logger,
     ) {
     }
 
@@ -35,9 +37,12 @@ class ApiAccessTokenHandler implements AccessTokenHandlerInterface
              * @return SymfonyUser|null
              */
             function (string $userIdentifier, array $attributes): SymfonyUser|null {
+                $this->logger->error(json_encode($attributes));
+                $this->logger->error($userIdentifier);
                 $decoded = $attributes['decoded'];
                 $user = $this->useCase
                     ->execute($decoded->getId());
+                $this->logger->info(json_encode($user));
                 if (
                     $user !== null
                     && $user->getAccessToken() === $decoded->getToken()
