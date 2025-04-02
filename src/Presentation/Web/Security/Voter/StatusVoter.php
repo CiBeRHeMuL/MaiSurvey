@@ -4,18 +4,11 @@ namespace App\Presentation\Web\Security\Voter;
 
 use App\Domain\Enum\UserStatusEnum;
 use App\Presentation\Web\Security\User\SymfonyUser;
-use Psr\Log\LoggerInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\CacheableVoterInterface;
 
 class StatusVoter implements CacheableVoterInterface
 {
-    public function __construct(
-        private LoggerInterface $logger,
-    )
-    {
-    }
-
     public function supportsAttribute(string $attribute): bool
     {
         return UserStatusEnum::tryFrom($attribute) !== null;
@@ -42,9 +35,7 @@ class StatusVoter implements CacheableVoterInterface
 
             $result = self::ACCESS_DENIED;
             $user = $token->getUser();
-            $this->logger->error(json_encode($user));
             if ($user instanceof SymfonyUser) {
-                $this->logger->error(json_encode($user->getUser()));
                 if (
                     $user->getUser()->isDeleted() === false
                     && $user->getUser()->getStatus()->value === $attribute

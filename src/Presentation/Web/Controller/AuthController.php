@@ -93,7 +93,7 @@ class AuthController extends BaseController
     }
 
     /** Регистрация в приложении. Шаг 2 (Персональные данные) */
-    #[IsGranted(UserStatusEnum::Draft->value, exceptionCode: 401)]
+    #[IsGranted(UserStatusEnum::Active->value, statusCode: 401, exceptionCode: 401)]
     #[Route('/auth/sign-up/2', 'sign-up-2', methods: ['POST'])]
     #[OA\Tag('auth')]
     #[LOA\SuccessResponse(User::class)]
@@ -165,7 +165,7 @@ class AuthController extends BaseController
 
     /** Сменить пароль */
     #[Route('/auth/change-password', 'change-password', methods: ['POST'])]
-    #[IsGranted(UserStatusEnum::Active->value, exceptionCode: 401)]
+    #[IsGranted(UserStatusEnum::Active->value, statusCode: 401, exceptionCode: 401)]
     #[OA\Tag('auth')]
     #[LOA\SuccessResponse('boolean')]
     #[LOA\ErrorResponse(400)]
