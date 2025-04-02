@@ -36,7 +36,10 @@ class StatusVoter implements CacheableVoterInterface
             $result = self::ACCESS_DENIED;
             $user = $token->getUser();
             if ($user instanceof SymfonyUser) {
-                if ($user->getUser()->getStatus() === UserStatusEnum::from($attribute)) {
+                if (
+                    $user->getUser()->isDeleted() === false
+                    && $user->getUser()->getStatus()->value === $attribute
+                ) {
                     return self::ACCESS_GRANTED;
                 }
             }
