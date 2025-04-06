@@ -300,6 +300,9 @@ class StudentSubjectsImporter
                         'студент не найден',
                     ),
                 ]);
+            } elseif ($student->getGroup() !== null && $student->getGroup()->getId() !== $dto->getOnlyForGroupId()) {
+                $skipped++;
+                continue;
             }
 
             $semHash = md5("$year$semesterNumber");

@@ -84,9 +84,16 @@ class StudentSubjectsByGroupsImporter
             $firstGroupRows[$groupName] ??= $k;
         }
 
-        $groups = $this
-            ->groupService
-            ->getByNames($groupNames);
+        $groups = [];
+        if ($dto->getOnlyForGroupId()) {
+            $group = $this->groupService->getById($dto->getOnlyForGroupId());
+            $group && $groups[] = $group;
+        } else {
+            $groups = $this
+                ->groupService
+                ->getByNames($groupNames);
+        }
+
         /** @var array<string, Group> $groups */
         $groups = HArray::index(
             $groups,
@@ -149,6 +156,7 @@ class StudentSubjectsByGroupsImporter
                     $dto->getYearCol(),
                     $dto->getSemesterCol(),
                     $dto->isSkipIfExists(),
+                    $dto->getOnlyForGroupId(),
                 ),
                 new ArrayIterator($data),
             );

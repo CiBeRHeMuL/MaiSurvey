@@ -2,8 +2,22 @@
 
 namespace App\Domain\Dto\StudentSubject;
 
+use Symfony\Component\Uid\Uuid;
+
 readonly class ImportDto
 {
+    /**
+     * @param string $file
+     * @param bool $headersInFirstRow
+     * @param string $studentEmailCol
+     * @param string $teacherEmailCol
+     * @param string $subjectCol
+     * @param string $typeCol
+     * @param string $yearCol
+     * @param string $semesterCol
+     * @param bool $skipIfExists
+     * @param Uuid|null $onlyForGroupId группа для которой надо импортировать данные (данные не для этой группы будут проигнорированы)
+     */
     public function __construct(
         private string $file,
         private bool $headersInFirstRow,
@@ -14,6 +28,7 @@ readonly class ImportDto
         private string $yearCol,
         private string $semesterCol,
         private bool $skipIfExists,
+        private Uuid|null $onlyForGroupId = null,
     ) {
     }
 
@@ -60,5 +75,10 @@ readonly class ImportDto
     public function isSkipIfExists(): bool
     {
         return $this->skipIfExists;
+    }
+
+    public function getOnlyForGroupId(): ?Uuid
+    {
+        return $this->onlyForGroupId;
     }
 }

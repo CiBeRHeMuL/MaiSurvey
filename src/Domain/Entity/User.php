@@ -350,4 +350,9 @@ class User
         $this->passwordChangedAt = $passwordChangedAt;
         return $this;
     }
+
+    public function getGroup(): Group|null
+    {
+        return $this->getData()?->getGroup()?->getGroup();
+    }
 }

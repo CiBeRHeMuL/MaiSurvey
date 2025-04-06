@@ -123,6 +123,11 @@ class StudentSubjectController extends BaseController
             );
         }
 
+        $onlyForGroupId = null;
+        if ($this->getUser()->getUser()->isStudentLeader()) {
+            $onlyForGroupId = $this->getUser()->getUser()->getGroup()->getId();
+        }
+
         $useCase->setLogger($logger);
         $result = $useCase->execute(
             new ImportDto(
@@ -135,6 +140,7 @@ class StudentSubjectController extends BaseController
                 $dto->year_col,
                 $dto->semester_col,
                 $dto->skip_if_exists,
+                $onlyForGroupId,
             ),
         );
 
@@ -179,6 +185,11 @@ class StudentSubjectController extends BaseController
             );
         }
 
+        $onlyForGroupId = null;
+        if ($this->getUser()->getUser()->isStudentLeader()) {
+            $onlyForGroupId = $this->getUser()->getUser()->getGroup()->getId();
+        }
+
         $useCase->setLogger($logger);
         $result = $useCase->execute(
             new ImportByGroupsDto(
@@ -191,6 +202,7 @@ class StudentSubjectController extends BaseController
                 $dto->year_col,
                 $dto->semester_col,
                 $dto->skip_if_exists,
+                $onlyForGroupId,
             ),
         );
 

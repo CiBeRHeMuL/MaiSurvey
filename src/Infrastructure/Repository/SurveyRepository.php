@@ -61,6 +61,7 @@ class SurveyRepository extends Common\AbstractRepository implements SurveyReposi
                 'myItems.surveyItem',
                 'survey.subject.semester',
                 'myItems.teacherSubject.teacher.data.group',
+                'survey.stat',
             ],
             new LimitOffset(
                 $dto->getLimit(),
