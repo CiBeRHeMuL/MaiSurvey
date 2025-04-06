@@ -1638,8 +1638,9 @@ paths:
             default: name
             enum:
               - name
-              - completed
+              - title
               - created_at
+              - status
         -
           name: sort_type
           in: query
@@ -1828,8 +1829,9 @@ paths:
             default: name
             enum:
               - name
-              - completed
+              - title
               - created_at
+              - status
         -
           name: sort_type
           in: query
@@ -3751,8 +3753,9 @@ components:
           default: name
           enum:
             - name
-            - completed
+            - title
             - created_at
+            - status
         sort_type:
           $ref: '#/components/schemas/SortTypeEnum'
         offset:
