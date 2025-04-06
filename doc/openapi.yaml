@@ -4583,7 +4583,7 @@ components:
         - subject
         - status
         - created_at
-        - update_at
+        - updated_at
       properties:
         id:
           type: string
@@ -4598,7 +4598,7 @@ components:
           nullable: true
         created_at:
           type: string
-        update_at:
+        updated_at:
           type: string
         stat:
           default: null

@@ -14,7 +14,7 @@ readonly class LiteFullSurvey
      * @param value-of<SurveyStatusEnum> $status
      * @param string|null $actual_to
      * @param string $created_at
-     * @param string $update_at
+     * @param string $updated_at
      * @param LiteSurveyStat|null $stat
      */
     public function __construct(
@@ -24,7 +24,7 @@ readonly class LiteFullSurvey
         public string $status,
         public string|null $actual_to,
         public string $created_at,
-        public string $update_at,
+        public string $updated_at,
         public LiteSurveyStat|null $stat = null,
     ) {
     }
