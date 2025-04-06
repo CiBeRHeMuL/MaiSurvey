@@ -389,12 +389,12 @@ class SurveyService
             ]);
         }
 
-        if ($survey->isClosed() && $dto->getStatus() !== SurveyStatusEnum::Closed) {
+        if ($survey->isClosed() && !in_array($dto->getStatus(), [SurveyStatusEnum::Closed, SurveyStatusEnum::Active], true)) {
             throw ValidationException::new([
                 new ValidationError(
                     'status',
                     ValidationErrorSlugEnum::WrongField->getSlug(),
-                    'Смена статуса закрытого опроса недоступна',
+                    'Смена статуса закрытого опроса на черновик недоступна',
                 ),
             ]);
         }
@@ -426,6 +426,18 @@ class SurveyService
                         'actual_to',
                         ValidationErrorSlugEnum::WrongField->getSlug(),
                         'Время закрытия опроса должно быть больше текущего',
+                    ),
+                ]);
+            }
+        }
+
+        if ($dto->getStatus() === SurveyStatusEnum::Active && $survey->getStatus() === SurveyStatusEnum::Closed) {
+            if ($dto->getActualTo() === null) {
+                throw ValidationException::new([
+                    new ValidationError(
+                        'actual_to',
+                        ValidationErrorSlugEnum::WrongField->getSlug(),
+                        'Необходимо указать время закрытия опроса',
                     ),
                 ]);
             }
