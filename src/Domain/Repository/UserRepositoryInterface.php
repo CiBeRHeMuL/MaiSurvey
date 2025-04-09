@@ -48,4 +48,11 @@ interface UserRepositoryInterface extends RepositoryInterface
      * @return string[]
      */
     public function findEmailsByEmails(array $emails): array;
+
+    /**
+     * @param string[] $emails
+     *
+     * @return string[]
+     */
+    public function findILikeEmails(array $emails): array;
 }

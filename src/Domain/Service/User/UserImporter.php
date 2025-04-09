@@ -125,17 +125,29 @@ class UserImporter
             );
 
             $existingEmails = array_unique(array_merge(
-                $this
-                    ->userDataService
-                    ->getEmailsByNames(iterator_to_array($names)),
-                $this
-                    ->userService
-                    ->getEmailsByEmails(array_filter(array_column(
-                        $arrayPresetData,
-                        $dto->getEmailCol(),
-                    )))
+                $this->userDataService->getEmailsByNames(iterator_to_array($names)),
+                $this->userService->getEmailsByEmails(
+                    array_filter(
+                        array_column(
+                            $arrayPresetData,
+                            $dto->getEmailCol(),
+                        ),
+                    ),
+                ),
+                $this->userService->getILikeEmails(iterator_to_array(
+                    new ProjectionIterator(
+                        new ArrayIterator($allUserData),
+                        function (UserData $userData) {
+                            $emailUser = HString::rusToEng(
+                                $userData->getLastName()
+                                . mb_substr($userData->getFirstName(), 0, 1)
+                                . mb_substr($userData->getPatronymic() ?? '', 0, 1),
+                            );
+                            return str_replace(' ', '_', $emailUser);
+                        },
+                    )
+                )),
             ));
-
 
             /** @var array<string, UserData> $userDataByEmail */
             $userDataByEmail = [];

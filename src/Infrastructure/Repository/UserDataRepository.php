@@ -126,6 +126,10 @@ class UserDataRepository extends AbstractRepository implements UserDataRepositor
                     $ids,
                 ),
             ]);
-        return $this->findAllByQuery($q, UserData::class);
+        return $this->findAllByQuery(
+            $q,
+            UserData::class,
+            ['group', 'group.group'],
+        );
     }
 }

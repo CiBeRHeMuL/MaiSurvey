@@ -178,4 +178,21 @@ class UserRepository extends AbstractRepository implements UserRepositoryInterfa
         return $this
             ->findColumnByQuery($q);
     }
+
+    public function findILikeEmails(array $emails): array
+    {
+        $q = Query::select()
+            ->distinct(true)
+            ->select(['u.email'])
+            ->from(['u' => $this->getClassTable(User::class)])
+            ->where([
+                'OR',
+                ...array_map(
+                    fn($e) => new ILikeExpr(new Expr('lower(email)'), $e),
+                    $emails,
+                ),
+            ]);
+        return $this
+            ->findColumnByQuery($q);
+    }
 }

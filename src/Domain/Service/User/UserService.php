@@ -270,6 +270,13 @@ class UserService
             ->findEmailsByEmails($emails);
     }
 
+    public function getILikeEmails(array $emails): array
+    {
+        return $this
+            ->userRepository
+            ->findILikeEmails($emails);
+    }
+
     private function entityFromCreateDto(CreateUserDto $dto): User
     {
         $accessToken = $this->securityService->generateAccessToken();
