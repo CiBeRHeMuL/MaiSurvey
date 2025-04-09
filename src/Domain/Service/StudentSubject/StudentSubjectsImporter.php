@@ -300,7 +300,11 @@ class StudentSubjectsImporter
                         'студент не найден',
                     ),
                 ]);
-            } elseif ($student->getGroup() !== null && $student->getGroup()->getId() !== $dto->getOnlyForGroupId()) {
+            } elseif (
+                $student->getGroup() !== null
+                && $dto->getOnlyForGroupId() !== null
+                && $student->getGroup()->getId() !== $dto->getOnlyForGroupId()
+            ) {
                 $skipped++;
                 continue;
             }
