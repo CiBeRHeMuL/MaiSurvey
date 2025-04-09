@@ -9,6 +9,7 @@ enum RoleEnum: string
     case Teacher = 'teacher';
     case SurveyCreator = 'survey_creator';
     case StudentLeader = 'student_leader';
+    case UserImporter = 'user_importer';
 
     public function getName(): string
     {
@@ -18,6 +19,7 @@ enum RoleEnum: string
             self::Teacher => 'Преподаватель',
             self::SurveyCreator => 'Создатель опросов',
             self::StudentLeader => 'Староста',
+            self::UserImporter => 'Импортер пользователей',
         };
     }
 
@@ -79,6 +81,13 @@ enum RoleEnum: string
                 PermissionEnum::UserExport,
                 PermissionEnum::UserView,
                 PermissionEnum::StudentSubjectImport,
+            ],
+            self::UserImporter => [
+                PermissionEnum::UserExport,
+                PermissionEnum::UserCreate,
+                PermissionEnum::UserDataImport,
+                PermissionEnum::UserDataViewAll,
+                PermissionEnum::UserView,
             ],
         };
     }
