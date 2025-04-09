@@ -141,8 +141,8 @@ enum RoleEnum: string
     {
         return match ($this) {
             self::Admin => [],
-            self::Student => [self::SurveyCreator, self::StudentLeader],
-            self::Teacher => [],
+            self::Student => [self::SurveyCreator, self::StudentLeader, self::UserImporter],
+            self::Teacher => [self::UserImporter],
             default => [],
         };
     }
