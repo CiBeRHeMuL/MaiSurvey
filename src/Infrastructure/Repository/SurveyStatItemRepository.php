@@ -419,7 +419,7 @@ class SurveyStatItemRepository extends Common\AbstractRepository implements Surv
                                             'id',
                                         ])
                                         ->from($this->getClassTable(MySurveyItem::class))
-//                                        ->andFilterWhere(['survey_id' => $surveyIds])
+                                        ->andFilterWhere(['survey_id' => $surveyIds])
                                         ->groupBy(['id'])
                                 ],
                                 'all_msi.id = si.id',

@@ -177,9 +177,8 @@ class CompleteSurveyService
                     ),
                 );
 
-            $this->statRefresher->refreshStats([$survey->getSurvey()], true);
-
             $this->transactionManager->commit();
+            $this->statRefresher->refreshStats([$survey->getSurvey()], true);
         } catch (Throwable $e) {
             $this->transactionManager->rollback();
             $this->logger->error($e);

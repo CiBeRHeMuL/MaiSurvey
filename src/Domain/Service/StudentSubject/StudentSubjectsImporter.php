@@ -21,6 +21,7 @@ use App\Domain\Repository\SemesterRepositoryInterface;
 use App\Domain\Service\Db\TransactionManagerInterface;
 use App\Domain\Service\FileReader\FileReaderInterface;
 use App\Domain\Service\Subject\SubjectService;
+use App\Domain\Service\SurveyStat\StatRefresherInterface;
 use App\Domain\Service\TeacherSubject\TeacherSubjectService;
 use App\Domain\Service\User\UserService;
 use App\Domain\Validation\ValidationError;
@@ -43,6 +44,7 @@ class StudentSubjectsImporter
         private FileReaderInterface $dataImport,
         private TransactionManagerInterface $transactionManager,
         private SemesterRepositoryInterface $semesterRepository,
+        private StatRefresherInterface $statRefresher,
         LoggerInterface $logger,
     ) {
         $this->setLogger($logger);
@@ -370,6 +372,7 @@ class StudentSubjectsImporter
             }
         }
         $this->transactionManager->commit();
+        $this->statRefresher->refreshStats();
         return new CreatedStudentSubjectsInfo(
             $created,
             $skipped,
