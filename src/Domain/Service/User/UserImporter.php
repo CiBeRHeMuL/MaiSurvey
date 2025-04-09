@@ -178,6 +178,7 @@ class UserImporter
                             . mb_substr($userData->getFirstName(), 0, 1)
                             . mb_substr($userData->getPatronymic() ?? '', 0, 1),
                         );
+                        $emailUser = str_replace(' ', '_', $emailUser);
                         $k = 1;
                         $tempEmail = $emailUser;
                         while (in_array("$tempEmail$emailDomain", $existingEmails)) {

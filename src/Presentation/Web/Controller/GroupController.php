@@ -96,7 +96,7 @@ class GroupController extends BaseController
         ImportUseCase $useCase,
         LoggerInterface $logger,
         #[MapRequestPayload]
-        ImportGroupsDto $dto,
+        ImportGroupsDto $dto = new ImportGroupsDto(),
         #[MapUploadedFile]
         UploadedFile|array $file = [],
     ): JsonResponse {
