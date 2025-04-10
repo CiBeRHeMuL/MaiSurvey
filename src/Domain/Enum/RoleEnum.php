@@ -67,6 +67,7 @@ enum RoleEnum: string
                 PermissionEnum::TeacherSubjectViewMy,
             ],
             self::SurveyCreator => [
+                PermissionEnum::SurveyView,
                 PermissionEnum::SurveyCreate,
                 PermissionEnum::SurveyUpdate,
                 PermissionEnum::SurveyViewAll,

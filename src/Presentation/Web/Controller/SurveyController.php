@@ -156,7 +156,7 @@ class SurveyController extends BaseController
 
     /** Обновить опрос */
     #[Route('/surveys/{id}', 'update-survey', requirements: ['id' => Requirement::UUID], methods: ['PUT'])]
-    #[IsGranted(PermissionEnum::SurveyCreate->value, statusCode: 404, exceptionCode: 404)]
+    #[IsGranted(PermissionEnum::SurveyUpdate->value, statusCode: 404, exceptionCode: 404)]
     #[OA\Tag('surveys')]
     #[LOA\SuccessResponse(FullSurvey::class)]
     #[LOA\ErrorResponse(401)]
