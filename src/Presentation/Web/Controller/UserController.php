@@ -120,7 +120,7 @@ class UserController extends BaseController
         if ($this->getUser()->getUser()->isStudentLeader()) {
             $roles = [RoleEnum::Student->value];
             $groupIds = [$this->getUser()->getUser()->getData()?->getGroup()->getGroupId()->toRfc4122()];
-            if (in_array(RoleEnum::Teacher->value, $dto->roles)) {
+            if (in_array(RoleEnum::Teacher->value, $dto->roles ?? [])) {
                 $roles = [RoleEnum::Teacher->value];
                 $groupIds = [];
             }
@@ -188,7 +188,7 @@ class UserController extends BaseController
         if ($this->getUser()->getUser()->isStudentLeader()) {
             $roles = [RoleEnum::Student->value];
             $groupIds = [$this->getUser()->getUser()->getData()?->getGroup()->getGroupId()->toRfc4122()];
-            if (in_array(RoleEnum::Teacher->value, $dto->roles)) {
+            if (in_array(RoleEnum::Teacher->value, $dto->roles ?? [])) {
                 $roles = [RoleEnum::Teacher->value];
                 $groupIds = [];
             }
