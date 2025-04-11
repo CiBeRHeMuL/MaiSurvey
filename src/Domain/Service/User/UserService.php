@@ -295,7 +295,8 @@ class UserService
             ->setRoles([$dto->getRole()])
             ->setPassword($this->passwordHasherService->hashPassword($dto->getPassword()))
             ->setDeletedAt(null)
-            ->setDeleted(false);
+            ->setDeleted(false)
+            ->setNeedChangePassword($dto->isNeedChangePassword());
         return $user;
     }
 

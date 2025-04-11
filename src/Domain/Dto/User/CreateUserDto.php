@@ -15,6 +15,7 @@ readonly class CreateUserDto
         private RoleEnum $role,
         #[SensitiveParameter]
         private string $password,
+        private bool $needChangePassword = false,
     ) {
     }
 
@@ -36,5 +37,10 @@ readonly class CreateUserDto
     public function getPassword(): string
     {
         return $this->password;
+    }
+
+    public function isNeedChangePassword(): bool
+    {
+        return $this->needChangePassword;
     }
 }

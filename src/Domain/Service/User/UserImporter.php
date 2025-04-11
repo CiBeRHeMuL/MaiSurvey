@@ -224,6 +224,7 @@ class UserImporter
                         UserStatusEnum::Active,
                         $dto->getForRole(),
                         $dto->getPassword(),
+                        true,
                     );
                 },
             );
