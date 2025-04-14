@@ -430,7 +430,7 @@ class UserService
                     $data,
                     new UpdateUserDataDto(
                         $dto->getFirstName(),
-                        $dto->getFirstName(),
+                        $dto->getLastName(),
                         $dto->getPatronymic(),
                         $data->getGroup()?->getGroup(),
                     ),
