@@ -355,4 +355,13 @@ class User
     {
         return $this->getData()?->getGroup()?->getGroup();
     }
+
+    public function getMainRole(): RoleEnum
+    {
+        return array_reduce(
+            $this->getRoles(),
+            fn(RoleEnum|null $c, RoleEnum $r) => $r->isMain() ? $r : $c,
+            null,
+        );
+    }
 }

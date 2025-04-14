@@ -313,7 +313,7 @@ class UserService
     public function updateUser(User $user, UpdateUserDto $dto, User $updater): User
     {
         if ($updater->isAdmin() === false) {
-            throw ErrorException::new('Вам запрещено выполнять это действие');
+            throw ErrorException::new('Вам запрещено выполнять это действие', 403);
         }
 
         $availableRoles = array_values(
@@ -329,6 +329,8 @@ class UserService
             ),
         );
 
+        $mainRole = $user->getMainRole();
+        $mainRoleExists = false;
         foreach ($dto->getRoles() as $role) {
             if (!in_array($role, $availableRoles, true)) {
                 throw ValidationException::new([
@@ -343,6 +345,18 @@ class UserService
                     ),
                 ]);
             }
+            if ($role === $mainRole) {
+                $mainRoleExists = true;
+            }
+        }
+        if (!$mainRoleExists) {
+            throw ValidationException::new([
+                new ValidationError(
+                    'roles',
+                    ValidationErrorSlugEnum::WrongField->getSlug(),
+                    sprintf('Нельзя удалить роль %s у пользователя', $user->getMainRole()->getName()),
+                ),
+            ]);
         }
 
         $availableStatuses = array_values(
