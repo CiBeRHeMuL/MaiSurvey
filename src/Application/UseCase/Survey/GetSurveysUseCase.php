@@ -7,6 +7,7 @@ use App\Domain\DataProvider\DataProviderInterface;
 use App\Domain\Dto\Survey\GetSurveysDto as DomainGetSurveysDto;
 use App\Domain\Entity\Survey;
 use App\Domain\Enum\SortTypeEnum;
+use App\Domain\Enum\SurveyStatusEnum;
 use App\Domain\Service\Survey\SurveyService;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Uid\Uuid;
@@ -49,6 +50,9 @@ class GetSurveysUseCase
                     $dto->sort_by,
                     SortTypeEnum::from($dto->sort_type),
                     $dto->actual,
+                    $dto->statuses !== null
+                        ? array_map(SurveyStatusEnum::from(...), $dto->statuses)
+                        : null,
                 ),
             );
     }
