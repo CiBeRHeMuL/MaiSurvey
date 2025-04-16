@@ -109,7 +109,7 @@ class SubjectsImporter
             }
             $year = (int)$year;
 
-            if (!ctype_digit($semesterNumber) && !in_array($semesterNumber, ['1', '2'])) {
+            if (!ctype_digit($semesterNumber) || !in_array($semesterNumber, ['1', '2'])) {
                 throw ValidationException::new([
                     $errorGenerator(
                         $k,
