@@ -13,7 +13,6 @@ readonly class UpdateUserDto
     /**
      * @param string[] $roles
      * @param value-of<UserStatusEnum> $status
-     * @param bool $deleted
      * @param bool $need_change_password
      */
     public function __construct(
@@ -32,9 +31,6 @@ readonly class UpdateUserDto
         #[Assert\NotBlank]
         #[LAssert\EnumChoice(UserStatusEnum::class)]
         public string $status,
-        /** Удален */
-        #[Assert\Type('boolean')]
-        public bool $deleted,
         /** Необходимо сменить пароль */
         #[Assert\Type('boolean')]
         public bool $need_change_password,

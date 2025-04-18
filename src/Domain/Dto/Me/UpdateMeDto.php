@@ -8,7 +8,6 @@ readonly class UpdateMeDto
         private string $firstName,
         private string $lastName,
         private string|null $patronymic,
-        private bool $deleted,
     ) {
     }
 
@@ -25,10 +24,5 @@ readonly class UpdateMeDto
     public function getPatronymic(): ?string
     {
         return $this->patronymic;
-    }
-
-    public function isDeleted(): bool
-    {
-        return $this->deleted;
     }
 }

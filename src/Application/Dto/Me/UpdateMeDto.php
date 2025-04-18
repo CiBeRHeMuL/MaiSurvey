@@ -19,9 +19,6 @@ readonly class UpdateMeDto
         #[Assert\Type(['string', 'null'])]
         #[Assert\Length(max: 255, maxMessage: 'Значение должно быть короче 255 символов')]
         public string|null $patronymic,
-        /** Удален */
-        #[Assert\Type('boolean')]
-        public bool $deleted,
     ) {
     }
 }

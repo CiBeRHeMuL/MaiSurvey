@@ -277,6 +277,19 @@ class UserService
             ->findILikeEmails($emails);
     }
 
+    public function deleteMe(User $me): User
+    {
+        if ($me->isDeleted()) {
+            throw ErrorException::new('Нельзя удалить профиль', 400);
+        }
+        $me->setDeleted(true)
+            ->setDeletedAt(new DateTimeImmutable());
+        if ($this->userRepository->update($me)) {
+            return $me;
+        }
+        throw ErrorException::new('Не удалось удалить профиль');
+    }
+
     private function entityFromCreateDto(CreateUserDto $dto): User
     {
         $accessToken = $this->securityService->generateAccessToken();
@@ -390,8 +403,6 @@ class UserService
 
         $user->setStatus($dto->getStatus())
             ->setRoles($dto->getRoles())
-            ->setDeleted($dto->isDeleted())
-            ->setDeletedAt($dto->isDeleted() ? new DateTimeImmutable() : $user->getDeletedAt())
             ->setUpdaterId($updater->getId())
             ->setUpdater($updater)
             ->setUpdatedAt(new DateTimeImmutable())
@@ -413,9 +424,7 @@ class UserService
         try {
             $this->transactionManager->beginTransaction();
 
-            $me->setDeleted($dto->isDeleted())
-                ->setDeletedAt($dto->isDeleted() ? new DateTimeImmutable() : $me->getDeletedAt())
-                ->setUpdatedAt(new DateTimeImmutable())
+            $me->setUpdatedAt(new DateTimeImmutable())
                 ->setUpdater($me)
                 ->setUpdaterId($me->getId());
             $updated = $this->userRepository->update($me);
@@ -461,5 +470,21 @@ class UserService
             throw ErrorException::new('Не удалось обновить запись');
         }
         return $this->refreshCredentials($user);
+    }
+
+    public function delete(User $user, User $updater): User
+    {
+        if (!$updater->isAdmin() || !$updater->isActive()) {
+            throw ErrorException::new('Вам запрещено выполнять это действие', 403);
+        }
+        if ($user->getId()->equals($updater->getId())) {
+            throw ErrorException::new('Нельзя удалить себя', 400);
+        }
+        $user->setDeleted(true)
+            ->setDeletedAt(new DateTimeImmutable());
+        if ($this->userRepository->update($user)) {
+            return $user;
+        }
+        throw ErrorException::new('Не удалось удалить пользователя');
     }
 }

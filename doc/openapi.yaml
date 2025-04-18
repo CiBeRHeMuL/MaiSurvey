@@ -363,7 +363,7 @@ paths:
       summary: 'Импорт групп'
       operationId: post_import-groups
       requestBody:
-        required: true
+        required: false
         content:
           multipart/form-data:
             schema:
@@ -467,6 +467,38 @@ paths:
                 allOf:
                   - { $ref: '#/components/schemas/SuccessResponse' }
                   - { properties: { data: { $ref: '#/components/schemas/User' } }, type: object }
+        '400':
+          description: 'Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: 'Unprocessable Entity'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResponse'
+        '500':
+          description: 'Internal Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      tags:
+        - me
+      summary: 'Удалить себя.'
+      operationId: delete_delete-me
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/SuccessResponse' }
+                  - { properties: { data: { type: boolean } }, type: object }
         '400':
           description: 'Bad Request'
           content:
@@ -2351,6 +2383,58 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
   '/users/{id}':
+    get:
+      tags:
+        - users
+      summary: 'Получить пользователя'
+      operationId: get_get-user
+      parameters:
+        -
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '[0-9a-f]{8}-[0-9a-f]{4}-[13-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/SuccessResponse' }
+                  - { properties: { data: { $ref: '#/components/schemas/User' } }, type: object }
+        '400':
+          description: 'Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 'Not Found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: 'Unprocessable Entity'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResponse'
+        '500':
+          description: 'Internal Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
     put:
       tags:
         - users
@@ -2387,6 +2471,64 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
         '401':
           description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 'Not Found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: 'Unprocessable Entity'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResponse'
+        '500':
+          description: 'Internal Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      tags:
+        - users
+      summary: 'Удаление пользователя'
+      operationId: delete_delete-user
+      parameters:
+        -
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '[0-9a-f]{8}-[0-9a-f]{4}-[13-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/SuccessResponse' }
+                  - { properties: { data: { type: boolean } }, type: object }
+        '400':
+          description: 'Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden
           content:
             application/json:
               schema:
@@ -3262,7 +3404,6 @@ components:
       required:
         - first_name
         - last_name
-        - deleted
       properties:
         first_name:
           title: Имя
@@ -3277,9 +3418,6 @@ components:
           type: string
           maxLength: 255
           nullable: true
-        deleted:
-          title: Удален
-          type: boolean
       type: object
     CreateSemesterDto:
       required:
@@ -3953,12 +4091,15 @@ components:
           title: Группа
           type: string
           nullable: true
+        need_change_password:
+          title: 'Необходимо сменить пароль'
+          type: boolean
+          default: false
       type: object
     UpdateUserDto:
       required:
         - roles
         - status
-        - deleted
         - need_change_password
       properties:
         roles:
@@ -3968,9 +4109,6 @@ components:
             $ref: '#/components/schemas/RoleEnum'
         status:
           $ref: '#/components/schemas/UserStatusEnum'
-        deleted:
-          title: Удален
-          type: boolean
         need_change_password:
           title: 'Необходимо сменить пароль'
           type: boolean

@@ -3,6 +3,7 @@
 namespace App\Presentation\Web\Controller;
 
 use App\Application\Dto\Me\UpdateMeDto;
+use App\Application\UseCase\Me\DeleteMeUseCase;
 use App\Application\UseCase\Me\UpdateMeUseCase;
 use App\Presentation\Web\OpenApi\Attribute as LOA;
 use App\Presentation\Web\Response\Model\Common\SuccessResponse;
@@ -56,5 +57,21 @@ class MeController extends BaseController
                 User::fromUser($me),
             ),
         );
+    }
+
+    /** Удалить себя. */
+    #[Route('/me', 'delete-me', methods: ['DELETE'])]
+    #[OA\Tag('me')]
+    #[LOA\SuccessResponse('boolean')]
+    #[LOA\ErrorResponse]
+    #[LOA\ValidationResponse]
+    #[LOA\ErrorResponse(500)]
+    public function delete(
+        LoggerInterface $logger,
+        DeleteMeUseCase $useCase,
+    ): JsonResponse {
+        $useCase->setLogger($logger);
+        $me = $useCase->execute($this->getUser()->getUser());
+        return Response::success(new SuccessResponse(true));
     }
 }

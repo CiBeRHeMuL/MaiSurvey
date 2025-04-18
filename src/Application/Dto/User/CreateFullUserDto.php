@@ -47,6 +47,9 @@ readonly class CreateFullUserDto
         #[Assert\NotBlank(message: 'Значение не должно быть пустым', allowNull: true)]
         #[Assert\Uuid(message: 'Значение должно быть корректным uuid')]
         public string|null $group_id,
+        /** Необходимо сменить пароль */
+        #[Assert\Type('boolean')]
+        public bool $need_change_password = false,
     ) {
     }
 }

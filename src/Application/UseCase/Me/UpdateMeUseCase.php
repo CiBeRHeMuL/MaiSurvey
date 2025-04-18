@@ -34,7 +34,6 @@ class UpdateMeUseCase
                 $dto->first_name,
                 $dto->last_name,
                 $dto->patronymic,
-                $dto->deleted,
             ),
         );
     }

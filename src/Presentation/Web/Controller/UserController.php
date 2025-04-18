@@ -6,7 +6,9 @@ use App\Application\Dto\User\CreateFullUserDto;
 use App\Application\Dto\User\GetAllUsersDto;
 use App\Application\Dto\User\UpdateUserDto;
 use App\Application\UseCase\User\CreateUserUseCase;
+use App\Application\UseCase\User\DeleteUserUseCase;
 use App\Application\UseCase\User\GetAllUseCase;
+use App\Application\UseCase\User\GetUserUseCase;
 use App\Application\UseCase\User\ImportUsersUseCase;
 use App\Application\UseCase\User\MultiUpdateUseCase;
 use App\Application\UseCase\User\UpdateUserUseCase;
@@ -15,6 +17,7 @@ use App\Domain\Dto\User\MultiUpdateDto;
 use App\Domain\Enum\PermissionEnum;
 use App\Domain\Enum\RoleEnum;
 use App\Domain\Enum\UserStatusEnum;
+use App\Domain\Exception\ErrorException;
 use App\Domain\Helper\HString;
 use App\Presentation\Web\Dto\User\ImportUsersDto;
 use App\Presentation\Web\Dto\User\UpdateUsersDto;
@@ -150,6 +153,29 @@ class UserController extends BaseController
                 ),
             ),
         );
+    }
+
+    /** Получить пользователя */
+    #[Route('/users/{id}', 'get-user', requirements: ['id' => Requirement::UUID], methods: ['GET'])]
+    #[IsGranted(PermissionEnum::UserView->value, statusCode: 404, exceptionCode: 404)]
+    #[OA\Tag('users')]
+    #[LOA\SuccessResponse(User::class)]
+    #[LOA\ErrorResponse(400)]
+    #[LOA\ErrorResponse(401)]
+    #[LOA\ErrorResponse(404)]
+    #[LOA\ValidationResponse]
+    #[LOA\ErrorResponse(500)]
+    public function getById(
+        Uuid $id,
+        GetUserUseCase $useCase,
+        LoggerInterface $logger,
+    ): JsonResponse {
+        $useCase->setLogger($logger);
+        $user = $useCase->execute($id);
+        if ($user === null) {
+            throw ErrorException::new('Пользователь не найден', 404);
+        }
+        return Response::success(new SuccessResponse(User::fromUser($user)));
     }
 
     /** Экспорт пользователей в файл */
@@ -379,5 +405,26 @@ class UserController extends BaseController
                 ),
             ),
         );
+    }
+
+    /** Удаление пользователя */
+    #[Route('/users/{id}', 'delete-user', requirements: ['id' => Requirement::UUID], methods: ['DELETE'])]
+    #[IsGranted(PermissionEnum::UserCreate->value, statusCode: 404, exceptionCode: 404)]
+    #[OA\Tag('users')]
+    #[LOA\SuccessResponse('boolean')]
+    #[LOA\ErrorResponse(400)]
+    #[LOA\ErrorResponse(401)]
+    #[LOA\ErrorResponse(403)]
+    #[LOA\ErrorResponse(404)]
+    #[LOA\ValidationResponse]
+    #[LOA\ErrorResponse(500)]
+    public function delete(
+        Uuid $id,
+        DeleteUserUseCase $useCase,
+        LoggerInterface $logger,
+    ): JsonResponse {
+        $useCase->setLogger($logger);
+        $useCase->execute($id, $this->getUser()->getUser());
+        return Response::success(new SuccessResponse(true));
     }
 }

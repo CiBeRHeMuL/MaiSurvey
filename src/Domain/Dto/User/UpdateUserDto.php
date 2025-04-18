@@ -10,13 +10,11 @@ readonly class UpdateUserDto
     /**
      * @param RoleEnum[] $roles
      * @param UserStatusEnum $status
-     * @param bool $deleted
      * @param bool $needChangePassword
      */
     public function __construct(
         private array $roles,
         private UserStatusEnum $status,
-        private bool $deleted,
         private bool $needChangePassword,
     ) {
     }
@@ -29,11 +27,6 @@ readonly class UpdateUserDto
     public function getStatus(): UserStatusEnum
     {
         return $this->status;
-    }
-
-    public function isDeleted(): bool
-    {
-        return $this->deleted;
     }
 
     public function isNeedChangePassword(): bool

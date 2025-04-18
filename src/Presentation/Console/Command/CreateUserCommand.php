@@ -74,6 +74,13 @@ class CreateUserCommand extends AbstractCommand
                 'g',
                 InputOption::VALUE_OPTIONAL,
                 'Группа',
+            )
+            ->addOption(
+                'need_change_password',
+                'C',
+                InputOption::VALUE_NONE | InputOption::VALUE_OPTIONAL,
+                'Необходимо сменить пароль при первом входе',
+                false,
             );
         parent::configure();
     }
@@ -91,6 +98,7 @@ class CreateUserCommand extends AbstractCommand
                     $input->getArgument('last_name'),
                     $input->getOption('patronymic'),
                     $input->getOption('group_id'),
+                    $input->getOption('need_change_password'),
                 ),
             );
 

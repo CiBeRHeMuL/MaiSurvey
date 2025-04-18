@@ -42,6 +42,7 @@ class CreateUserUseCase
                     $dto->last_name,
                     $dto->patronymic,
                     $dto->group_id !== null ? new Uuid($dto->group_id) : null,
+                    $dto->need_change_password,
                 ),
             );
     }

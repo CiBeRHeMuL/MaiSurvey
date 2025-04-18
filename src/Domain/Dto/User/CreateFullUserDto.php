@@ -18,6 +18,7 @@ readonly class CreateFullUserDto
         private string $lastName,
         private string|null $patronymic,
         private Uuid|null $groupId,
+        private bool $needChangePassword =  false,
     ) {
     }
 
@@ -54,5 +55,10 @@ readonly class CreateFullUserDto
     public function getGroupId(): Uuid|null
     {
         return $this->groupId;
+    }
+
+    public function isNeedChangePassword(): bool
+    {
+        return $this->needChangePassword;
     }
 }

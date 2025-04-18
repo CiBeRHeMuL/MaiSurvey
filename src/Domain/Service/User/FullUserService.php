@@ -55,6 +55,7 @@ class FullUserService
                         $dto->getRole(),
                     ),
                 );
+            $user->setNeedChangePassword($dto->isNeedChangePassword());
 
             $group = null;
             if ($dto->getGroupId() !== null) {
