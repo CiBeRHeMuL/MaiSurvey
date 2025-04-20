@@ -3,6 +3,7 @@
 namespace App\Infrastructure\Service\FileReader;
 
 use App\Domain\Service\FileReader\FileReaderInterface;
+use ArrayIterator;
 use InvalidArgumentException;
 use Iterator;
 use PhpOffice\PhpSpreadsheet\Reader\BaseReader;
@@ -39,6 +40,10 @@ class XlsxFileReader implements FileReaderInterface
      */
     public function getRows(int $startIndex = 1, int|null $endIndex = null, bool $allowEmptyRows = false): Iterator
     {
+        $endIndex ??= $this->worksheet->getHighestRow();
+        if ($endIndex < $startIndex) {
+            return new ArrayIterator([]);
+        }
         foreach ($this->worksheet->getRowIterator($startIndex, $endIndex) as $k => $row) {
             $empty = $allowEmptyRows === false
                 && $row->isEmpty(
