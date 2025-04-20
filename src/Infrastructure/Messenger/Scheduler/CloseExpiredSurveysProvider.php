@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Presentation\Messenger\Scheduler;
+namespace App\Infrastructure\Messenger\Scheduler;
 
-use App\Presentation\Messenger\Message\CloseExpiredSurveysMessage;
+use App\Infrastructure\Messenger\Message\CloseExpiredSurveysMessage;
 use Symfony\Component\Scheduler\Attribute\AsSchedule;
 use Symfony\Component\Scheduler\RecurringMessage;
 use Symfony\Component\Scheduler\Schedule;

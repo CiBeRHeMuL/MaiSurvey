@@ -52,7 +52,7 @@ services:
   stat_refresher.sync:
     class: App\Domain\Service\SurveyStat\SyncStatRefresher
   stat_refresher.async:
-    class: App\Presentation\Messenger\Service\SurveyStat\AsyncStatRefresher
+    class: App\Infrastructure\Messenger\Service\SurveyStat\AsyncStatRefresher
 
   App\Domain\Service\SurveyStat\StatRefresherInterface:
     factory: '@=env("STAT_REFRESH_TYPE") == "async" ? service("stat_refresher.async") : service("stat_refresher.sync")'

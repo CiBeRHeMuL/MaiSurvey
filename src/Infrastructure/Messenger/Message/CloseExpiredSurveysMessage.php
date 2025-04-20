@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Presentation\Messenger\Message;
+namespace App\Infrastructure\Messenger\Message;
 
 readonly class CloseExpiredSurveysMessage
 {

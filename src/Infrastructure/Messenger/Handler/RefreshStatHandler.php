@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Presentation\Messenger\Handler;
+namespace App\Infrastructure\Messenger\Handler;
 
 use App\Application\Dto\Survey\GetSurveysDto;
 use App\Application\UseCase\Survey\GetSurveysByIdsUseCase;
@@ -8,7 +8,7 @@ use App\Application\UseCase\Survey\GetSurveysUseCase;
 use App\Application\UseCase\SurveyStat\GenerateForSurveysUseCase;
 use App\Domain\Entity\Survey;
 use App\Domain\Exception\ErrorException;
-use App\Presentation\Messenger\Message\RefreshStatsMessage;
+use App\Infrastructure\Messenger\Message\RefreshStatsMessage;
 use DateTimeImmutable;
 use Psr\Cache\CacheItemInterface;
 use Psr\Log\LoggerInterface;

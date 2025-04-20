@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Presentation\Messenger\Handler;
+namespace App\Infrastructure\Messenger\Handler;
 
 use App\Application\UseCase\Survey\CloseExpiredSurveysUseCase;
-use App\Presentation\Messenger\Message\CloseExpiredSurveysMessage;
+use App\Infrastructure\Messenger\Message\CloseExpiredSurveysMessage;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Throwable;
