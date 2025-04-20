@@ -208,6 +208,7 @@ class UserController extends BaseController
             $fullExportFileName = "$projectDir/export/$exportType/$exportFileName";
             $dataExport->setFile($fullExportFileName);
         } catch (Throwable $e) {
+            $logger->error($e);
             return Response::notFound();
         }
 
@@ -253,10 +254,8 @@ class UserController extends BaseController
         }
 
         if ($dataExport->exportArray($rows)) {
-            return $this->file(
-                $fullExportFileName,
-                str_replace(':', '.', HString::rusToEng($exportFileName)),
-            );
+            return $this->file($fullExportFileName, str_replace(':', '.', HString::rusToEng($exportFileName)))
+                ->deleteFileAfterSend();
         }
         return Response::error(
             new ErrorResponse(
