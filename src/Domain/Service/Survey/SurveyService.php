@@ -563,10 +563,22 @@ class SurveyService
                 actual: false,
                 statuses: [SurveyStatusEnum::Active],
             ));
-        $surveys = iterator_to_array($surveys->getItems());
-        foreach ($surveys as $survey) {
+        $limit = 1000;
+        $i = 0;
+        $updated = 0;
+        $preparedForUpdate = [];
+        foreach ($surveys->getItems() as $survey) {
+            $i++;
             $survey->setStatus(SurveyStatusEnum::Closed);
+            $preparedForUpdate[] = $survey;
+            if ($i % $limit === 0) {
+                $updated += $this->surveyRepository->updateMulti($preparedForUpdate);
+                $preparedForUpdate = [];
+            }
         }
-        return $this->surveyRepository->updateMulti($surveys);
+        if ($preparedForUpdate) {
+            $updated += $this->surveyRepository->updateMulti($preparedForUpdate);
+        }
+        return $updated;
     }
 }
