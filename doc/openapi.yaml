@@ -701,20 +701,6 @@ paths:
             maxItems: 50
             nullable: true
         -
-          name: is_actual_from
-          in: query
-          required: false
-          schema:
-            type: string
-            nullable: true
-        -
-          name: is_actual_to
-          in: query
-          required: false
-          schema:
-            type: string
-            nullable: true
-        -
           name: sort_by
           in: query
           required: false
@@ -3470,12 +3456,6 @@ components:
           items: {  }
           default: null
           maxItems: 50
-          nullable: true
-        is_actual_from:
-          type: string
-          nullable: true
-        is_actual_to:
-          type: string
           nullable: true
         sort_by:
           title: 'Сортировка по'
