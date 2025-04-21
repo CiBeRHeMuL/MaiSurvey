@@ -305,7 +305,7 @@ class StudentSubjectsImporter
             } elseif (
                 $student->getGroup() !== null
                 && $dto->getOnlyForGroupId() !== null
-                && $student->getGroup()->getId() !== $dto->getOnlyForGroupId()
+                && $student->getGroup()->getId()->equals($dto->getOnlyForGroupId()) === false
             ) {
                 $skipped++;
                 continue;
