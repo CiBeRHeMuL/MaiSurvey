@@ -13,6 +13,7 @@ use App\Domain\Entity\Subject;
 use App\Domain\Repository\SubjectRepositoryInterface;
 use App\Infrastructure\Db\Expr\ILikeExpr;
 use App\Infrastructure\Repository\Common\AbstractRepository;
+use ArrayIterator;
 use Iterator;
 use Qstart\Db\QueryBuilder\DML\Expression\Expr;
 use Qstart\Db\QueryBuilder\DML\Expression\InExpr;
@@ -81,6 +82,9 @@ class SubjectRepository extends AbstractRepository implements SubjectRepositoryI
 
     public function findByRawIndexes(array $indexes): Iterator
     {
+        if (empty($indexes)) {
+            return new ArrayIterator([]);
+        }
         $q = Query::select()
             ->select(['s.*'])
             ->from(['s' => $this->getClassTable(Subject::class)])
