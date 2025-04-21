@@ -311,7 +311,6 @@ class UserImporter
                 $created,
                 new GetAllUsersDto(
                     roles: [$dto->getForRole()],
-                    email: $emailDomain,
                     deleted: false,
                     status: UserStatusEnum::Active,
                     groupIds: $groupIds,
