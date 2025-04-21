@@ -3,7 +3,6 @@
 namespace App\Domain\Dto\StudentSubject;
 
 use App\Domain\Enum\SortTypeEnum;
-use DateTimeImmutable;
 use Symfony\Component\Uid\Uuid;
 
 readonly class GetAllStudentSubjectsDto
@@ -12,8 +11,6 @@ readonly class GetAllStudentSubjectsDto
      * @param Uuid[]|null $userIds
      * @param Uuid[]|null $teacherIds
      * @param Uuid[]|null $subjectIds
-     * @param DateTimeImmutable|null $isActualFrom
-     * @param DateTimeImmutable|null $isActualTo
      * @param string $sortBy
      * @param SortTypeEnum $sortType
      * @param int $offset
@@ -23,8 +20,6 @@ readonly class GetAllStudentSubjectsDto
         private array|null $userIds = null,
         private array|null $teacherIds = null,
         private array|null $subjectIds = null,
-        private DateTimeImmutable|null $isActualFrom = null,
-        private DateTimeImmutable|null $isActualTo = null,
         private string $sortBy = 'name',
         private SortTypeEnum $sortType = SortTypeEnum::Asc,
         private int $offset = 0,
@@ -45,16 +40,6 @@ readonly class GetAllStudentSubjectsDto
     public function getSubjectIds(): array|null
     {
         return $this->subjectIds;
-    }
-
-    public function getIsActualFrom(): DateTimeImmutable|null
-    {
-        return $this->isActualFrom;
-    }
-
-    public function getIsActualTo(): DateTimeImmutable|null
-    {
-        return $this->isActualTo;
     }
 
     public function getSortBy(): string

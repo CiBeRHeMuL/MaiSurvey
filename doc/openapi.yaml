@@ -705,7 +705,6 @@ paths:
           in: query
           required: false
           schema:
-            title: 'Был актуален с'
             type: string
             nullable: true
         -
@@ -713,7 +712,6 @@ paths:
           in: query
           required: false
           schema:
-            title: 'Был актуален до'
             type: string
             nullable: true
         -
@@ -726,8 +724,7 @@ paths:
             default: name
             enum:
               - name
-              - actual_from
-              - actual_to
+              - created_at
         -
           name: sort_type
           in: query
@@ -839,8 +836,7 @@ paths:
             default: name
             enum:
               - name
-              - actual_from
-              - actual_to
+              - created_at
         -
           name: sort_type
           in: query
@@ -3476,11 +3472,9 @@ components:
           maxItems: 50
           nullable: true
         is_actual_from:
-          title: 'Был актуален с'
           type: string
           nullable: true
         is_actual_to:
-          title: 'Был актуален до'
           type: string
           nullable: true
         sort_by:
@@ -3489,8 +3483,7 @@ components:
           default: name
           enum:
             - name
-            - actual_from
-            - actual_to
+            - created_at
         sort_type:
           $ref: '#/components/schemas/SortTypeEnum'
         offset:
@@ -3531,8 +3524,7 @@ components:
           default: name
           enum:
             - name
-            - actual_from
-            - actual_to
+            - created_at
         sort_type:
           $ref: '#/components/schemas/SortTypeEnum'
         offset:

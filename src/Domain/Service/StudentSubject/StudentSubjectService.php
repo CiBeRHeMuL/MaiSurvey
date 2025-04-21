@@ -23,7 +23,7 @@ use Throwable;
 
 class StudentSubjectService
 {
-    public const array GET_ALL_SORT = ['name', 'actual_from', 'actual_to'];
+    public const array GET_ALL_SORT = ['name', 'created_at'];
 
     private LoggerInterface $logger;
 

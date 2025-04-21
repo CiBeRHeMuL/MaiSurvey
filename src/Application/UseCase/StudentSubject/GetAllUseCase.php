@@ -8,7 +8,6 @@ use App\Domain\Dto\StudentSubject\GetAllStudentSubjectsDto as DomainGetAllStuden
 use App\Domain\Entity\StudentSubject;
 use App\Domain\Enum\SortTypeEnum;
 use App\Domain\Service\StudentSubject\StudentSubjectService;
-use DateTimeImmutable;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Uid\Uuid;
 
@@ -49,12 +48,6 @@ class GetAllUseCase
                         : null,
                     $dto->subject_ids !== null
                         ? array_map(Uuid::fromRfc4122(...), $dto->subject_ids)
-                        : null,
-                    $dto->is_actual_from !== null
-                        ? new DateTimeImmutable($dto->is_actual_from)
-                        : null,
-                    $dto->is_actual_to !== null
-                        ? new DateTimeImmutable($dto->is_actual_to)
                         : null,
                     $dto->sort_by,
                     SortTypeEnum::from($dto->sort_type),

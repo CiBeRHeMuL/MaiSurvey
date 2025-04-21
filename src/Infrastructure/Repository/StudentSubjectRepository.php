@@ -21,7 +21,6 @@ use ArrayIterator;
 use DateTimeImmutable;
 use Iterator;
 use Qstart\Db\QueryBuilder\DML\Expression\BetweenExpr;
-use Qstart\Db\QueryBuilder\DML\Expression\Expr;
 use Qstart\Db\QueryBuilder\Query;
 use Symfony\Component\Uid\Uuid;
 
@@ -60,22 +59,6 @@ class StudentSubjectRepository extends Common\AbstractRepository implements Stud
             $q->andWhere([
                 'ts.teacher_id' => array_map(fn(Uuid $id) => $id->toRfc4122(), $userIds),
             ]);
-        }
-        if ($dto->getIsActualFrom() !== null) {
-            $q->andWhere(
-                new Expr(
-                    'us.actual_from <= :acf',
-                    ['acf' => $dto->getIsActualFrom()->format(DATE_RFC3339)],
-                ),
-            );
-        }
-        if ($dto->getIsActualTo() !== null) {
-            $q->andWhere(
-                new Expr(
-                    'us.actual_to >= :act',
-                    ['act' => $dto->getIsActualTo()->format(DATE_RFC3339)],
-                ),
-            );
         }
         return $this
             ->findWithLazyBatchedProvider(

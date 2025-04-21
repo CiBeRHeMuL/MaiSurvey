@@ -35,14 +35,6 @@ readonly class GetAllStudentSubjectsDto
         ])]
         #[Assert\Count(max: 50, maxMessage: 'Поиск по более чем 50 значениям не поддерживается')]
         public array|null $subject_ids = null,
-        /** Был актуален с */
-        #[LAssert\DateTime]
-        #[Assert\NotBlank(message: 'Значение не должно быть пустым', allowNull: true)]
-        public string|null $is_actual_from = null,
-        /** Был актуален до */
-        #[LAssert\DateTime]
-        #[Assert\NotBlank(message: 'Значение не должно быть пустым', allowNull: true)]
-        public string|null $is_actual_to = null,
         /** Сортировка по */
         #[Assert\Type('string', message: 'Значение должно быть строкой')]
         #[Assert\Choice(choices: StudentSubjectService::GET_ALL_SORT, message: 'Значение должно входить в список допустимых')]
