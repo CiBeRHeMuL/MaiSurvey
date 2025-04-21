@@ -130,6 +130,7 @@ class TeacherSubjectController extends BaseController
                 $dto->type_col,
                 $dto->year_col,
                 $dto->semester_col,
+                $dto->skip_if_exists,
             ),
         );
         return Response::success(

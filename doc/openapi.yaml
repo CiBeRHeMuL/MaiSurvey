@@ -3682,6 +3682,10 @@ components:
           title: 'Столбец с семестром'
           type: string
           default: C
+        skip_if_exists:
+          title: 'Пропускать новые предметы, которые конфликтуют с существующими'
+          type: boolean
+          default: true
       type: object
     GetMySurveysDto:
       properties:
@@ -4057,6 +4061,10 @@ components:
           title: 'Столбец с семестром'
           type: string
           default: E
+        skip_if_exists:
+          title: 'Пропускать новые предметы, которые конфликтуют с существующими'
+          type: boolean
+          default: true
       type: object
     CreateFullUserDto:
       required:

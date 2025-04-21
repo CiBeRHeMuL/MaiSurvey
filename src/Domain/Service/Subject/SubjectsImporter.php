@@ -181,7 +181,7 @@ class SubjectsImporter
             }
 
             $hash = md5("$name$year$semesterNumber");
-            if (isset($existingSubjects[$hash])) {
+            if (isset($existingSubjects[$hash]) && !$dto->isSkipIfExists()) {
                 throw ValidationException::new([
                     new ValidationError(
                         'file',
@@ -193,27 +193,27 @@ class SubjectsImporter
                         ),
                     ),
                 ]);
+            } elseif (!isset($existingSubjects[$hash])) {
+                $createDto = new CreateSubjectDto(
+                    $name,
+                    $semester,
+                );
+
+                try {
+                    $this->subjectService->validateCreateDto($createDto, false);
+                } catch (ValidationException $e) {
+                    throw ValidationException::new(array_map(
+                        fn(ValidationError $error) => new ValidationError(
+                            'file',
+                            ValidationErrorSlugEnum::WrongFile->getSlug(),
+                            sprintf($validationErrorTemplate, $k - 1 + $firstRow, $error->getMessage()),
+                        ),
+                        $e->getErrors(),
+                    ));
+                }
+
+                $createDtos[] = $createDto;
             }
-
-            $createDto = new CreateSubjectDto(
-                $name,
-                $semester,
-            );
-
-            try {
-                $this->subjectService->validateCreateDto($createDto, false);
-            } catch (ValidationException $e) {
-                throw ValidationException::new(array_map(
-                    fn(ValidationError $error) => new ValidationError(
-                        'file',
-                        ValidationErrorSlugEnum::WrongFile->getSlug(),
-                        sprintf($validationErrorTemplate, $k - 1 + $firstRow, $error->getMessage()),
-                    ),
-                    $e->getErrors(),
-                ));
-            }
-
-            $createDtos[] = $createDto;
         }
 
         // Сохраняем по 100 записей за раз, чтобы делать меньше запросов

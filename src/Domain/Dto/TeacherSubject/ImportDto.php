@@ -12,6 +12,7 @@ readonly class ImportDto
         private string $typeCol,
         private string $yearCol,
         private string $semesterCol,
+        private bool $skipIfExists,
     ) {
     }
 
@@ -48,5 +49,10 @@ readonly class ImportDto
     public function getYearCol(): string
     {
         return $this->yearCol;
+    }
+
+    public function isSkipIfExists(): bool
+    {
+        return $this->skipIfExists;
     }
 }

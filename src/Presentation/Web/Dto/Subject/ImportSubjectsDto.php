@@ -25,6 +25,9 @@ readonly class ImportSubjectsDto
         #[Assert\Regex('/^[A-Z]+$/u', message: 'Значение должно быть названием столбца excel')]
         #[Assert\NotBlank(message: 'Значение не должно быть пустым')]
         public string $semester_col = 'C',
+        /** Пропускать новые предметы, которые конфликтуют с существующими */
+        #[Assert\Type('boolean', message: 'Значение должно быть булевым значением')]
+        public bool $skip_if_exists = true,
     ) {
     }
 }

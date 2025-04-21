@@ -236,26 +236,30 @@ class TeacherSubjectsImporter
             } catch (Throwable $e) {
                 throw $e;
             }
-            $createDtos[] = $createDto;
+            $createDtos[$k] = $createDto;
         }
 
         $existingTeacherSubjects = $this
             ->teacherSubjectService
             ->getAllByIndexes($indexes);
-        if ($existingTeacherSubjects->current() !== null) {
-            $teacher = $existingTeacherSubjects->current()->getTeacher();
-            $subject = $existingTeacherSubjects->current()->getSubject();
-            $type = $existingTeacherSubjects->current()->getType();
+        foreach ($existingTeacherSubjects as $existingTeacherSubject) {
+            $teacher = $existingTeacherSubject->getTeacher();
+            $subject = $existingTeacherSubject->getSubject();
+            $type = $existingTeacherSubject->getType();
             $semester = $subject->getSemester();
             $semesterNumber = (int)$semester->isSpring();
             $hash = md5("{$subject->getName()}_{$teacher->getEmail()->getEmail()}_{$type->value}_{$semester->getYear()}_{$semesterNumber}");
             $row = $existingRows[$hash];
-            throw ValidationException::new([
-                $errorGenerator(
-                    $row,
-                    'преподаватель уже ведет этот предмет в указанном семестре',
-                ),
-            ]);
+            if ($dto->isSkipIfExists()) {
+                unset($createDtos[$row]);
+            } else {
+                throw ValidationException::new([
+                    $errorGenerator(
+                        $row,
+                        'преподаватель уже ведет этот предмет в указанном семестре',
+                    ),
+                ]);
+            }
         }
 
         $chunks = array_chunk($createDtos, 100, true);
