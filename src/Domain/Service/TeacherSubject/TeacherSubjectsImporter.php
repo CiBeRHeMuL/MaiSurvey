@@ -247,7 +247,7 @@ class TeacherSubjectsImporter
             $subject = $existingTeacherSubject->getSubject();
             $type = $existingTeacherSubject->getType();
             $semester = $subject->getSemester();
-            $semesterNumber = (int)$semester->isSpring();
+            $semesterNumber = (int)$semester->isSpring() ? 1 : 2;
             $hash = md5("{$subject->getName()}_{$teacher->getEmail()->getEmail()}_{$type->value}_{$semester->getYear()}_{$semesterNumber}");
             $row = $existingRows[$hash];
             if ($dto->isSkipIfExists()) {
