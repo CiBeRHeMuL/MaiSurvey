@@ -129,7 +129,7 @@ class StudentSubjectsByGroupsImporter
         foreach ($this->fileReader->getRows($firstRow, $this->fileReader->getHighestRow()) as $k => $row) {
             $groupName = $row[$dto->getGroupNameCol()];
             foreach ($students[$groupName] ?? [] as $student) {
-                $data[] = [
+                $data[$k] = [
                     $dto->getGroupNameCol() => $student->getEmail()->getEmail(),
                     $dto->getTeacherEmailCol() => $row[$dto->getTeacherEmailCol()] ?? '',
                     $dto->getSubjectCol() => $row[$dto->getSubjectCol()] ?? '',
@@ -148,7 +148,7 @@ class StudentSubjectsByGroupsImporter
             ->importFromIterator(
                 new ImportDto(
                     $dto->getFile(),
-                    $dto->isHeadersInFirstRow(),
+                    false,
                     $dto->getGroupNameCol(),
                     $dto->getTeacherEmailCol(),
                     $dto->getSubjectCol(),
