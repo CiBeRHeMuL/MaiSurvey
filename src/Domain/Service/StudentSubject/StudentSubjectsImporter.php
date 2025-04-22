@@ -346,7 +346,7 @@ class StudentSubjectsImporter
                     $errorGenerator(
                         $k,
                         sprintf(
-                            'этот преподаватель не ведет предмет "%s"',
+                            'этот преподаватель не ведет предмет "%s" в указанном семестре',
                             $subject,
                         ),
                     ),
