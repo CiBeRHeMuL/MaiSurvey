@@ -139,8 +139,8 @@ class StudentSubjectsByGroupsImporter
                     $dto->getYearCol() => $row[$dto->getYearCol()] ?? '',
                     $dto->getSemesterCol() => $row[$dto->getSemesterCol()] ?? '',
                 ];
-                $i++;
                 $rowsMap[$i] = $k;
+                $i++;
             }
         }
 
