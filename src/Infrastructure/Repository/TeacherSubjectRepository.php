@@ -103,7 +103,7 @@ class TeacherSubjectRepository extends Common\AbstractRepository implements Teac
             $q->andWhere([
                 'ts.subject_id' => array_map(
                     fn(Uuid $id) => $id->toRfc4122(),
-                    $dto->getSubjectIds(),
+                    $dto->getTeacherIds(),
                 ),
             ]);
         }
