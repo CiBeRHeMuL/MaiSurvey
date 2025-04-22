@@ -125,11 +125,13 @@ class StudentSubjectsByGroupsImporter
             fn(User $u) => $u->getData()->getGroup()->getGroup()->getName(),
         );
 
+        $rowsMap = [];
         $data = [];
+        $i = 0;
         foreach ($this->fileReader->getRows($firstRow, $this->fileReader->getHighestRow()) as $k => $row) {
             $groupName = $row[$dto->getGroupNameCol()];
             foreach ($students[$groupName] ?? [] as $student) {
-                $data[] = [
+                $data[$i] = [
                     $dto->getGroupNameCol() => $student->getEmail()->getEmail(),
                     $dto->getTeacherEmailCol() => $row[$dto->getTeacherEmailCol()] ?? '',
                     $dto->getSubjectCol() => $row[$dto->getSubjectCol()] ?? '',
@@ -137,28 +139,45 @@ class StudentSubjectsByGroupsImporter
                     $dto->getYearCol() => $row[$dto->getYearCol()] ?? '',
                     $dto->getSemesterCol() => $row[$dto->getSemesterCol()] ?? '',
                 ];
+                $i++;
+                $rowsMap[$i] = $k;
             }
         }
 
         unset($students);
         unset($groups);
 
-        return $this
-            ->studentSubjectsImporter
-            ->importFromIterator(
-                new ImportDto(
-                    $dto->getFile(),
-                    false,
-                    $dto->getGroupNameCol(),
-                    $dto->getTeacherEmailCol(),
-                    $dto->getSubjectCol(),
-                    $dto->getTypeCol(),
-                    $dto->getYearCol(),
-                    $dto->getSemesterCol(),
-                    $dto->isSkipIfExists(),
-                    $dto->getOnlyForGroupId(),
+        try {
+            return $this
+                ->studentSubjectsImporter
+                ->importFromIterator(
+                    new ImportDto(
+                        $dto->getFile(),
+                        false,
+                        $dto->getGroupNameCol(),
+                        $dto->getTeacherEmailCol(),
+                        $dto->getSubjectCol(),
+                        $dto->getTypeCol(),
+                        $dto->getYearCol(),
+                        $dto->getSemesterCol(),
+                        $dto->isSkipIfExists(),
+                        $dto->getOnlyForGroupId(),
+                    ),
+                    new ArrayIterator($data),
+                );
+        } catch (ValidationException $e) {
+            throw ValidationException::new(array_map(
+                fn(ValidationError $er) => new ValidationError(
+                    $er->getField(),
+                    $er->getSlug(),
+                    preg_replace_callback(
+                        '/(?<=Ошибка в строке )(\d+)/ui',
+                        fn($m) => $rowsMap[$m[0]] ?? $m[0],
+                        $er->getMessage(),
+                    ),
                 ),
-                new ArrayIterator($data),
-            );
+                $e->getErrors(),
+            ));
+        }
     }
 }
