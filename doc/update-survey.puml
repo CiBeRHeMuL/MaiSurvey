@@ -1,0 +1,140 @@
+@startuml
+
+!pragma teoz true
+
+actor Front
+
+box "Back" #LightBlue
+    box Security
+    participant ApiAccessHandler
+    participant PermissionChecker
+    end box
+
+    box Presentation
+    participant SurveyController
+    end box
+
+    box Application
+    participant UpdateSurveyUseCase
+    participant GetUserUseCase
+    end box
+
+    box Domain
+    participant SurveyService
+    participant UserService
+    participant StatRefresherInterface
+    end box
+
+    box Infrastructure
+    participant SurveyRepository
+    participant UserRepository
+    participant SyncStatRefresher
+    participant AsyncStatRefresher
+    end box
+database DB
+queue Broker
+end box
+
+== Запрос ==
+Front -> SurveyController ++ : POST /surveys/{id}/update
+
+alt все хорошо
+    == Аутентификация ==
+    SurveyController -> SurveyController ++ #Orange : Аутентификация
+
+    SurveyController -> ApiAccessHandler ++ #Yellow : Запрос на аутентификацию
+    ApiAccessHandler -> ApiAccessHandler ++ #Orange : Декодирование\nJWT токена доступа
+    alt ошибка декодирования токена
+        ApiAccessHandler --[#Red]> SurveyController ++ #Red : HTTP 401
+        SurveyController --[#Red]> Front -- : HTTP 401
+    end
+
+    ApiAccessHandler -> GetUserUseCase ++ : Получение пользователя по ID
+    GetUserUseCase -> UserService ++ : Получение пользователя по ID
+    UserService -> UserRepository ++ : Получение пользователя по ID
+    UserRepository -> DB ++ : SELECT
+    DB --> UserRepository -- : Найденная запись или ничего
+    UserRepository --> UserService -- : Данные пользователя,\nпрошедшие гидратацию\nили ничего
+    UserService --> GetUserUseCase -- : Пользователь или ничего
+    GetUserUseCase --> ApiAccessHandler -- : Пользователь или ничего
+    ApiAccessHandler -> ApiAccessHandler ++ #Yellow : Проверка наличия пользователя
+    alt пользователь не найден, удален или находится в статусе "черновик"
+        ApiAccessHandler --[#Red]> SurveyController ++ #Red : HTTP 401
+        SurveyController --[#Red]> Front -- : HTTP 401
+    end
+    ApiAccessHandler -> ApiAccessHandler ++ #Orange : Проверка токена\nи времени его действия
+    alt некорректный или истекший токен
+        ApiAccessHandler --[#Red]> SurveyController ++ #Red : HTTP 401
+        SurveyController --[#Red]> Front -- : HTTP 401
+    end
+
+    ApiAccessHandler --[#Green]> ApiAccessHandler -- : Токен валиден
+    ApiAccessHandler --[#Green]> ApiAccessHandler -- : Пользователь прошел проверку на подлинность
+    ApiAccessHandler --[#Green]> ApiAccessHandler -- : Пользователь аутентифицирован
+    ApiAccessHandler --[#Green]> SurveyController -- : Пользователь аутентифицирован
+    SurveyController --[#Green]> SurveyController -- : Пользователь аутентифицирован
+
+    == Авторизация ==
+    SurveyController -> SurveyController ++ #Orange : Авторизация
+    SurveyController -> PermissionChecker ++ #Yellow : Запрос на получение доступа к выполнению действия
+    PermissionChecker -> PermissionChecker ++ #Orange : Проверка доступов пользователя
+    alt пользователь не имеет необходимых прав
+        PermissionChecker --[#Red]> SurveyController ++ #Red : Пользователь не авторизован
+        SurveyController --[#Red]> Front -- : HTTP 404
+    end
+    PermissionChecker --[#Green]> PermissionChecker -- : Пользователь имеет необходимые права
+    PermissionChecker --[#Green]> SurveyController -- : Пользователь авторизован
+    SurveyController --[#Green]> SurveyController -- : Пользователь авторизован
+
+    == Обработка запроса ==
+    SurveyController -> UpdateSurveyUseCase ++ #Green : Запрос на обновление опроса
+    UpdateSurveyUseCase -> UpdateSurveyUseCase ++ #Orange : Проверка существования опроса
+    UpdateSurveyUseCase -> SurveyService ++ : Получение опроса по ID
+    SurveyService -> SurveyRepository ++ : Получение опроса по ID
+    SurveyRepository -> DB ++ : SELECT
+    DB --> SurveyRepository -- : Найденная запись или ничего
+    SurveyRepository --> SurveyService -- : Данные опроса,\nпрошедшие гидратацию\nили ничего
+    SurveyService --> UpdateSurveyUseCase -- : Опрос или ничего
+    alt опрос не найден
+        UpdateSurveyUseCase --[#Red]> SurveyController ++ #Red : Опрос не найден
+        SurveyController --[#Red]> Front -- : HTTP 404
+    end
+
+    UpdateSurveyUseCase --[#Green]> UpdateSurveyUseCase -- : Опрос найден
+    UpdateSurveyUseCase -> SurveyService ++ #Green : Запрос на обновление опроса
+    SurveyService -> SurveyService ++ #Orange : Валидация входных данных
+
+    alt данные не валидны
+        SurveyService --[#Red]> UpdateSurveyUseCase ++ #Red : Данные не валидны
+        UpdateSurveyUseCase --[#Red]> SurveyController --++ #Red : Данные не валидны
+        SurveyController --[#Red]> Front -- #Red : HTTP 422
+    end
+
+    SurveyService --[#Green]> SurveyService -- : Данные валидны
+    SurveyService -> SurveyRepository ++ : Сохранить опрос с новыми данными
+    SurveyRepository -> DB ++ : UPDATE
+    DB --> SurveyRepository -- : Данные обновлены
+    SurveyRepository --> SurveyService -- : Данные обновлены
+
+    SurveyService -> StatRefresherInterface ++ : Обновить статистику
+    alt включена асинхронная очередь
+    StatRefresherInterface -> AsyncStatRefresher ++ : Обновить статистику
+    AsyncStatRefresher -> Broker : Оправка сообщения на обновление статистики
+    AsyncStatRefresher --> StatRefresherInterface -- :  Статистика обновлена
+    else асинхронная очередь отключена
+    StatRefresherInterface -> SyncStatRefresher ++ : Обновить статистику
+    note right: Здесь спрятана логика по вызову\nслоя приложения и последующих\nвызовов нужных сервисов
+    SyncStatRefresher -> StatRefresherInterface -- : Статистика обновлена
+    end
+    StatRefresherInterface -> SurveyService -- : Статистика обновлена
+
+    SurveyService --[#Green]> UpdateSurveyUseCase -- : Опрос обновлен
+    UpdateSurveyUseCase --[#Green]> SurveyController -- : Опрос обновлен
+
+    SurveyController --[#Green]> Front -- : HTTP 200
+
+else любая ошибка
+    SurveyController --[#Red]> Front -- : HTTP 500
+end
+
+@enduml

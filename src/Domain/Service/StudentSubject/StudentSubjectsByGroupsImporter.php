@@ -171,9 +171,13 @@ class StudentSubjectsByGroupsImporter
                     $er->getField(),
                     $er->getSlug(),
                     preg_replace_callback(
-                        '/(?<=(Ошибка в строке |такой набор уже был указан в строке ))(\d+)/ui',
+                        '/(?<=Ошибка в строке )(\d+)/ui',
                         fn($m) => $rowsMap[$m[0]] ?? $m[0],
-                        $er->getMessage(),
+                        preg_replace_callback(
+                            '/(?<=такой набор уже был указан в строке )(\d+)/ui',
+                            fn($m) => $rowsMap[$m[0]] ?? $m[0],
+                            $er->getMessage(),
+                        ),
                     ),
                 ),
                 $e->getErrors(),

@@ -1,0 +1,91 @@
+@startuml
+
+!pragma teoz true
+
+actor Front
+
+box "Back" #LightBlue
+    box Security
+    participant ApiAccessHandler
+    participant PermissionChecker
+    end box
+
+    box Presentation
+    participant Controller
+    end box
+
+    box Application
+    participant GetUserUseCase
+    end box
+
+    box Domain
+    participant UserService
+    end box
+
+    box Infrastructure
+    participant UserRepository
+    end box
+database DB
+end box
+
+== Запрос ==
+Front -> Controller ++ : request
+
+alt все хорошо
+    == Аутентификация ==
+    Controller -> Controller ++ #Orange : Аутентификация
+
+    Controller -> ApiAccessHandler ++ #Yellow : Запрос на аутентификацию
+    ApiAccessHandler -> ApiAccessHandler ++ #Orange : Декодирование\nJWT токена доступа
+    alt ошибка декодирования токена
+        ApiAccessHandler --[#Red]> Controller ++ #Red : HTTP 401
+        Controller --[#Red]> Front -- : HTTP 401
+    end
+
+    ApiAccessHandler -> GetUserUseCase ++ : Получение пользователя по ID
+    GetUserUseCase -> UserService ++ : Получение пользователя по ID
+    UserService -> UserRepository ++ : Получение пользователя по ID
+    UserRepository -> DB ++ : SELECT
+    DB --> UserRepository -- : Найденная запись или ничего
+    UserRepository --> UserService -- : Данные пользователя,\nпрошедшие гидратацию\nили ничего
+    UserService --> GetUserUseCase -- : Пользователь или ничего
+    GetUserUseCase --> ApiAccessHandler -- : Пользователь или ничего
+    ApiAccessHandler -> ApiAccessHandler ++ #Yellow : Проверка наличия пользователя
+    alt пользователь не найден, удален или находится в статусе "черновик"
+        ApiAccessHandler --[#Red]> Controller ++ #Red : HTTP 401
+        Controller --[#Red]> Front -- : HTTP 401
+    end
+    ApiAccessHandler -> ApiAccessHandler ++ #Orange : Проверка токена\nи времени его действия
+    alt некорректный или истекший токен
+        ApiAccessHandler --[#Red]> Controller ++ #Red : HTTP 401
+        Controller --[#Red]> Front -- : HTTP 401
+    end
+
+    ApiAccessHandler --[#Green]> ApiAccessHandler -- : Токен валиден
+    ApiAccessHandler --[#Green]> ApiAccessHandler -- : Пользователь прошел проверку на подлинность
+    ApiAccessHandler --[#Green]> ApiAccessHandler -- : Пользователь аутентифицирован
+    ApiAccessHandler --[#Green]> Controller -- : Пользователь аутентифицирован
+    Controller --[#Green]> Controller -- : Пользователь аутентифицирован
+
+    == Авторизация ==
+    Controller -> Controller ++ #Orange : Авторизация
+    Controller -> PermissionChecker ++ #Yellow : Запрос на получение доступа к выполнению действия
+    PermissionChecker -> PermissionChecker ++ #Orange : Проверка доступов пользователя
+    alt пользователь не имеет необходимых прав
+        PermissionChecker --[#Red]> Controller ++ #Red : Пользователь не авторизован
+        Controller --[#Red]> Front -- : HTTP 404
+    end
+    PermissionChecker --[#Green]> PermissionChecker -- : Пользователь имеет необходимые права
+    PermissionChecker --[#Green]> Controller -- : Пользователь авторизован
+    Controller --[#Green]> Controller -- : Пользователь авторизован
+
+    == Обработка запроса ==
+    Controller -> ++ #Green : Запрос на выполнение сценария
+    Controller <[#Green]-- -- : Сценарий выполнен
+    Controller --[#Green]> Front -- : HTTP 200
+
+else любая ошибка
+    Controller --[#Red]> Front -- : HTTP 500
+end
+
+@enduml

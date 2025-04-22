@@ -1,0 +1,67 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+actor Front
+actor Console
+participant "Web Api"
+participant "Cron"
+participant "Consumer"
+participant "Application Layer"
+participant "Domain Layer"
+participant "Infrastructure Layer"
+participant "Message Publisher"
+queue MessageQueue
+database DB
+
+Front -> "Web Api" : Any Request
+"Web Api" -> "Application Layer" : Any Use Case Calls
+Console -> "Application Layer" : Any Use Case Calls
+MessageQueue -> "Consumer" : Any Message
+"Consumer" -> "Application Layer" : Any Use Case Calls
+"Cron" -> "Message Publisher" : Send Message
+
+alt successful case
+    "Application Layer" -> "Domain Layer" : Any Service Calls
+    "Domain Layer" -> "Domain Layer" : Internal Method Calls
+    "Domain Layer" -> "Infrastructure Layer" : Any Repository Calls
+    "Domain Layer" -> "Message Publisher" : Message Publication Request
+
+    alt sync message publishing
+        "Message Publisher" -> "Application Layer" : Any Use Case Calls
+    else async message publishing
+        "Message Publisher" -> MessageQueue : Send Message
+    end
+
+    "Infrastructure Layer" -> "Domain Layer" : Any Synchronous Methods Calls
+    "Infrastructure Layer" -> MessageQueue : Any Message Publication
+    "Infrastructure Layer" -> DB : Any SQL Request
+
+    DB --> "Infrastructure Layer" : Raw Data
+    "Infrastructure Layer" --> "Domain Layer" : Hydrated Data
+    "Domain Layer" --> "Application Layer" : Domain response
+
+    "Application Layer" --> "Web Api" : Domain Response
+    "Application Layer" --> "Console" : Domain Response
+    "Application Layer" --> "Consumer" : Domain Response
+
+    "Web Api" --> Front : Success Response
+    "Consumer" --> MessageQueue : Ack
+else some validation error
+    "Domain Layer" --> "Application Layer" : Throw Validation Error
+    "Application Layer" --> "Web Api" : Throw Validation Error
+    "Application Layer" --> Console : Throw Validation Error
+    "Application Layer" --> "Consumer" : Throw Validation Error
+
+    "Web Api" --> Front : Validation Response
+    "Consumer" --> MessageQueue : NoAck
+else some general error
+    "Domain Layer" --> "Application Layer" : Throw General Error
+    "Application Layer" --> "Web Api" : Throw General Error
+    "Application Layer" --> Console : Throw General Error
+    "Application Layer" --> "Consumer" : Throw General Error
+
+    "Web Api" --> Front : Error Response
+    "Consumer" --> MessageQueue : NoAck
+end
+
+@enduml
