@@ -130,7 +130,7 @@ class TeacherSubjectsImporter
                 ]);
             }
 
-            if (!ctype_digit($year) && strlen($year) !== 4) {
+            if (!ctype_digit($year) || strlen($year) !== 4) {
                 throw ValidationException::new([
                     $errorGenerator(
                         $k,
