@@ -546,6 +546,10 @@ class SurveyService
                 ),
             );
         } catch (Throwable $e) {
+            if ($e instanceof ValidationException || $e instanceof ErrorException) {
+                $this->transactionManager->rollback();
+                throw $e;
+            }
             $this->logger->error($e);
             throw ErrorException::new('Не удалось создать опрос из шаблона, обратитесь в поддержку');
         }
