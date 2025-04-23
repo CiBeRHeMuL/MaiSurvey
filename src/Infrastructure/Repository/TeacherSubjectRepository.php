@@ -183,7 +183,7 @@ class TeacherSubjectRepository extends Common\AbstractRepository implements Teac
                 'sem.id = s.semester_id'
             )
             ->where(new InExpr(
-                ['u.email', 's.name', 'ts.type', 'sem.year', 'sem.spring'],
+                ['lower(u.email)', 'lower(s.name)', 'ts.type', 'sem.year', 'sem.spring'],
                 array_map(
                     fn(GetTSByIndexRawDto $dto) => [
                         'u.email' => $dto->getTeacherEmail()->getEmail(),

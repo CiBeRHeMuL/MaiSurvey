@@ -250,7 +250,7 @@ class StudentSubjectsImporter
         /** @var array<string, User> $students */
         $students = HArray::index(
             $students,
-            fn(User $s) => $s->getEmail()->getEmail(),
+            fn(User $s) => mb_strtolower($s->getEmail()->getEmail()),
         );
         /** @var array<string, TeacherSubject> $teacherSubjects */
         $teacherSubjects = HArray::index(
@@ -347,7 +347,7 @@ class StudentSubjectsImporter
                         $k,
                         sprintf(
                             'этот преподаватель не ведет предмет "%s" в указанном семестре',
-                            $subject,
+                            mb_ucfirst($subject),
                         ),
                     ),
                 ]);
