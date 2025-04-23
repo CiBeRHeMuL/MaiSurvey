@@ -62,7 +62,7 @@ class GroupsImporter
         $names = [];
         foreach ($this->dataImport->getRows($firstRow, $this->dataImport->getHighestRow()) as $k => $row) {
             $name = $row[$dto->getNameCol()] ?? '';
-            $name = trim($name);
+            $name = mb_strtolower(trim($name));
             if (isset($nameToRow[$name])) {
                 throw ValidationException::new([
                     new ValidationError(
@@ -88,7 +88,7 @@ class GroupsImporter
             ->getByNames($names);
         $existingGroups = HArray::index(
             $existingGroups,
-            fn(Group $g) => $g->getName(),
+            fn(Group $g) => mb_strtolower($g->getName()),
         );
 
         foreach ($names as $k => $name) {

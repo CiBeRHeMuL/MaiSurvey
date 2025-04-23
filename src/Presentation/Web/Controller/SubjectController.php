@@ -97,7 +97,7 @@ class SubjectController extends BaseController
         ImportUseCase $useCase,
         LoggerInterface $logger,
         #[MapRequestPayload]
-        ImportSubjectsDto $dto,
+        ImportSubjectsDto $dto = new ImportSubjectsDto(),
         #[MapUploadedFile]
         UploadedFile|array $file = [],
     ): JsonResponse {

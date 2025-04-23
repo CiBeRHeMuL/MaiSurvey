@@ -185,7 +185,7 @@ class SubjectService
     {
         $subject = new Subject();
         $subject
-            ->setName(trim($dto->getName()))
+            ->setName(mb_lcfirst(trim($dto->getName())))
             ->setSemesterId($dto->getSemester()->getId())
             ->setSemester($dto->getSemester())
             ->setCreatedAt(new DateTimeImmutable())

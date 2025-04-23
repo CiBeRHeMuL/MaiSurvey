@@ -82,7 +82,7 @@ class SubjectsImporter
         /** @var GetByRawIndexDto[] $indexes */
         $indexes = [];
         foreach ($this->dataImport->getRows($firstRow, $this->dataImport->getHighestRow()) as $k => $row) {
-            $name = trim($row[$dto->getNameCol()] ?? '');
+            $name = mb_strtolower(trim($row[$dto->getNameCol()] ?? ''));
             $year = trim($row[$dto->getYearCol()] ?? '');
             $semesterNumber = trim($row[$dto->getSemesterCol()] ?? '');
 
@@ -151,7 +151,7 @@ class SubjectsImporter
         $existingSubjects = HArray::index(
             $existingSubjects,
             function (Subject $s) {
-                $name = $s->getName();
+                $name = mb_strtolower($s->getName());
                 $year = $s->getSemester()->getYear();
                 $isSpring = (int)$s->getSemester()->isSpring();
                 return md5("$name$year$isSpring");
@@ -159,7 +159,7 @@ class SubjectsImporter
         );
 
         foreach ($this->dataImport->getRows($firstRow, $this->dataImport->getHighestRow()) as $k => $row) {
-            $name = trim($row[$dto->getNameCol()] ?? '');
+            $name = mb_strtolower(trim($row[$dto->getNameCol()] ?? ''));
             $year = trim($row[$dto->getYearCol()] ?? '');
             $semesterNumber = ((int)trim($row[$dto->getSemesterCol()] ?? '') % 2);
 

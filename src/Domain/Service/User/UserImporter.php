@@ -200,7 +200,7 @@ class UserImporter
                         $email = new Email("$tempEmail$emailDomain");
                     } else {
                         /** @var Email $presetEmail */
-                        if (in_array($presetEmail->getEmail(), $existingEmails)) {
+                        if (in_array(mb_strtolower($presetEmail->getEmail()), $existingEmails)) {
                             throw ValidationException::new([
                                 new ValidationError(
                                     'file',
@@ -216,7 +216,7 @@ class UserImporter
                         $email = $presetEmail;
                     }
 
-                    $existingEmails[] = $email->getEmail();
+                    $existingEmails[] = mb_strtolower($email->getEmail());
                     $userDataByEmail[$email->getEmail()] = $userData;
                     $presetData->next();
                     return new CreateUserDto(

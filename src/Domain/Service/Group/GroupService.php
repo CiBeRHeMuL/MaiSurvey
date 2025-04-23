@@ -193,7 +193,7 @@ class GroupService
     {
         $subject = new Group();
         $subject
-            ->setName(trim($dto->getName()))
+            ->setName(mb_strtoupper(trim($dto->getName())))
             ->setCreatedAt(new DateTimeImmutable())
             ->setUpdatedAt(new DateTimeImmutable());
         return $subject;
