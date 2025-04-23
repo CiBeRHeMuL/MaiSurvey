@@ -547,7 +547,6 @@ class SurveyService
             );
         } catch (Throwable $e) {
             if ($e instanceof ValidationException || $e instanceof ErrorException) {
-                $this->transactionManager->rollback();
                 throw $e;
             }
             $this->logger->error($e);
