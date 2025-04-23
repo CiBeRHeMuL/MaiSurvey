@@ -448,10 +448,11 @@ class UserService
 
             $this->transactionManager->commit();
             return $me;
-        } catch (ErrorException|ValidationException $e) {
-            $this->transactionManager->rollback();
-            throw $e;
         } catch (Throwable $e) {
+            if ($e instanceof ValidationException || $e instanceof ErrorException) {
+                $this->transactionManager->rollback();
+                throw $e;
+            }
             $this->transactionManager->rollback();
             $this->logger->error($e);
             throw ErrorException::new('Не удалось обновить запись');

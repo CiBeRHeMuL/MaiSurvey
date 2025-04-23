@@ -95,10 +95,11 @@ class FullUserService
                 );
             $this->transactionManager->commit();
             return $user;
-        } catch (ErrorException|ValidationException $e) {
-            $this->transactionManager->rollback();
-            throw $e;
         } catch (Throwable $e) {
+            if ($e instanceof ValidationException || $e instanceof ErrorException) {
+                $this->transactionManager->rollback();
+                throw $e;
+            }
             $this->logger->error($e);
             $this->transactionManager->rollback();
             throw $e;

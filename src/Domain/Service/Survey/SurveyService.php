@@ -160,10 +160,11 @@ class SurveyService
 
             $this->transactionManager->commit();
             return $entity;
-        } catch (ErrorException|ValidationException $e) {
-            $this->transactionManager->rollback();
-            throw $e;
-        } catch (Throwable $e) {
+        }  catch (Throwable $e) {
+            if ($e instanceof ValidationException || $e instanceof ErrorException) {
+                $this->transactionManager->rollback();
+                throw $e;
+            }
             $this->logger->error($e);
             $this->transactionManager->rollback();
             throw ErrorException::new(
@@ -286,10 +287,11 @@ class SurveyService
 
             $this->transactionManager->commit();
             return $survey;
-        } catch (ErrorException|ValidationException $e) {
-            $this->transactionManager->rollback();
-            throw $e;
-        } catch (Throwable $e) {
+        }  catch (Throwable $e) {
+            if ($e instanceof ValidationException || $e instanceof ErrorException) {
+                $this->transactionManager->rollback();
+                throw $e;
+            }
             $this->logger->error($e);
             $this->transactionManager->rollback();
             throw ErrorException::new(
