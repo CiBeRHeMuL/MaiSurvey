@@ -6,7 +6,7 @@ CONTAINER_NAME="mai-survey-postgresql-container"
 DB_NAME="ms"
 USER_NAME="ms"
 
-mkdir -p "$DUMP_DIR" >> "${LOG_DIR}/cron.log" 2>&1
+mkdir -p "$DUMP_DIR"
 
 DUMP_FILE="dump_$(date +\%Y-\%m-\%d_\%H:\%M).sql"
 
@@ -17,5 +17,4 @@ DUMP_FILE="dump_$(date +\%Y-\%m-\%d_\%H:\%M).sql"
     --create \
     --clean \
     --if-exists \
-    --verbose \
     -U "$USER_NAME" >> "${LOG_DIR}/cron.log" 2>&1
