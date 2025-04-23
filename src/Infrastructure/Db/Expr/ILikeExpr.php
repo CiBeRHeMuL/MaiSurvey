@@ -22,6 +22,7 @@ class ILikeExpr implements ExprInterface
             $eng = addcslashes($eng, $escapedChars);
 
             $right = [
+                $this->right,
                 $eng,
                 $rus,
                 preg_replace('/[еёЕЁ]/u', '[еёЕЁ]', $rus),
