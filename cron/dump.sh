@@ -1,6 +1,21 @@
 #!/bin/bash
 
-cd /home/a_gostev/app/api.mai-survey.ru && \
-mkdir -p dump >>/home/a_gostev/app/api.mai-survey.ru/var/log/cron.log 2>&1 && \
-touch /home/a_gostev/app/api.mai-survey.ru/dump/dump_$(date +%Y-%m-%d_%H:%i).sql >>/home/a_gostev/app/api.mai-survey.ru/var/log/cron.log 2>&1 && \
-docker exec -it mai-survey-postgresql-container pg_dump --dbname=ms --file="/app/dump/dump_$(date +%Y-%m-%d_%H:%i).sql" --format=c --create --clean --if-exists --verbose -U ms >>/home/a_gostev/app/api.mai-survey.ru/var/log/cron.log 2>&1
+LOG_DIR="/home/a_gostev/app/api.mai-survey.ru/var/log"
+DUMP_DIR="/home/a_gostev/app/api.mai-survey.ru/dump"
+CONTAINER_NAME="mai-survey-postgresql-container"
+DB_NAME="ms"
+USER_NAME="ms"
+
+mkdir -p "$DUMP_DIR" >> "${LOG_DIR}/cron.log" 2>&1
+
+DUMP_FILE="dump_$(date +\%Y-\%m-\%d_\%H:\%M).sql"
+
+/usr/bin/docker exec "$CONTAINER_NAME" pg_dump \
+    --dbname="$DB_NAME" \
+    --file="/app/dump/$DUMP_FILE" \
+    --format=c \
+    --create \
+    --clean \
+    --if-exists \
+    --verbose \
+    -U "$USER_NAME" >> "${LOG_DIR}/cron.log" 2>&1
