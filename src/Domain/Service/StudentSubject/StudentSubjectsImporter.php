@@ -134,9 +134,9 @@ class StudentSubjectsImporter
         /** @var GetSemesterByIndexDto[] $semesterIndexes */
         $semesterIndexes = [];
         foreach ($data as $k => $row) {
-            $studentEmail = trim($row[$dto->getStudentEmailCol()] ?? '');
-            $teacherEmail = trim($row[$dto->getTeacherEmailCol()] ?? '');
-            $subject = trim($row[$dto->getSubjectCol()] ?? '');
+            $studentEmail = mb_strtolower(trim($row[$dto->getStudentEmailCol()] ?? ''));
+            $teacherEmail = mb_strtolower(trim($row[$dto->getTeacherEmailCol()] ?? ''));
+            $subject = mb_strtolower(trim($row[$dto->getSubjectCol()] ?? ''));
             $type = trim($row[$dto->getTypeCol()] ?? '');
             $year = trim($row[$dto->getYearCol()] ?? '');
             $semesterNumber = trim($row[$dto->getSemesterCol()] ?? '');
@@ -256,8 +256,8 @@ class StudentSubjectsImporter
         $teacherSubjects = HArray::index(
             $teacherSubjects,
             function (TeacherSubject $ts) {
-                $teacherEmail = $ts->getTeacher()->getEmail()->getEmail();
-                $subject = $ts->getSubject()->getName();
+                $teacherEmail = mb_strtolower($ts->getTeacher()->getEmail()->getEmail());
+                $subject = mb_strtolower($ts->getSubject()->getName());
                 $type = $ts->getType()->value;
                 $semYear = $ts->getSubject()->getSemester()->getYear();
                 $semSpring = (int)$ts->getSubject()->getSemester()->isSpring();
@@ -268,9 +268,9 @@ class StudentSubjectsImporter
         $studentSubjects = HArray::index(
             $studentSubjects,
             function (StudentSubject $ss) {
-                $studentEmail = $ss->getUser()->getEmail()->getEmail();
-                $teacherEmail = $ss->getTeacher()->getEmail()->getEmail();
-                $subject = $ss->getSubject()->getName();
+                $studentEmail = mb_strtolower($ss->getUser()->getEmail()->getEmail());
+                $teacherEmail = mb_strtolower($ss->getTeacher()->getEmail()->getEmail());
+                $subject = mb_strtolower($ss->getSubject()->getName());
                 $type = $ss->getTeacherSubject()->getType()->value;
                 $year = $ss->getSubject()->getSemester()->getYear();
                 $semesterNumber = (int)$ss->getSubject()->getSemester()->isSpring();
@@ -287,9 +287,9 @@ class StudentSubjectsImporter
         $createDtos = [];
         $skipped = 0;
         foreach ($data as $k => $row) {
-            $studentEmail = trim($row[$dto->getStudentEmailCol()]);
-            $teacherEmail = trim($row[$dto->getTeacherEmailCol()]);
-            $subject = trim($row[$dto->getSubjectCol()]);
+            $studentEmail = mb_strtolower(trim($row[$dto->getStudentEmailCol()]));
+            $teacherEmail = mb_strtolower(trim($row[$dto->getTeacherEmailCol()]));
+            $subject = mb_strtolower(trim($row[$dto->getSubjectCol()]));
             $type = trim($row[$dto->getTypeCol()]);
             $year = (int)trim($row[$dto->getYearCol()]);
             $semesterNumber = (int)trim($row[$dto->getSemesterCol()]) % 2;

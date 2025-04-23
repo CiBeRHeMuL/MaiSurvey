@@ -86,8 +86,8 @@ class TeacherSubjectsImporter
         /** @var array<string, int> $existingRows */
         $existingRows = [];
         foreach ($this->dataImport->getRows($firstRow, $this->dataImport->getHighestRow()) as $k => $row) {
-            $subject = trim($row[$dto->getSubjectCol()] ?? '');
-            $email = trim($row[$dto->getEmailCol()] ?? '');
+            $subject = mb_strtolower(trim($row[$dto->getSubjectCol()] ?? ''));
+            $email = mb_strtolower(trim($row[$dto->getEmailCol()] ?? ''));
             $type = trim($row[$dto->getTypeCol()] ?? '');
             $year = trim($row[$dto->getYearCol()] ?? '');
             $semesterNumber = trim($row[$dto->getSemesterCol()] ?? '');
@@ -164,7 +164,10 @@ class TeacherSubjectsImporter
         /** @var array<string, Subject> $subjects */
         $subjects = HArray::index(
             $subjects,
-            fn(Subject $s) => md5("{$s->getName()}_{$s->getSemester()->getYear()}_{$s->getSemester()->isSpring()}"),
+            function (Subject $s) {
+                $name = mb_strtolower($s->getName());
+                return md5("{$name}_{$s->getSemester()->getYear()}_{$s->getSemester()->isSpring()}");
+            },
         );
 
         $teachers = $this
@@ -173,7 +176,7 @@ class TeacherSubjectsImporter
         /** @var array<string, User> $teachers */
         $teachers = HArray::index(
             $teachers,
-            fn(User $t) => $t->getEmail()->getEmail(),
+            fn(User $t) => mb_strtolower($t->getEmail()->getEmail()),
         );
 
         $createDtos = [];
@@ -194,7 +197,7 @@ class TeacherSubjectsImporter
                     ),
                 ]);
             }
-            $teacher = $teachers[$email->getEmail()] ?? null;
+            $teacher = $teachers[mb_strtolower($email->getEmail())] ?? null;
             if (!$teacher) {
                 throw ValidationException::new([
                     new ValidationError(
@@ -248,7 +251,9 @@ class TeacherSubjectsImporter
             $type = $existingTeacherSubject->getType();
             $semester = $subject->getSemester();
             $semesterNumber = (int)$semester->isSpring() ? 1 : 2;
-            $hash = md5("{$subject->getName()}_{$teacher->getEmail()->getEmail()}_{$type->value}_{$semester->getYear()}_{$semesterNumber}");
+            $sName = mb_strtolower($subject->getName());
+            $tEmail = mb_strtolower($teacher->getEmail()->getEmail());
+            $hash = md5("{$sName}_{$tEmail}_{$type->value}_{$semester->getYear()}_{$semesterNumber}");
             $row = $existingRows[$hash];
             if ($dto->isSkipIfExists()) {
                 unset($createDtos[$row]);
