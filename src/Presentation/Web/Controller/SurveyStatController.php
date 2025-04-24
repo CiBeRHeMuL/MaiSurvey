@@ -177,6 +177,7 @@ class SurveyStatController extends BaseController
         $title = mb_strlen($title) > 25
             ? mb_substr($title, 0, 25) . '...'
             : $title;
+        $title = str_replace(['*', ':', '/', '\\', '?', '[', ']'], '', $title);
         $worksheet = new Worksheet($spreadsheet, $title);
         $spreadsheet->addSheet($worksheet, retitleIfNeeded: true);
 
