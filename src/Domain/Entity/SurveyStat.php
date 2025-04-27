@@ -23,7 +23,7 @@ class SurveyStat
     #[ORM\Column(name: 'not_completed_users', type: 'stat_nc_user[]', nullable: false, options: ['default' => '[]', 'jsonb' => true])]
     private array $notCompletedUsers;
     #[ORM\Column(name: 'rating_avg', type: 'float', nullable: false, options: ['default' => 0])]
-    private float $rating_avg;
+    private float $ratingAvg;
 
     #[ORM\OneToOne(targetEntity: Survey::class, inversedBy: 'stat')]
     #[ORM\JoinColumn(name: 'id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
@@ -84,12 +84,12 @@ class SurveyStat
 
     public function getRatingAvg(): float
     {
-        return $this->rating_avg;
+        return $this->ratingAvg;
     }
 
-    public function setRatingAvg(float $rating_avg): SurveyStat
+    public function setRatingAvg(float $ratingAvg): SurveyStat
     {
-        $this->rating_avg = $rating_avg;
+        $this->ratingAvg = $ratingAvg;
         return $this;
     }
 
