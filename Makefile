@@ -1,6 +1,7 @@
 .DEFAULT_GOAL := help
 
-CONSOLE = php bin/console
+PHP = php
+CONSOLE = $(PHP) bin/console
 Command := $(firstword $(MAKECMDGOALS))
 Arguments := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
 PG_USER = ms
@@ -32,10 +33,10 @@ dphp:
 
 # Запуск тестов
 test:
-	php bin/console --env=test doctrine:database:create --if-not-exists -vv
-	php bin/console --env=test doctrine:schema:drop --force -vv
-	php bin/console --env=test doctrine:schema:create -vv
-	php bin/phpunit --testdox --colors
+	$(CONSOLE) --env=test doctrine:database:create --if-not-exists -vv
+	$(CONSOLE) --env=test doctrine:schema:drop --force -vv
+	$(CONSOLE) --env=test doctrine:schema:create -vv
+	$(PHP) bin/phpunit --testdox --colors
 
 # Очистка кэша Symfony
 cache-clear:
