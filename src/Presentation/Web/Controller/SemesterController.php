@@ -13,6 +13,7 @@ use App\Presentation\Web\Response\Model\Common\PaginatedData;
 use App\Presentation\Web\Response\Model\Common\SuccessResponse;
 use App\Presentation\Web\Response\Model\Common\SuccessWithPaginationResponse;
 use App\Presentation\Web\Response\Model\CreatedSemestersInfo;
+use App\Presentation\Web\Response\Model\FullSemester;
 use App\Presentation\Web\Response\Model\Semester;
 use App\Presentation\Web\Response\Response;
 use OpenApi\Attributes as OA;
@@ -67,14 +68,14 @@ class SemesterController extends BaseController
         );
     }
 
-    #[Route('/semesters', name: 'create-semester-multi', methods: ['GET'])]
+    #[Route('/semesters', name: 'get-all-semesters', methods: ['GET'])]
     #[IsGranted('IS_AUTHENTICATED', statusCode: 404, exceptionCode: 404)]
     #[OA\Tag('semesters')]
     #[LOA\ErrorResponse(500)]
     #[LOA\ValidationResponse]
     #[LOA\ErrorResponse(400)]
     #[LOA\ErrorResponse(401)]
-    #[LOA\SuccessPaginationResponse(Semester::class)]
+    #[LOA\SuccessPaginationResponse(FullSemester::class)]
     public function getAll(
         LoggerInterface $logger,
         GetAllSemestersUseCase $useCase,
@@ -87,7 +88,7 @@ class SemesterController extends BaseController
             new SuccessWithPaginationResponse(
                 PaginatedData::fromDataProvider(
                     $dataProvider,
-                    Semester::fromSemester(...),
+                    FullSemester::fromSemester(...),
                 ),
             ),
         );

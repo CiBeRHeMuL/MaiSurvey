@@ -591,7 +591,7 @@ paths:
     get:
       tags:
         - semesters
-      operationId: get_create-semester-multi
+      operationId: get_get-all-semesters
       parameters:
         -
           name: sort_by
@@ -659,7 +659,52 @@ paths:
               schema:
                 allOf:
                   - { $ref: '#/components/schemas/SuccessWithPaginationResponse' }
-                  - { properties: { data: { properties: { items: { type: array, items: { $ref: '#/components/schemas/Semester' } } }, type: object } }, type: object }
+                  - { properties: { data: { properties: { items: { type: array, items: { $ref: '#/components/schemas/FullSemester' } } }, type: object } }, type: object }
+    post:
+      tags:
+        - semesters
+      operationId: post_create-semester-multi
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/CreateSemesterDto'
+      responses:
+        '500':
+          description: 'Internal Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: 'Unprocessable Entity'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResponse'
+        '400':
+          description: 'Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/SuccessResponse' }
+                  - { properties: { data: { $ref: '#/components/schemas/CreatedSemestersInfo' } }, type: object }
   /student-subjects:
     get:
       tags:
@@ -1136,7 +1181,7 @@ paths:
       summary: 'Импорт предметов'
       operationId: post_import-subjects
       requestBody:
-        required: true
+        required: false
         content:
           multipart/form-data:
             schema:
@@ -4551,6 +4596,23 @@ components:
       properties:
         name:
           type: string
+      type: object
+    FullSemester:
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+      type: object
+    CreatedSemestersInfo:
+      required:
+        - created
+      properties:
+        created:
+          type: integer
       type: object
     StudentSubject:
       required:
