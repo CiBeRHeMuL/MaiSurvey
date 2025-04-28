@@ -97,7 +97,7 @@ class CreateUserCommand extends AbstractCommand
                     $input->getArgument('last_name'),
                     $input->getOption('patronymic'),
                     $input->getOption('group_id'),
-                    $input->getOption('need_change_password'),
+                    $input->getOption('need-change-password'),
                 ),
             );
 
