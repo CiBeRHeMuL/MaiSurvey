@@ -47,13 +47,13 @@ class RefreshStatHandler
         if ($message->getSurveyIds() !== null) {
             $surveys = $this->surveysByIdsUseCase->execute(
                 $message->getSurveyIds(),
-                $message->isForce() === false,
+                $message->isForce() ? null : true,
             );
         } else {
             $surveys = iterator_to_array(
                 $this
                     ->surveysUseCase
-                    ->execute(new GetSurveysDto())
+                    ->execute(new GetSurveysDto(actual: $message->isForce() ? null : true))
                     ->getItems(),
             );
         }
