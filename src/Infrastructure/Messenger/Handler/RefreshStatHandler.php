@@ -42,6 +42,7 @@ class RefreshStatHandler
 
     public function __invoke(RefreshStatsMessage $message): void
     {
+        $this->logger->warning(sprintf('Given surveys: %s', implode(', ', $message->getSurveyIds())));
         $surveys = [];
         if ($message->getSurveyIds() !== null) {
             $surveys = $this->surveysByIdsUseCase->execute(
@@ -80,10 +81,12 @@ class RefreshStatHandler
         if ($surveys === []) {
             return;
         }
+        $this->logger->warning(sprintf('Found %d surveys', count($surveys)));
 
         try {
             $refreshed = $this->generateForSurveysUseCase->execute($surveys, $message->isForce());
             $this->logger->info(sprintf('Статистка успешно обновлена для %d опросов', $refreshed));
+            $this->logger->warning(sprintf('Статистка успешно обновлена для %d опросов', $refreshed));
             foreach ($surveys as $survey) {
                 $this
                     ->cache
