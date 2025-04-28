@@ -78,10 +78,7 @@ class RefreshStatHandler
                     sprintf(
                         "Times:\nMsg: %s\nLast: %s",
                         $message->getRefreshTime()->format(DATE_RFC3339),
-                        $lastRefreshTime->format
-                        (
-                            DATE_RFC3339,
-                        ),
+                        $lastRefreshTime?->format(DATE_RFC3339),
                     ),
                 );
                 return $lastRefreshTime === null
