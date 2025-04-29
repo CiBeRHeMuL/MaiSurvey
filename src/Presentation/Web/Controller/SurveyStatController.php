@@ -101,7 +101,7 @@ class SurveyStatController extends BaseController
             if (!is_dir("$projectDir/export/$exportType")) {
                 mkdir("$projectDir/export/$exportType", 0777, true);
             }
-            $exportFileName = HString::rusToEng($stat->getSurvey()->getSubject()->getName())
+            $exportFileName = HString::rusToEng(str_replace('/', '-', $stat->getSurvey()->getSubject()->getName()))
                 . '_'
                 . (new DateTimeImmutable())->format('Y-m-d H:i:s')
                 . ".$exportType";
