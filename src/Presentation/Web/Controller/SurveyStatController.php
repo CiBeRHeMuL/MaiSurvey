@@ -23,10 +23,14 @@ use App\Presentation\Web\Response\Model\SurveyStat;
 use App\Presentation\Web\Response\Response;
 use DateTimeImmutable;
 use OpenApi\Attributes as OA;
+use PhpOffice\PhpSpreadsheet\Cell\AdvancedValueBinder;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Color;
+use PhpOffice\PhpSpreadsheet\Style\Conditional;
+use PhpOffice\PhpSpreadsheet\Style\ConditionalFormatting\ConditionalColorScale;
+use PhpOffice\PhpSpreadsheet\Style\ConditionalFormatting\ConditionalFormatValueObject;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
@@ -101,7 +105,14 @@ class SurveyStatController extends BaseController
             if (!is_dir("$projectDir/export/$exportType")) {
                 mkdir("$projectDir/export/$exportType", 0777, true);
             }
-            $exportFileName = HString::rusToEng(str_replace('/', '-', $stat->getSurvey()->getSubject()->getName()))
+            $exportFileName = HString::rusToEng(
+                    str_replace(
+                        '/',
+                        '-',
+                        $stat->getSurvey()->getSubject()->getName()
+                        . ' ' . $stat->getSurvey()->getSubject()->getSemester()->getName(),
+                    ),
+                )
                 . '_'
                 . (new DateTimeImmutable())->format('Y-m-d H:i:s')
                 . ".$exportType";
@@ -147,9 +158,79 @@ class SurveyStatController extends BaseController
         $writer = new Xlsx($spreadsheet);
         $spreadsheet->removeSheetByIndex(0);
 
+        $topBorderStyle = [
+            'borders' => [
+                'top' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['argb' => Color::COLOR_BLACK],
+                ],
+            ],
+        ];
+        $bottomBorderStyle = [
+            'borders' => [
+                'bottom' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['argb' => Color::COLOR_BLACK],
+                ],
+            ],
+        ];
+
+        $commonWorksheet = new Worksheet($spreadsheet, 'Общая информация');
+        $spreadsheet->addSheet($commonWorksheet);
+        $row = 1;
+        $commonWorksheet->setCellValue("A$row", 'Семестр');
+        $commonWorksheet->setCellValue("B$row", 'Группа');
+        $commonWorksheet->setCellValue("C$row", 'Предмет');
+        $commonWorksheet->setCellValue("D$row", 'Всего');
+        $commonWorksheet->setCellValue("E$row", 'Проголосовало');
+        $commonWorksheet->setCellValue("F$row", 'Процент проголосовавших');
+        $row++;
+
         foreach ($statProvider->getItems() as $stat) {
+            $commonWorksheet->getStyle("A$row")->applyFromArray($topBorderStyle);
+            $commonWorksheet->getStyle("B$row")->applyFromArray($topBorderStyle);
+            $commonWorksheet->getStyle("C$row")->applyFromArray($topBorderStyle);
+            $commonWorksheet->getStyle("D$row")->applyFromArray($topBorderStyle);
+            $commonWorksheet->getStyle("E$row")->applyFromArray($topBorderStyle);
+            $commonWorksheet->getStyle("F$row")->applyFromArray($topBorderStyle);
+            foreach ($stat->getCountsByGroups() as $group) {
+                $commonWorksheet->setCellValue("A$row", $stat->getSurvey()->getSubject()->getSemester()->getName());
+                $commonWorksheet->setCellValue("B$row", $group->getName());
+                $commonWorksheet->setCellValue("C$row", $stat->getSurvey()->getSubject()->getName());
+                $commonWorksheet->setCellValue("D$row", (string)$group->getAvailableCount());
+                $commonWorksheet->setCellValue("E$row", (string)$group->getCompletedCount());
+                $commonWorksheet->setCellValue(
+                    "F$row",
+                    ($group->getCompletedCount() / $group->getAvailableCount() * 100) . '%',
+                    new AdvancedValueBinder(),
+                );
+                $row++;
+            }
+            $commonWorksheet->getStyle('A' . ($row - 1))->applyFromArray($bottomBorderStyle);
+            $commonWorksheet->getStyle('B' . ($row - 1))->applyFromArray($bottomBorderStyle);
+            $commonWorksheet->getStyle('C' . ($row - 1))->applyFromArray($bottomBorderStyle);
+            $commonWorksheet->getStyle('D' . ($row - 1))->applyFromArray($bottomBorderStyle);
+            $commonWorksheet->getStyle('E' . ($row - 1))->applyFromArray($bottomBorderStyle);
+            $commonWorksheet->getStyle('F' . ($row - 1))->applyFromArray($bottomBorderStyle);
             $this->generateStatWorksheet($stat, $spreadsheet);
         }
+
+        $conditionalColorScale = new ConditionalColorScale();
+        $conditionalColorScale->setMinimumColor(new Color('FFF8696B'))
+            ->setMidpointColor(new Color('FFFFEB84'))
+            ->setMaximumColor(new Color('FF63BE7B'))
+            ->setMinimumConditionalFormatValueObject(new ConditionalFormatValueObject('min'))
+            ->setMidpointConditionalFormatValueObject(new ConditionalFormatValueObject('percentile', '50'))
+            ->setMaximumConditionalFormatValueObject(new ConditionalFormatValueObject('max'));
+        $commonWorksheet->setConditionalStyles(
+            'F1:F1048576',
+            [(new Conditional())->setColorScale($conditionalColorScale)->setConditionType(Conditional::CONDITION_COLORSCALE)]
+        );
+        foreach ($commonWorksheet->getColumnIterator() as $column) {
+            $commonWorksheet->getColumnDimension($column->getColumnIndex())
+                ->setAutoSize(true);
+        }
+
         $spreadsheet->setActiveSheetIndex(0);
 
         // Сохраняем
@@ -173,7 +254,8 @@ class SurveyStatController extends BaseController
      */
     public function generateStatWorksheet(DomainSurveyStat $stat, Spreadsheet $spreadsheet): Worksheet
     {
-        $title = $stat->getSurvey()->getSubject()->getName();
+        $title = $stat->getSurvey()->getSubject()->getSemester()->getShortName()
+            . ' – ' . $stat->getSurvey()->getSubject()->getName();
         $title = mb_strlen($title) > 25
             ? mb_substr($title, 0, 25) . '...'
             : $title;
@@ -183,7 +265,7 @@ class SurveyStatController extends BaseController
 
         $worksheet->setCellValue(
             'A1',
-            "Статистика по опросу по предмету \"{$stat->getSurvey()->getSubject()->getName()}\"",
+            "Статистика по опросу по предмету \"{$stat->getSurvey()->getSubject()->getName()}\" за {$stat->getSurvey()->getSubject()->getSemester()->getName()}",
         );
         $worksheet->mergeCells('A1:G1');
 

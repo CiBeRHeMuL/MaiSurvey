@@ -94,4 +94,9 @@ class Semester
     {
         return ($this->spring ? 'Весенний' : 'Осенний') . " семестр {$this->getYear()} года";
     }
+
+    public function getShortName(): string
+    {
+        return ($this->spring ? 'Весна' : 'Осень') . ' ' . $this->getYear();
+    }
 }
