@@ -8,7 +8,6 @@ use App\Domain\DataProvider\DataSort;
 use App\Domain\DataProvider\LimitOffset;
 use App\Domain\DataProvider\SortColumn;
 use App\Domain\Dto\Survey\GetSurveysDto;
-use App\Domain\Entity\CompletedSurvey;
 use App\Domain\Entity\Group;
 use App\Domain\Entity\MySurvey;
 use App\Domain\Entity\Subject;
@@ -180,28 +179,18 @@ class SurveyStatRepository extends Common\AbstractRepository implements SurveySt
             ->select([
                 's.id',
                 'available_count' => new CoalesceFunc(new Expr('ms.count'), 0),
-                'completed_count' => new CoalesceFunc(new Expr('cs.count'), 0),
+                'completed_count' => new CoalesceFunc(new Expr('ms.completed_count'), 0),
                 'not_completed_users' => new CoalesceFunc(new Expr('ncuds.names'), new Expr("'[]'::jsonb")),
                 'rating_avg' => new CoalesceFunc(new Expr('r_avg.avg'), 0),
+                'counts_by_groups' => new CoalesceFunc(new Expr('gc.counts'), new Expr("'[]'::jsonb")),
             ])
             ->from(['s' => $this->getClassTable(Survey::class)])
-            ->leftJoin(
-                [
-                    'cs' => Query::select()
-                        ->select([
-                            'count' => new Expr('count(*)'),
-                            'survey_id',
-                        ])
-                        ->from($this->getClassTable(CompletedSurvey::class))
-                        ->groupBy(['survey_id']),
-                ],
-                'cs.survey_id = s.id',
-            )
             ->leftJoin(
                 [
                     'ms' => Query::select()
                         ->select([
                             'count' => new Expr('count(*)'),
+                            'completed_count' => new Expr('count(*) FILTER ( WHERE completed IS TRUE )'),
                             'id',
                         ])
                         ->from($this->getClassTable(MySurvey::class))
@@ -259,6 +248,41 @@ class SurveyStatRepository extends Common\AbstractRepository implements SurveySt
                         ->groupBy(['si.survey_id']),
                 ],
                 'r_avg.id = s.id',
+            )
+            ->leftJoin(
+                [
+                    'gc' => Query::select()
+                        ->select([
+                            'gc.id',
+                            'counts' => new JsonbAggFunc(
+                                new JsonbBuildObjectFunc([
+                                    'name',
+                                    new Expr('gc.name'),
+                                    'available_count',
+                                    new Expr('gc.available_count'),
+                                    'completed_count',
+                                    new Expr('gc.completed_count'),
+                                ]),
+                            ),
+                        ])
+                        ->from([
+                            'gc' => Query::select()
+                                ->select([
+                                    'ms.id',
+                                    'g.name',
+                                    'available_count' => new Expr('count(*)'),
+                                    'completed_count' => new Expr('count(*) FILTER ( WHERE completed IS TRUE )'),
+                                ])
+                                ->from(['ms' => $this->getClassTable(MySurvey::class)])
+                                ->innerJoin(['ud' => $this->getClassTable(UserData::class)], 'ud.user_id = ms.user_id')
+                                ->innerJoin(['udg' => $this->getClassTable(UserDataGroup::class)], 'ud.id = udg.user_data_id')
+                                ->innerJoin(['g' => $this->getClassTable(Group::class)], 'g.id = udg.group_id')
+                                ->groupBy(['ms.id', 'g.name'])
+                                ->orderBy(['ms.id' => SORT_ASC, 'g.name' => SORT_ASC]),
+                        ])
+                        ->groupBy('gc.id'),
+                ],
+                'gc.id = s.id',
             )
             ->filterWhere(['s.id' => $surveyIds]);
     }

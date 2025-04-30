@@ -2,6 +2,7 @@
 
 namespace App\Domain\Entity;
 
+use App\Domain\Dto\SurveyStat\CountsByGroup;
 use App\Domain\Dto\SurveyStat\StatNCUser;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -19,11 +20,14 @@ class SurveyStat
     private int $availableCount;
     #[ORM\Column(name: 'completed_count', type: 'integer', nullable: false)]
     private int $completedCount;
-    /** @var StatNCUser[] */
+    /** @var StatNCUser[] $notCompletedUsers */
     #[ORM\Column(name: 'not_completed_users', type: 'stat_nc_user[]', nullable: false, options: ['default' => '[]', 'jsonb' => true])]
     private array $notCompletedUsers;
     #[ORM\Column(name: 'rating_avg', type: 'float', nullable: false, options: ['default' => 0])]
     private float $ratingAvg;
+    /** @var CountsByGroup[] $countsByGroups */
+    #[ORM\Column(name: 'counts_by_groups', type: 'counts_by_group[]', nullable: false, options: ['default' => '[]', 'jsonb' => true])]
+    private array $countsByGroups;
 
     #[ORM\OneToOne(targetEntity: Survey::class, inversedBy: 'stat')]
     #[ORM\JoinColumn(name: 'id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
@@ -90,6 +94,17 @@ class SurveyStat
     public function setRatingAvg(float $ratingAvg): SurveyStat
     {
         $this->ratingAvg = $ratingAvg;
+        return $this;
+    }
+
+    public function getCountsByGroups(): array
+    {
+        return $this->countsByGroups;
+    }
+
+    public function setCountsByGroups(array $countsByGroups): SurveyStat
+    {
+        $this->countsByGroups = $countsByGroups;
         return $this;
     }
 
