@@ -35,7 +35,7 @@ readonly class GetSurveysDto
         #[Assert\Type('integer', message: 'Значение должно быть целым числом')]
         #[Assert\GreaterThanOrEqual(0, message: 'Значение должно быть больше или равно 0')]
         public int $offset = 0,
-        #[Assert\Type('integer', message: 'Значение должно быть целым числом')]
+        #[Assert\Type(['integer', 'null'], message: 'Значение должно быть целым числом')]
         #[Assert\GreaterThanOrEqual(0, message: 'Значение должно быть больше или равно 0')]
         #[Assert\LessThanOrEqual(100, message: 'Значение должно быть меньше или равно 100')]
         public int|null $limit = 100,
