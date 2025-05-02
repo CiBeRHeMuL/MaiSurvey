@@ -149,7 +149,7 @@ class SurveyStatController extends BaseController
         #[Autowire('%kernel.project_dir%')]
         string $projectDir,
         #[MapQueryString(validationFailedStatusCode: 422)]
-        GetSurveysDto $dto = new GetSurveysDto(),
+        GetSurveysDto $dto = new GetSurveysDto(limit: null),
     ): BinaryFileResponse {
         $useCase->setLogger($logger);
         $statProvider = $useCase->execute($dto);
