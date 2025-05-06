@@ -459,12 +459,12 @@ class UserService
         }
     }
 
-    public function changePassword(User $user, #[SensitiveParameter] string $newPassword): User
+    public function changePassword(User $user, #[SensitiveParameter] string $newPassword, bool $needChangePassword = false): User
     {
         $user->setPassword($this->passwordHasherService->hashPassword($newPassword))
             ->setUpdatedAt(new DateTimeImmutable())
             ->setPasswordChangedAt(new DateTimeImmutable())
-            ->setNeedChangePassword(false);
+            ->setNeedChangePassword($needChangePassword);
 
         $updated = $this->userRepository->update($user);
         if (!$updated) {

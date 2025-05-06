@@ -318,4 +318,31 @@ class AuthService
 
         return $this->userService->changePassword($user, $dto->getNewPassword());
     }
+
+    /**
+     * Сбросить пароль принудительно без подтверждения
+     *
+     * @param User $user
+     * @param string $newPassword
+     *
+     * @return User
+     */
+    public function resetPasswordHard(User $user, string $newPassword): User
+    {
+        try {
+            $this->passwordCheckerService->checkPasswordStrength($newPassword);
+        } catch (ValidationException $e) {
+            throw ValidationException::new(
+                array_map(
+                    fn(ValidationError $ve) => new ValidationError(
+                        'new_password',
+                        $ve->getSlug(),
+                        $ve->getMessage(),
+                    ),
+                    $e->getErrors(),
+                ),
+            );
+        }
+        return $this->userService->changePassword($user, $newPassword, true);
+    }
 }
