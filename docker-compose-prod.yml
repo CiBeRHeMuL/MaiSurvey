@@ -57,6 +57,7 @@ services:
       - caddy
     ports:
       - "${NGINX_EXTERNAL_PORT}:80"
+    restart: always
   mai-survey-messenger:
     container_name: mai-survey-messenger-container
     build:

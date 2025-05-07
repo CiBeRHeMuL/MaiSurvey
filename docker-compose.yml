@@ -18,9 +18,6 @@ services:
       context: ./
       dockerfile: docker/php/Dockerfile
     container_name: mai-survey-php-container
-    environment:
-      PHP_IDE_CONFIG: 'serverName=development'
-      XDEBUG_SESSION: PHPSTORM
     volumes:
       - type: bind
         source: .
