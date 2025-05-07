@@ -20,6 +20,7 @@ use App\Domain\Service\Db\TransactionManagerInterface;
 use App\Domain\Service\Security\EmailCheckerServiceInterface;
 use App\Domain\Service\Security\PasswordHasherServiceInterface;
 use App\Domain\Service\Security\SecurityService;
+use App\Domain\Service\SurveyStat\StatRefresherInterface;
 use App\Domain\Service\UserData\UserDataService;
 use App\Domain\Validation\ValidationError;
 use App\Domain\ValueObject\Email;
@@ -42,6 +43,7 @@ class UserService
         private PasswordHasherServiceInterface $passwordHasherService,
         private TransactionManagerInterface $transactionManager,
         private UserDataService $userDataService,
+        private StatRefresherInterface $statRefresher,
         LoggerInterface $logger,
     ) {
         $this->setLogger($logger);
@@ -51,6 +53,7 @@ class UserService
     {
         $this->logger = $logger;
         $this->userDataService->setLogger($logger);
+        $this->statRefresher->setLogger($logger);
         return $this;
     }
 
@@ -285,6 +288,7 @@ class UserService
         $me->setDeleted(true)
             ->setDeletedAt(new DateTimeImmutable());
         if ($this->userRepository->update($me)) {
+            $this->statRefresher->refreshStats(force: true);
             return $me;
         }
         throw ErrorException::new('Не удалось удалить профиль');
@@ -484,6 +488,7 @@ class UserService
         $user->setDeleted(true)
             ->setDeletedAt(new DateTimeImmutable());
         if ($this->userRepository->update($user)) {
+            $this->statRefresher->refreshStats(force: true);
             return $user;
         }
         throw ErrorException::new('Не удалось удалить пользователя');
