@@ -8,7 +8,10 @@ use App\Domain\Dto\Survey\GetSurveysDto as DomainGetSurveysDto;
 use App\Domain\Entity\Survey;
 use App\Domain\Enum\SortTypeEnum;
 use App\Domain\Enum\SurveyStatusEnum;
+use App\Domain\Enum\ValidationErrorSlugEnum;
+use App\Domain\Exception\ValidationException;
 use App\Domain\Service\Survey\SurveyService;
+use App\Domain\Validation\ValidationError;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Uid\Uuid;
 
@@ -37,6 +40,15 @@ class GetSurveysUseCase
      */
     public function execute(GetSurveysDto $dto): DataProviderInterface
     {
+        if ($dto->limit === null) {
+            throw ValidationException::new([
+                new ValidationError(
+                    'limit',
+                    ValidationErrorSlugEnum::WrongField->getSlug(),
+                    'Лимит должен быть указан',
+                ),
+            ]);
+        }
         return $this
             ->surveyService
             ->getAll(
