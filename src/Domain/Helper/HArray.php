@@ -114,13 +114,13 @@ class HArray
 
     /**
      * Группирует массив по ключу(ам),
-     * если надо, индексирует элементы по индексу $index и,
-     * если надо, проецирует элементы используя функцию $projection.
+     * если надо, индексирует элементы по индексу \$index и,
+     * если надо, проецирует элементы используя функцию \$projection.
      *
-     * Если необходимо переиндексировать ключи элементов, то $preserveKeys должен быть равен false.
-     * Если $preserveKeys равен false, то $index принудительно устанавливается в null, чтобы избежать лишних вычислений
+     * Если необходимо переиндексировать ключи элементов, то \$preserveKeys должен быть равен false.
+     * Если \$preserveKeys равен false, то \$index принудительно устанавливается в null, чтобы избежать лишних вычислений
      *
-     * Если некоторые элементы могут не содержать значения по ключу $index, то можно передать значение по умолчанию $defaultIndex
+     * Если некоторые элементы могут не содержать значения по ключу \$index, то можно передать значение по умолчанию \$defaultIndex
      *
      * Примеры использования:
      * 1. Простая группировка по ключу:
@@ -175,8 +175,7 @@ class HArray
      *      $array,
      *      'value',
      * );
-     * // $array = ['1' => ['one' => ['id' => 1, 'value' => 1]], '2' => ['two' => ['id' => 2, 'value' => 2]], '3' => ['three' => ['id' => 3, 'value'
-     * => 3]]]
+     * // $array = ['1' => ['one' => ['id' => 1, 'value' => 1]], '2' => ['two' => ['id' => 2, 'value' => 2]], '3' => ['three' => ['id' => 3, 'value' => 3]]]
      * ```
      * 7. Группировка по ключу вложенного массива с использованием индекс по умолчанию:
      * ```
@@ -204,7 +203,7 @@ class HArray
      *
      * @return ($projection is null
      *      ? ($key is array ? array : ($preserveKeys is false ? T[][] : array<TResKey, T[]>))
-     *      : ($key is array ? array : ($preserveKeys is false ? T[][] : array<TResKey, T[]>)))
+     *      : ($key is array ? array : ($preserveKeys is false ? TProj[][] : array<TResKey, TProj[]>)))
      */
     public static function groupExtended(
         iterable $array,

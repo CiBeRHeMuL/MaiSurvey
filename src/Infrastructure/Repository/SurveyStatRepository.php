@@ -21,6 +21,7 @@ use App\Domain\Enum\SurveyItemTypeEnum;
 use App\Domain\Enum\SurveyStatusEnum;
 use App\Domain\Repository\SurveyStatRepositoryInterface;
 use App\Infrastructure\Db\Expr\ActualSurveyExpr;
+use App\Infrastructure\Db\Expr\ArrayAggFunc;
 use App\Infrastructure\Db\Expr\CoalesceFunc;
 use App\Infrastructure\Db\Expr\FullNameExpr;
 use App\Infrastructure\Db\Expr\ILikeExpr;
@@ -183,6 +184,7 @@ class SurveyStatRepository extends Common\AbstractRepository implements SurveySt
                 'not_completed_users' => new CoalesceFunc(new Expr('ncuds.names'), new Expr("'[]'::jsonb")),
                 'rating_avg' => new CoalesceFunc(new Expr('r_avg.avg'), 0),
                 'counts_by_groups' => new CoalesceFunc(new Expr('gc.counts'), new Expr("'[]'::jsonb")),
+                'available_groups' => new CoalesceFunc(new Expr('gc.names'), new Expr("'{}'::text[]")),
             ])
             ->from(['s' => $this->getClassTable(Survey::class)])
             ->leftJoin(
@@ -264,6 +266,7 @@ class SurveyStatRepository extends Common\AbstractRepository implements SurveySt
                                     new Expr('gc.completed_count'),
                                 ]),
                             ),
+                            'names' => new ArrayAggFunc(new Expr('DISTINCT gc.name'), new Expr('gc.name ASC')),
                         ])
                         ->from([
                             'gc' => Query::select()

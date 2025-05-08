@@ -20,7 +20,7 @@ class TextArrayType extends Type
         try {
             if ($platform instanceof PostgreSQLPlatform) {
                 $value = array_map(
-                    fn($v) => $v === null ? 'null' : "\"$v\"",
+                    fn($v) => $v === null ? 'null' : '"' . addcslashes($v, '"') . '"',
                     $value,
                 );
                 return '{' . implode(',', $value) . '}';

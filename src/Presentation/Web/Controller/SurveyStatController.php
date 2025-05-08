@@ -5,6 +5,7 @@ namespace App\Presentation\Web\Controller;
 use App\Application\Dto\Survey\GetSurveysDto;
 use App\Application\UseCase\SurveyStat\GetSurveysStatUseCase;
 use App\Application\UseCase\SurveyStat\GetSurveyStatByIdUseCase;
+use App\Domain\Dto\SurveyStat\StatNCUser;
 use App\Domain\Dto\SurveyStatItem\ChoiceStatData;
 use App\Domain\Dto\SurveyStatItem\CommentStatData;
 use App\Domain\Dto\SurveyStatItem\MultiChoiceStatData;
@@ -12,6 +13,7 @@ use App\Domain\Dto\SurveyStatItem\RatingStatData;
 use App\Domain\Entity\SurveyStat as DomainSurveyStat;
 use App\Domain\Enum\PermissionEnum;
 use App\Domain\Enum\SurveyItemTypeEnum;
+use App\Domain\Helper\HArray;
 use App\Domain\Helper\HString;
 use App\Presentation\Web\Enum\ErrorSlugEnum;
 use App\Presentation\Web\Enum\HttpStatusCodeEnum;
@@ -35,6 +37,9 @@ use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpWord\PhpWord;
+use PhpOffice\PhpWord\SimpleType\TblWidth;
+use PhpOffice\PhpWord\Writer\Word2007;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -77,7 +82,7 @@ class SurveyStatController extends BaseController
     #[Route('/surveys/{id}/stat/export/xlsx', 'export-survey-stat-by-id', requirements: ['id' => Requirement::UUID], methods: ['GET'])]
     #[IsGranted(PermissionEnum::SurveyStatView->value, statusCode: 404, exceptionCode: 404)]
     #[OA\Tag('survey-stats')]
-    #[LOA\FileResponse(['xlsx'])]
+    #[LOA\FileResponse(['docx'])]
     #[LOA\ErrorResponse(401)]
     #[LOA\ErrorResponse(404)]
     #[LOA\ErrorResponse(500)]
@@ -94,12 +99,10 @@ class SurveyStatController extends BaseController
             return Response::notFound();
         }
         try {
-            $exportType = 'xlsx';
-            $spreadsheet = new Spreadsheet();
-            $writer = new Xlsx($spreadsheet);
-            $spreadsheet->removeSheetByIndex(0);
-            $this->generateStatWorksheet($stat, $spreadsheet);
-            $spreadsheet->setActiveSheetIndex(0);
+            $word = $this->generateWordStat($stat);
+            $writer = new Word2007($word);
+
+            $exportType = 'docx';
 
             // Сохраняем
             if (!is_dir("$projectDir/export/$exportType")) {
@@ -252,7 +255,7 @@ class SurveyStatController extends BaseController
      * @param Spreadsheet $spreadsheet
      * @return Worksheet
      */
-    public function generateStatWorksheet(DomainSurveyStat $stat, Spreadsheet $spreadsheet): Worksheet
+    private function generateStatWorksheet(DomainSurveyStat $stat, Spreadsheet $spreadsheet): Worksheet
     {
         $title = $stat->getSurvey()->getSubject()->getSemester()->getShortName()
             . ' – ' . $stat->getSurvey()->getSubject()->getName();
@@ -454,5 +457,175 @@ class SurveyStatController extends BaseController
             ->setAutoSize(false)
             ->setWidth(20);
         return $worksheet;
+    }
+
+    private function generateWordStat(DomainSurveyStat $stat): PhpWord
+    {
+        $phpWord = new PhpWord();
+        $phpWord->setDefaultFontName('Times New Roman');
+        $phpWord->setDefaultFontSize(12);
+
+        $standardIndent = 709; // Стандартный отступ в 1,25 см в двадцатых долях пункта
+
+        $section = $phpWord->addSection();
+
+        $section->addText(
+            "Статистика по опросу по предмету \"{$stat->getSurvey()->getSubject()->getName()}\""
+            . " за {$stat->getSurvey()->getSubject()->getSemester()->getName()}",
+            ['bold' => true, 'size' => 18],
+            ['alignment' => 'center'],
+        );
+        $section->addText(
+            msgfmt_format_message(
+                'ru-RU',
+                '{c,plural,one{Прошел # студент} few{Прошло # студентов} many{Прошли # студентов} other{Прошло # студентов}} из {a}',
+                ['c' => $stat->getCompletedCount(), 'a' => $stat->getAvailableCount()],
+            ),
+        );
+        $section->addText(
+            sprintf(
+                'Процент прохождения: %.2f%%',
+                $stat->getAvailableCount()
+                    ? $stat->getCompletedCount() / $stat->getAvailableCount() * 100
+                    : 0.00,
+            ),
+        );
+
+        $section->addText(
+            "Группы, которым доступен опрос:",
+            ['bold' => true, 'size' => 16],
+            ['alignment' => 'left'],
+        );
+        foreach ($stat->getAvailableGroups() as $group) {
+            $section->addListItem($group, 0);
+        }
+
+        $section->addText(
+            "Ответы:",
+            ['bold' => true, 'size' => 16],
+            ['alignment' => 'left'],
+        );
+
+        foreach ($stat->getItems() as $item) {
+            $section->addListItem($item->getItem()->getText(), 0, ['bold' => true, 'size' => 14]);
+            $section->addListItem(
+                msgfmt_format_message(
+                    'ru-RU',
+                    '{c,plural,one{Прошел # студент} few{Прошло # студентов} many{Прошли # студентов} other{Прошло # студентов}} из {a}',
+                    ['c' => $item->getCompletedCount(), 'a' => $item->getAvailableCount()],
+                ),
+                1,
+            );
+            $section->addListItem(
+                sprintf(
+                    'Процент прохождения: %.2f%%',
+                    $item->getAvailableCount()
+                        ? $item->getCompletedCount() / $item->getAvailableCount() * 100
+                        : 0.00,
+                ),
+                1,
+            );
+
+            foreach ($item->getStats() as $itemStat) {
+                $section->addListItem(
+                    $itemStat->getTeacherName() ?? 'Общая статистика',
+                    1,
+                    ['bold' => true, 'size' => 14],
+                );
+                $section->addListItem('Статистика', 2);
+                $section->addListItem(
+                    msgfmt_format_message(
+                        'ru-RU',
+                        '{c,plural,one{Прошел # студент} few{Прошло # студента} many{Прошли # студентов} other{Прошло # студентов}} из {a}',
+                        ['c' => $itemStat->getCompletedCount(), 'a' => $itemStat->getAvailableCount()],
+                    ),
+                    3,
+                );
+                $section->addListItem(
+                    sprintf(
+                        'Процент прохождения: %.2f%%',
+                        $itemStat->getAvailableCount()
+                            ? $itemStat->getCompletedCount() / $itemStat->getAvailableCount() * 100
+                            : 0.00,
+                    ),
+                    3,
+                );
+                $section->addListItem('Ответы', 2);
+
+                switch ($itemStat->getType()) {
+                    case SurveyItemTypeEnum::Rating:
+                        /** @var RatingStatData $itemStat */
+                        $section->addListItem(sprintf('Средний рейтинг: %.2f', $itemStat->getAverage()), 3);
+                        $table = $section->addTable([
+                            'borderSize' => 1,
+                            'borderColor' => 'black',
+                            'cellMarginLeft' => 114,
+                            'cellMarginRight' => 114,
+                            'indent' => new \PhpOffice\PhpWord\ComplexType\TblWidth($standardIndent * 4, TblWidth::TWIP),
+                        ]);
+
+                        $ratingRow = $table->addRow();
+                        $ratingRow->addCell()->addText('Рейтинг');
+                        $countRow = $table->addRow();
+                        $countRow->addCell()->addText('Количество');
+
+                        foreach ($itemStat->getCounts() as $count) {
+                            $ratingRow->addCell()->addText($count->getRating());
+                            $countRow->addCell()->addText($count->getCount());
+                        }
+
+                        break;
+                    case SurveyItemTypeEnum::Choice:
+                    case SurveyItemTypeEnum::MultiChoice:
+                        /** @var ChoiceStatData|MultiChoiceStatData $itemStat */
+                        $table = $section->addTable([
+                            'borderSize' => 1,
+                            'borderColor' => 'black',
+                            'cellMarginLeft' => 114,
+                            'cellMarginRight' => 114,
+                            'indent' => new \PhpOffice\PhpWord\ComplexType\TblWidth($standardIndent * 4, TblWidth::TWIP),
+                        ]);
+
+                        $choiceRow = $table->addRow();
+                        $choiceRow->addCell()->addText('Рейтинг');
+                        $countRow = $table->addRow();
+                        $countRow->addCell()->addText('Количество');
+
+                        foreach ($itemStat->getCounts() as $count) {
+                            $choiceRow->addCell()->addText($count->getChoice());
+                            $countRow->addCell()->addText($count->getCount());
+                        }
+                        break;
+                    case SurveyItemTypeEnum::Comment:
+                        /** @var CommentStatData $itemStat */
+                        foreach ($itemStat->getComments() as $comment) {
+                            $section->addListItem($comment, 3);
+                        }
+                        break;
+                }
+            }
+        }
+
+        $section->addText(
+            "Студенты, не прошедшие опрос:",
+            ['bold' => true, 'size' => 16],
+            ['alignment' => 'left'],
+        );
+
+        /** @var array<string, string[]> $notCompletedStudents */
+        $notCompletedStudents = HArray::groupExtended(
+            $stat->getNotCompletedUsers(),
+            fn(StatNCUser $u) => $u->getGroup(),
+            projection: fn(StatNCUser $u): string => $u->getName(),
+        );
+
+        foreach ($notCompletedStudents as $group => $groupNotCompletedStudent) {
+            $section->addListItem($group, 0);
+            foreach ($groupNotCompletedStudent as $student) {
+                $section->addListItem($student, 1);
+            }
+        }
+
+        return $phpWord;
     }
 }

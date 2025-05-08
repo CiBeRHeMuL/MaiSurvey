@@ -28,6 +28,9 @@ class SurveyStat
     /** @var CountsByGroup[] $countsByGroups */
     #[ORM\Column(name: 'counts_by_groups', type: 'counts_by_group[]', nullable: false, options: ['default' => '[]', 'jsonb' => true])]
     private array $countsByGroups;
+    /** @var string[] $availableGroups */
+    #[ORM\Column(name: 'available_groups', type: 'text[]', nullable: false, options: ['default' => '{}'])]
+    private array $availableGroups;
 
     #[ORM\OneToOne(targetEntity: Survey::class, inversedBy: 'stat')]
     #[ORM\JoinColumn(name: 'id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
@@ -105,6 +108,17 @@ class SurveyStat
     public function setCountsByGroups(array $countsByGroups): SurveyStat
     {
         $this->countsByGroups = $countsByGroups;
+        return $this;
+    }
+
+    public function getAvailableGroups(): array
+    {
+        return $this->availableGroups;
+    }
+
+    public function setAvailableGroups(array $availableGroups): SurveyStat
+    {
+        $this->availableGroups = $availableGroups;
         return $this;
     }
 
