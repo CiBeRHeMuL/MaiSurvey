@@ -468,6 +468,7 @@ class SurveyStatController extends BaseController
         $standardIndent = 709; // Стандартный отступ в 1,25 см в двадцатых долях пункта
 
         $section = $phpWord->addSection();
+        $section->addFooter()->addPreserveText('{ PAGE }', [], ['alignment' => 'center']);
 
         $section->addText(
             "Статистика по опросу по предмету \"{$stat->getSurvey()->getSubject()->getName()}\""
