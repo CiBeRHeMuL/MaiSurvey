@@ -25,21 +25,21 @@ readonly class UpdateMeDto
         public string|null $patronymic,
         /** Включить уведомления */
         #[Assert\Type('bool', message: 'Значение должно быть булевым')]
-        public bool $notices_enabled,
+        public bool $notices_enabled = false,
         /** Типы уведомлений */
         #[LOA\EnumItems(NoticeTypeEnum::class)]
         #[Assert\All([
             new Assert\Type('string', message: 'Значение должно быть строкой'),
         ])]
         #[LAssert\EnumChoice(enum: NoticeTypeEnum::class, multiple: true, message: 'Значение должно входить в список допустимых')]
-        public array $notice_types,
+        public array $notice_types = [],
         /** Способы уведомлений */
         #[LOA\EnumItems(NoticeChannelEnum::class)]
         #[Assert\All([
             new Assert\Type('string', message: 'Значение должно быть строкой'),
         ])]
         #[LAssert\EnumChoice(enum: NoticeChannelEnum::class, multiple: true, message: 'Значение должно входить в список допустимых')]
-        public array $notice_channels,
+        public array $notice_channels = [],
     ) {
     }
 }
