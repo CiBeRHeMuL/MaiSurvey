@@ -30,6 +30,7 @@ use App\Presentation\Web\Response\Model\Common\SuccessResponse;
 use App\Presentation\Web\Response\Model\Common\SuccessWithPaginationResponse;
 use App\Presentation\Web\Response\Model\Common\ValidationResponse;
 use App\Presentation\Web\Response\Model\CreatedUsersInfo;
+use App\Presentation\Web\Response\Model\LiteUser;
 use App\Presentation\Web\Response\Model\UpdatedUsersInfo;
 use App\Presentation\Web\Response\Model\User;
 use App\Presentation\Web\Response\Response;
@@ -108,7 +109,7 @@ class UserController extends BaseController
     #[Route('/users', 'get-all-users', methods: ['GET'])]
     #[IsGranted(PermissionEnum::UserView->value, statusCode: 404, exceptionCode: 404)]
     #[OA\Tag('users')]
-    #[LOA\SuccessPaginationResponse(User::class)]
+    #[LOA\SuccessPaginationResponse(LiteUser::class)]
     #[LOA\ErrorResponse(400)]
     #[LOA\ErrorResponse(401)]
     #[LOA\ErrorResponse(404)]
@@ -149,7 +150,7 @@ class UserController extends BaseController
             new SuccessWithPaginationResponse(
                 PaginatedData::fromDataProvider(
                     $dataProvider,
-                    User::fromUser(...),
+                    LiteUser::fromUser(...),
                 ),
             ),
         );

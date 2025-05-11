@@ -2742,7 +2742,7 @@ paths:
               schema:
                 allOf:
                   - { $ref: '#/components/schemas/SuccessWithPaginationResponse' }
-                  - { properties: { data: { properties: { items: { type: array, items: { $ref: '#/components/schemas/User' } } }, type: object } }, type: object }
+                  - { properties: { data: { properties: { items: { type: array, items: { $ref: '#/components/schemas/LiteUser' } } }, type: object } }, type: object }
         '400':
           description: 'Bad Request'
           content:
@@ -3458,9 +3458,6 @@ components:
       required:
         - first_name
         - last_name
-        - notices_enabled
-        - notice_types
-        - notice_channels
       properties:
         first_name:
           title: Имя
@@ -3478,10 +3475,19 @@ components:
         notices_enabled:
           title: 'Включить уведомления'
           type: boolean
+          default: false
         notice_types:
-          $ref: '#/components/schemas/NoticeTypeEnum'
+          title: 'Типы уведомлений'
+          type: array
+          items:
+            $ref: '#/components/schemas/NoticeTypeEnum'
+          default: []
         notice_channels:
-          $ref: '#/components/schemas/NoticeChannelEnum'
+          title: 'Способы уведомлений'
+          type: array
+          items:
+            $ref: '#/components/schemas/NoticeChannelEnum'
+          default: []
       type: object
     CreateSemesterDto:
       required:
@@ -4997,6 +5003,30 @@ components:
         created:
           type: integer
       type: object
+    LiteUser:
+      required:
+        - id
+        - email
+        - roles
+        - status
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+          format: email
+        data:
+          nullable: true
+          oneOf:
+            -
+              $ref: '#/components/schemas/UserData'
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoleEnum'
+        status:
+          $ref: '#/components/schemas/UserStatusEnum'
+      type: object
     UpdatedUsersInfo:
       required:
         - updated
@@ -5287,27 +5317,6 @@ components:
           type: string
           default: null
           nullable: true
-      type: object
-    LiteUser:
-      required:
-        - id
-        - email
-        - roles
-      properties:
-        id:
-          type: string
-        email:
-          type: string
-          format: email
-        data:
-          nullable: true
-          oneOf:
-            -
-              $ref: '#/components/schemas/UserData'
-        roles:
-          type: array
-          items:
-            $ref: '#/components/schemas/RoleEnum'
       type: object
     LiteSurvey:
       required:

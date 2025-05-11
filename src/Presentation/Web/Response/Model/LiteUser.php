@@ -4,8 +4,9 @@ namespace App\Presentation\Web\Response\Model;
 
 use App\Domain\Entity\User as DomainUser;
 use App\Domain\Enum\RoleEnum;
-use OpenApi\Attributes as OA;
+use App\Domain\Enum\UserStatusEnum;
 use App\Presentation\Web\OpenApi\Attribute as LOA;
+use OpenApi\Attributes as OA;
 
 readonly class LiteUser
 {
@@ -14,6 +15,7 @@ readonly class LiteUser
      * @param string $email
      * @param UserData|null $data
      * @param string[] $roles
+     * @param string $status
      */
     public function __construct(
         public string $id,
@@ -22,6 +24,8 @@ readonly class LiteUser
         public UserData|null $data,
         #[LOA\EnumItems(RoleEnum::class)]
         public array $roles,
+        #[LOA\Enum(UserStatusEnum::class)]
+        public string $status,
     ) {
     }
 
@@ -34,6 +38,7 @@ readonly class LiteUser
                 ? UserData::fromData($user->getData())
                 : null,
             array_values(array_map(fn(RoleEnum $r) => $r->value, $user->getRoles())),
+            $user->getStatus()->value,
         );
     }
 }
