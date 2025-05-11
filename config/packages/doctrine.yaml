@@ -16,6 +16,7 @@ doctrine:
       stat_data[]: App\Infrastructure\Db\Dbal\Types\StatDataArrayType
       stat_nc_user[]: App\Infrastructure\Db\Dbal\Types\StatNCUserArrayType
       counts_by_group[]: App\Infrastructure\Db\Dbal\Types\CountsByGroupArrayType
+      notice_context: App\Infrastructure\Db\Dbal\Types\NoticeContextType
   orm:
     auto_generate_proxy_classes: true
     enable_lazy_ghost_objects: true
