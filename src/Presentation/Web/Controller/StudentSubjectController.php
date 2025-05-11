@@ -96,6 +96,7 @@ class StudentSubjectController extends BaseController
     #[Route('/student-subjects/import', 'student-subjects-import-for-student', methods: ['POST'])]
     #[IsGranted(PermissionEnum::StudentSubjectImport->value, statusCode: 404, exceptionCode: 404)]
     #[OA\Tag('student-subjects')]
+    #[LOA\ImportRequestBody(ImportStudentSubjectsDto::class)]
     #[LOA\ErrorResponse(500)]
     #[LOA\ValidationResponse]
     #[LOA\ErrorResponse(400)]

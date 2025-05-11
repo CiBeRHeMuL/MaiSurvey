@@ -2,6 +2,8 @@
 
 namespace App\Domain\Entity;
 
+use App\Domain\Enum\NoticeChannelEnum;
+use App\Domain\Enum\NoticeTypeEnum;
 use App\Domain\Enum\PermissionEnum;
 use App\Domain\Enum\RoleEnum;
 use App\Domain\Enum\UserStatusEnum;
@@ -55,6 +57,16 @@ class User
     private bool $needChangePassword = false;
     #[ORM\Column(name: 'password_changed_at', type: 'datetime_immutable', nullable: true)]
     private DateTimeImmutable|null $passwordChangedAt = null;
+    #[ORM\Column(name: 'notices_enabled', type: 'boolean', nullable: false, options: ['default' => false])]
+    private bool $noticesEnabled = false;
+    /** @var NoticeChannelEnum[] $noticeChannels */
+    #[ORM\Column(name: 'notice_channels', type: 'text[]', nullable: false, enumType: NoticeChannelEnum::class, options: ['default' => '{}'])]
+    private array $noticeChannels;
+    /** @var NoticeTypeEnum[] $noticeTypes */
+    #[ORM\Column(name: 'notice_types', type: 'text[]', nullable: false, enumType: NoticeTypeEnum::class, options: ['default' => '{}'])]
+    private array $noticeTypes;
+    #[ORM\Column(name: 'telegram_connect_id', type: 'uuid', unique: true, nullable: false)]
+    private Uuid $telegramConnectId;
 
     #[ORM\OneToOne(targetEntity: UserData::class, mappedBy: 'user', cascade: ['persist'])]
     private UserData|null $data = null;
@@ -363,5 +375,49 @@ class User
             fn(RoleEnum|null $c, RoleEnum $r) => $r->isMain() ? $r : $c,
             null,
         );
+    }
+
+    public function isNoticesEnabled(): bool
+    {
+        return $this->noticesEnabled;
+    }
+
+    public function setNoticesEnabled(bool $noticesEnabled): User
+    {
+        $this->noticesEnabled = $noticesEnabled;
+        return $this;
+    }
+
+    public function getNoticeChannels(): array
+    {
+        return $this->noticeChannels;
+    }
+
+    public function setNoticeChannels(array $noticeChannels): User
+    {
+        $this->noticeChannels = $noticeChannels;
+        return $this;
+    }
+
+    public function getNoticeTypes(): array
+    {
+        return $this->noticeTypes;
+    }
+
+    public function setNoticeTypes(array $noticeTypes): User
+    {
+        $this->noticeTypes = $noticeTypes;
+        return $this;
+    }
+
+    public function getTelegramConnectId(): Uuid
+    {
+        return $this->telegramConnectId;
+    }
+
+    public function setTelegramConnectId(Uuid $telegramConnectId): User
+    {
+        $this->telegramConnectId = $telegramConnectId;
+        return $this;
     }
 }

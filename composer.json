@@ -7,13 +7,14 @@
     "php": "^8.3",
     "ext-ctype": "*",
     "ext-iconv": "*",
+    "ext-intl": "*",
     "andrew-gos/class-builder": "^1.2",
     "doctrine/doctrine-bundle": "^2",
     "doctrine/doctrine-migrations-bundle": "^3",
     "doctrine/orm": "^3.3.0",
     "dragonmantank/cron-expression": "^3.4",
     "firebase/php-jwt": "^6.10",
-    "nelmio/api-doc-bundle": "*",
+    "nelmio/api-doc-bundle": "~4.37.0",
     "nelmio/cors-bundle": "^2.5",
     "phpdocumentor/reflection-docblock": "^5.5",
     "phpoffice/phpspreadsheet": "^3",
@@ -40,8 +41,7 @@
     "symfony/serializer": "7.2.*",
     "symfony/uid": "7.2.*",
     "symfony/validator": "7.2.*",
-    "symfony/yaml": "7.2.*",
-    "ext-intl": "*"
+    "symfony/yaml": "7.2.*"
   },
   "config": {
     "allow-plugins": {

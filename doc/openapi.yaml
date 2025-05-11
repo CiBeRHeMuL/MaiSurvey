@@ -940,9 +940,14 @@ paths:
       requestBody:
         required: false
         content:
-          application/json:
+          multipart/form-data:
             schema:
-              $ref: '#/components/schemas/ImportStudentSubjectsDto'
+              allOf:
+                -
+                  $ref: '#/components/schemas/ImportStudentSubjectsDto'
+                -
+                  properties: { file: { type: string, format: binary } }
+                  type: object
       responses:
         '500':
           description: 'Internal Server Error'
@@ -1829,7 +1834,7 @@ paths:
         '200':
           description: Ok
           content:
-            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+            application/vnd.openxmlformats-officedocument.wordprocessingml.document:
               schema:
                 type: string
                 format: binary
@@ -2944,9 +2949,14 @@ paths:
       requestBody:
         required: false
         content:
-          application/json:
+          multipart/form-data:
             schema:
-              $ref: '#/components/schemas/UpdateUsersDto'
+              allOf:
+                -
+                  $ref: '#/components/schemas/UpdateUsersDto'
+                -
+                  properties: { file: { type: string, format: binary } }
+                  type: object
       responses:
         '404':
           description: 'Not Found'
@@ -2982,9 +2992,14 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
-              $ref: '#/components/schemas/ImportUsersDto'
+              allOf:
+                -
+                  $ref: '#/components/schemas/ImportUsersDto'
+                -
+                  properties: { file: { type: string, format: binary } }
+                  type: object
       responses:
         '404':
           description: 'Not Found'
@@ -3431,6 +3446,9 @@ components:
       required:
         - first_name
         - last_name
+        - notices_enabled
+        - notice_types
+        - notice_channels
       properties:
         first_name:
           title: Имя
@@ -3445,6 +3463,13 @@ components:
           type: string
           maxLength: 255
           nullable: true
+        notices_enabled:
+          title: 'Включить уведомления'
+          type: boolean
+        notice_types:
+          $ref: '#/components/schemas/NoticeTypeEnum'
+        notice_channels:
+          $ref: '#/components/schemas/NoticeChannelEnum'
       type: object
     CreateSemesterDto:
       required:
@@ -4929,6 +4954,14 @@ components:
       enum:
         - asc
         - desc
+    NoticeTypeEnum:
+      type: string
+      enum:
+        - new_survey
+    NoticeChannelEnum:
+      type: string
+      enum:
+        - telegram
     AnswerDataDtoInterface:
       required:
         - type

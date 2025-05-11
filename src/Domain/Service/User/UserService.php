@@ -313,7 +313,11 @@ class UserService
             ->setPassword($this->passwordHasherService->hashPassword($dto->getPassword()))
             ->setDeletedAt(null)
             ->setDeleted(false)
-            ->setNeedChangePassword($dto->isNeedChangePassword());
+            ->setNeedChangePassword($dto->isNeedChangePassword())
+            ->setTelegramConnectId(Uuid::v4())
+            ->setNoticesEnabled(false)
+            ->setNoticeTypes([])
+            ->setNoticeChannels([]);
         return $user;
     }
 
@@ -428,7 +432,12 @@ class UserService
         try {
             $this->transactionManager->beginTransaction();
 
+            $this->validateUpdateMeDto($dto);
+
             $me->setUpdatedAt(new DateTimeImmutable())
+                ->setNoticesEnabled($dto->isNoticesEnabled())
+                ->setNoticeTypes($dto->getNoticeTypes())
+                ->setNoticeChannels($dto->getNoticeChannels())
                 ->setUpdater($me)
                 ->setUpdaterId($me->getId());
             $updated = $this->userRepository->update($me);
@@ -460,6 +469,40 @@ class UserService
             $this->transactionManager->rollback();
             $this->logger->error($e);
             throw ErrorException::new('Не удалось обновить запись');
+        }
+    }
+
+    public function validateUpdateMeDto(UpdateMeDto $dto): void
+    {
+        if ($dto->isNoticesEnabled()) {
+            if (!$dto->getNoticeChannels()) {
+                throw ValidationException::new([
+                    new ValidationError(
+                        'notice_channels',
+                        ValidationErrorSlugEnum::WrongField->getSlug(),
+                        'Нужно выбрать хотя бы один способ уведомлений',
+                    ),
+                ]);
+            }
+        }
+
+        if (count(array_unique($dto->getNoticeChannels())) !== count($dto->getNoticeChannels())) {
+            throw ValidationException::new([
+                new ValidationError(
+                    'notice_channels',
+                    ValidationErrorSlugEnum::WrongField->getSlug(),
+                    'Способы уведомлений содержат повторяющиеся значения'
+                ),
+            ]);
+        }
+        if (count(array_unique($dto->getNoticeTypes())) !== count($dto->getNoticeTypes())) {
+            throw ValidationException::new([
+                new ValidationError(
+                    'notice_types',
+                    ValidationErrorSlugEnum::WrongField->getSlug(),
+                    'Типы уведомлений содержат повторяющиеся значения'
+                ),
+            ]);
         }
     }
 
