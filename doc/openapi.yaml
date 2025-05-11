@@ -226,6 +226,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+  /catalog:
+    get:
+      operationId: get_catalog
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/SuccessResponse' }
+                  - { properties: { data: { $ref: '#/components/schemas/Catalog' } }, type: object }
   /groups:
     get:
       tags:
@@ -4522,6 +4534,9 @@ components:
         - permissions
         - roles
         - need_change_password
+        - notices_enabled
+        - notice_types
+        - notice_channels
       properties:
         id:
           type: string
@@ -4555,6 +4570,16 @@ components:
           type: string
           format: date-time
           nullable: true
+        notices_enabled:
+          type: boolean
+        notice_types:
+          type: array
+          items:
+            $ref: '#/components/schemas/NoticeTypeEnum'
+        notice_channels:
+          type: array
+          items:
+            $ref: '#/components/schemas/NoticeChannelEnum'
       type: object
     UserCredentials:
       required:
@@ -4569,6 +4594,87 @@ components:
           type: string
           maxLength: 40
           minLength: 40
+      type: object
+    Catalog:
+      required:
+        - roles
+        - survey_statuses
+        - notice_channels
+        - notice_types
+        - sort_types
+        - survey_item_types
+        - teacher_subject_types
+      properties:
+        roles:
+          type: array
+          items:
+            allOf:
+              -
+                $ref: '#/components/schemas/EnumCase'
+              -
+                properties:
+                  value: { $ref: '#/components/schemas/RoleEnum' }
+                type: object
+        survey_statuses:
+          type: array
+          items:
+            allOf:
+              -
+                $ref: '#/components/schemas/EnumCase'
+              -
+                properties:
+                  value: { $ref: '#/components/schemas/SurveyStatusEnum' }
+                type: object
+        notice_channels:
+          type: array
+          items:
+            allOf:
+              -
+                $ref: '#/components/schemas/EnumCase'
+              -
+                properties:
+                  value: { $ref: '#/components/schemas/NoticeChannelEnum' }
+                type: object
+        notice_types:
+          type: array
+          items:
+            allOf:
+              -
+                $ref: '#/components/schemas/EnumCase'
+              -
+                properties:
+                  value: { $ref: '#/components/schemas/NoticeTypeEnum' }
+                type: object
+        sort_types:
+          type: array
+          items:
+            allOf:
+              -
+                $ref: '#/components/schemas/EnumCase'
+              -
+                properties:
+                  value: { $ref: '#/components/schemas/SortTypeEnum' }
+                type: object
+        survey_item_types:
+          type: array
+          items:
+            allOf:
+              -
+                $ref: '#/components/schemas/EnumCase'
+              -
+                properties:
+                  value: { $ref: '#/components/schemas/SurveyItemTypeEnum' }
+                type: object
+        teacher_subject_types:
+          type: array
+          items:
+            allOf:
+              -
+                $ref: '#/components/schemas/EnumCase'
+              -
+                properties:
+                  value: { $ref: '#/components/schemas/TeacherSubjectTypeEnum' }
+                type: object
       type: object
     SuccessWithPaginationResponse:
       properties:
@@ -5136,6 +5242,34 @@ components:
         - survey_template.delete
         - survey_template.view_all
         - survey_stat.view
+    EnumCase:
+      required:
+        - value
+        - name
+      properties:
+        value:
+          oneOf:
+            -
+              type: string
+            -
+              type: integer
+        name:
+          type: string
+      type: object
+    SurveyItemTypeEnum:
+      type: string
+      enum:
+        - choice
+        - multi_choice
+        - comment
+        - rating
+    TeacherSubjectTypeEnum:
+      type: string
+      enum:
+        - lecture
+        - practical_lesson
+        - laboratory_lesson
+        - course_paper
     PaginatedData:
       properties:
         items:
@@ -5288,13 +5422,6 @@ components:
         subject_type:
           $ref: '#/components/schemas/TeacherSubjectTypeEnum'
       type: object
-    TeacherSubjectTypeEnum:
-      type: string
-      enum:
-        - lecture
-        - practical_lesson
-        - laboratory_lesson
-        - course_paper
     CommentAnswerDataDto:
       required:
         - comment
@@ -5337,13 +5464,6 @@ components:
         type:
           type: string
       type: object
-    SurveyItemTypeEnum:
-      type: string
-      enum:
-        - choice
-        - multi_choice
-        - comment
-        - rating
     ItemDataInterface:
       required:
         - type

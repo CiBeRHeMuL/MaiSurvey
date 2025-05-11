@@ -25,4 +25,12 @@ enum SortTypeEnum: string
             self::Desc => SORT_DESC,
         };
     }
+
+    public function getName(): string
+    {
+        return match ($this) {
+            self::Asc => 'По возрастанию',
+            self::Desc => 'По убыванию',
+        };
+    }
 }
