@@ -27,14 +27,18 @@ readonly class UpdateMeDto
         #[Assert\Type('bool', message: 'Значение должно быть булевым')]
         public bool $notices_enabled,
         /** Типы уведомлений */
-        #[LOA\Enum(NoticeTypeEnum::class)]
-        #[Assert\Type('string', message: 'Значение должно быть строкой')]
-        #[LAssert\EnumChoice(enum: NoticeTypeEnum::class, message: 'Значение должно входить в список допустимых')]
+        #[LOA\EnumItems(NoticeTypeEnum::class)]
+        #[Assert\All([
+            new Assert\Type('string', message: 'Значение должно быть строкой'),
+        ])]
+        #[LAssert\EnumChoice(enum: NoticeTypeEnum::class, multiple: true, message: 'Значение должно входить в список допустимых')]
         public array $notice_types,
         /** Способы уведомлений */
-        #[LOA\Enum(NoticeChannelEnum::class)]
-        #[Assert\Type('string', message: 'Значение должно быть строкой')]
-        #[LAssert\EnumChoice(enum: NoticeChannelEnum::class, message: 'Значение должно входить в список допустимых')]
+        #[LOA\EnumItems(NoticeChannelEnum::class)]
+        #[Assert\All([
+            new Assert\Type('string', message: 'Значение должно быть строкой'),
+        ])]
+        #[LAssert\EnumChoice(enum: NoticeChannelEnum::class, multiple: true, message: 'Значение должно входить в список допустимых')]
         public array $notice_channels,
     ) {
     }

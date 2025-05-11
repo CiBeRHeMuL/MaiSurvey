@@ -5,6 +5,8 @@ namespace App\Application\UseCase\Me;
 use App\Application\Dto\Me\UpdateMeDto;
 use App\Domain\Dto\Me\UpdateMeDto as DomainUpdateMeDto;
 use App\Domain\Entity\User;
+use App\Domain\Enum\NoticeChannelEnum;
+use App\Domain\Enum\NoticeTypeEnum;
 use App\Domain\Service\User\UserService;
 use Psr\Log\LoggerInterface;
 
@@ -34,6 +36,9 @@ class UpdateMeUseCase
                 $dto->first_name,
                 $dto->last_name,
                 $dto->patronymic,
+                $dto->notices_enabled,
+                array_map(NoticeTypeEnum::from(...), $dto->notice_types),
+                array_map(NoticeChannelEnum::from(...), $dto->notice_channels),
             ),
         );
     }
