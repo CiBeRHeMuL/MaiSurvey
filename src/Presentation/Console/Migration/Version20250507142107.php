@@ -142,6 +142,6 @@ SQL,
         $this->addSql('CREATE INDEX my_survey_item_id_idx ON my_survey_item (id);');
         $this->addSql('CREATE INDEX my_survey_item_survey_id_user_id_idx ON my_survey_item (survey_id, user_id);');
 
-        $this->addSql('DROP TRIGGER refresh_views_user;');
+        $this->addSql('DROP TRIGGER refresh_views_user ON "user";');
     }
 }
