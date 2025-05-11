@@ -46,14 +46,24 @@ class TextArrayType extends Type
      */
     public function convertToPHPValue(mixed $value, AbstractPlatform $platform): array|null
     {
-        if (is_array($value) || $value === null) {
+        if ($value === null) {
             return null;
         }
         try {
             if ($platform instanceof PostgreSQLPlatform) {
-                return explode(
-                    ',',
-                    substr($value, 1, strlen($value) - 2),
+                if ($value === '{}') {
+                    return [];
+                }
+                $value = substr($value, 1, -1);
+                preg_match_all('/"(?:[^"\\\\]|\\\\.)*"|[^,]+/', $value, $matches);
+                return array_map(
+                    static function ($val) {
+                        if ($val === 'NULL' || $val === 'null') {
+                            return null;
+                        }
+                        return str_replace('\\"', '"', trim($val, '"'));
+                    },
+                    $matches[0],
                 );
             }
             return explode(',', $value);
