@@ -3,15 +3,18 @@
 namespace App\Presentation\Web\Response\Model;
 
 use App\Domain\Enum as Enums;
+use App\Domain\Enum\RoleEnum;
 use App\Presentation\Web\OpenApi\Attribute as LOA;
 use App\Presentation\Web\Response\Model\Catalog\EnumCase;
 use BackedEnum;
+use Nelmio\ApiDocBundle\Attribute\Model;
+use OpenApi\Attributes as OA;
 use UnitEnum;
 
 readonly class Catalog
 {
     public function __construct(
-        #[LOA\EnumCases(Enums\RoleEnum::class)]
+        #[OA\Property(type: 'array', items: new OA\Items(ref: new Model(type: Role::class)))]
         public array $roles,
         #[LOA\EnumCases(Enums\SurveyStatusEnum::class)]
         public array $survey_statuses,
@@ -31,7 +34,10 @@ readonly class Catalog
     public static function generate(): self
     {
         return new self(
-            self::enum(Enums\RoleEnum::class),
+            array_map(
+                Role::fromRole(...),
+                RoleEnum::cases(),
+            ),
             self::enum(Enums\SurveyStatusEnum::class),
             self::enum(Enums\NoticeChannelEnum::class),
             self::enum(Enums\NoticeTypeEnum::class),

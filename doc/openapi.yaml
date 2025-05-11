@@ -4608,13 +4608,7 @@ components:
         roles:
           type: array
           items:
-            allOf:
-              -
-                $ref: '#/components/schemas/EnumCase'
-              -
-                properties:
-                  value: { $ref: '#/components/schemas/RoleEnum' }
-                type: object
+            $ref: '#/components/schemas/Role'
         survey_statuses:
           type: array
           items:
