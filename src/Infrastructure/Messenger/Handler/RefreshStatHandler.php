@@ -49,7 +49,7 @@ class RefreshStatHandler
         } else {
             $surveys = iterator_to_array(
                 $this->surveysUseCase
-                    ->execute(new GetSurveysDto(actual: $message->isForce() ? null : true))
+                    ->execute(new GetSurveysDto(limit: null, actual: $message->isForce() ? null : true))
                     ->getItems(),
             );
         }

@@ -48,6 +48,7 @@ use Symfony\Component\HttpKernel\Attribute\MapQueryString;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Requirement\Requirement;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Uid\Uuid;
 use Throwable;
 
@@ -151,7 +152,10 @@ class SurveyStatController extends BaseController
         LoggerInterface $logger,
         #[Autowire('%kernel.project_dir%')]
         string $projectDir,
-        #[MapQueryString(validationFailedStatusCode: 422)]
+        #[MapQueryString(
+            serializationContext: [AbstractNormalizer::DEFAULT_CONSTRUCTOR_ARGUMENTS => [GetSurveysDto::class => ['limit' => null]]],
+            validationFailedStatusCode: 422,
+        )]
         GetSurveysDto $dto = new GetSurveysDto(limit: null),
     ): BinaryFileResponse {
         $useCase->setLogger($logger);
