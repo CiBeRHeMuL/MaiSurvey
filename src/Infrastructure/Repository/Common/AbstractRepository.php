@@ -19,6 +19,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Id\AssignedGenerator;
 use Doctrine\ORM\Mapping\MappingException;
 use Doctrine\ORM\NativeQuery;
+use Doctrine\ORM\Query as DQuery;
 use Doctrine\ORM\Query\ResultSetMapping;
 use Exception;
 use Psr\Log\LoggerInterface;
@@ -852,6 +853,7 @@ abstract class AbstractRepository implements RepositoryInterface
 
         $emQuery = $this->getEntityManager()->createNativeQuery($expr->getExpression(), $rsm);
         $emQuery->setParameters($expr->getParams());
+        $emQuery->setHint(DQuery::HINT_REFRESH, true);
 
         return $emQuery;
     }
