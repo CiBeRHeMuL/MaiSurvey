@@ -57,6 +57,7 @@ class SurveysGenerateStatCommand extends AbstractCommand
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $surveyIds = $input->getArgument('survey_ids') ?: null;
+        $force = $input->getOption('force');
         if ($surveyIds) {
             try {
                 array_walk(
@@ -77,9 +78,9 @@ class SurveysGenerateStatCommand extends AbstractCommand
 
         try {
             $surveys = $surveyIds !== null
-                ? $this->surveysByIdsUseCase->execute($surveyIds, true)
+                ? $this->surveysByIdsUseCase->execute($surveyIds, $force ? null : true)
                 : null;
-            $refreshed = $this->generateForSurveysUseCase->execute($surveys, $input->getOption('force'));
+            $refreshed = $this->generateForSurveysUseCase->execute($surveys, $force);
             $this->io->success(sprintf('Статистка успешно обновлена для %d опросов', $refreshed));
         } catch (Throwable $e) {
             $this->logger->error($e);
