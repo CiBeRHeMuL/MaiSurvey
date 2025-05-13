@@ -8,6 +8,7 @@ use App\Application\UseCase\Survey\GetSurveysUseCase;
 use App\Application\UseCase\SurveyStat\GenerateForSurveysUseCase;
 use App\Domain\Entity\Survey;
 use App\Domain\Exception\ErrorException;
+use App\Domain\Validation\ValidationError;
 use App\Infrastructure\Messenger\Message\RefreshStatsMessage;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
@@ -61,7 +62,9 @@ class RefreshStatHandler
             $refreshed = $this->generateForSurveysUseCase->execute($surveys, $message->isForce());
             $this->logger->info(sprintf('Статистка успешно обновлена для %d опросов', $refreshed));
         } catch (Throwable $e) {
-            $this->logger->error($e);
+            if (!$e instanceof ValidationError && !$e instanceof ErrorException) {
+                $this->logger->error('An error occurred', ['exception' => $e]);
+            }
             throw ErrorException::new('Не удалось обновить статистику по опросам');
         }
     }

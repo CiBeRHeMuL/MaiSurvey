@@ -144,7 +144,7 @@ class UserDataService
                 $this->transactionManager->rollback();
                 throw $e;
             }
-            $this->logger->error($e);
+            $this->logger->error('An error occurred', ['exception' => $e]);
             $this->transactionManager->rollback();
             throw ErrorException::new('Не удалось создать данные для пользователя');
         }
@@ -278,7 +278,9 @@ class UserDataService
                 ? []
                 : array_column(array_pop($created), 'id');
         } catch (Throwable $e) {
-            $this->logger->error($e);
+            if (!$e instanceof ValidationError && !$e instanceof ErrorException) {
+                $this->logger->error('An error occurred', ['exception' => $e]);
+            }
             if ($transaction) {
                 $this->transactionManager->rollback();
             }
@@ -390,7 +392,9 @@ class UserDataService
             }
             return $updated;
         } catch (Throwable $e) {
-            $this->logger->error($e);
+            if (!$e instanceof ValidationError && !$e instanceof ErrorException) {
+                $this->logger->error('An error occurred', ['exception' => $e]);
+            }
             if ($transaction) {
                 $this->transactionManager->rollback();
             }

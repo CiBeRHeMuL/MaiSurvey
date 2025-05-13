@@ -76,17 +76,11 @@ class SurveysGenerateStatCommand extends AbstractCommand
             }
         }
 
-        try {
-            $surveys = $surveyIds !== null
-                ? $this->surveysByIdsUseCase->execute($surveyIds, $force ? null : true)
-                : null;
-            $refreshed = $this->generateForSurveysUseCase->execute($surveys, $force);
-            $this->io->success(sprintf('Статистка успешно обновлена для %d опросов', $refreshed));
-        } catch (Throwable $e) {
-            $this->logger->error($e);
-            $this->io->error('Не удалось обновить статистику');
-            return self::FAILURE;
-        }
+        $surveys = $surveyIds !== null
+            ? $this->surveysByIdsUseCase->execute($surveyIds, $force ? null : true)
+            : null;
+        $refreshed = $this->generateForSurveysUseCase->execute($surveys, $force);
+        $this->io->success(sprintf('Статистка успешно обновлена для %d опросов', $refreshed));
         return self::SUCCESS;
     }
 }

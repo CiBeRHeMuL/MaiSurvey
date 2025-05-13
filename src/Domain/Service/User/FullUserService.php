@@ -100,7 +100,7 @@ class FullUserService
                 $this->transactionManager->rollback();
                 throw $e;
             }
-            $this->logger->error($e);
+            $this->logger->error('An error occurred', ['exception' => $e]);
             $this->transactionManager->rollback();
             throw $e;
         }

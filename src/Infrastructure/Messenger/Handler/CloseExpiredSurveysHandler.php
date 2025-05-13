@@ -3,6 +3,8 @@
 namespace App\Infrastructure\Messenger\Handler;
 
 use App\Application\UseCase\Survey\CloseExpiredSurveysUseCase;
+use App\Domain\Exception\ErrorException;
+use App\Domain\Validation\ValidationError;
 use App\Infrastructure\Messenger\Message\CloseExpiredSurveysMessage;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
@@ -33,7 +35,9 @@ class CloseExpiredSurveysHandler
             $closed = $this->useCase->execute();
             $this->logger->info(sprintf('Закрыто %d истекших опросов', $closed));
         } catch (Throwable $e) {
-            $this->logger->error($e);
+            if (!$e instanceof ValidationError && !$e instanceof ErrorException) {
+                $this->logger->error('An error occurred', ['exception' => $e]);
+            }
         }
     }
 }

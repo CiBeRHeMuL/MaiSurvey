@@ -53,7 +53,7 @@ class TeacherSubjectsImporter
         try {
             $this->dataImport->openFile($dto->getFile());
         } catch (InvalidArgumentException $e) {
-            $this->logger->error($e);
+            $this->logger->error('An error occurred', ['exception' => $e]);
             throw ValidationException::new([
                 new ValidationError(
                     'file',
@@ -275,7 +275,9 @@ class TeacherSubjectsImporter
             try {
                 $created += $this->teacherSubjectService->createMulti($dtos, false, false, true);
             } catch (Throwable $e) {
-                $this->logger->error($e);
+                if (!$e instanceof ValidationError && !$e instanceof ErrorException) {
+                    $this->logger->error('An error occurred', ['exception' => $e]);
+                }
                 $this->transactionManager->rollback();
                 throw ErrorException::new('Не удалось сохранить предметы для преподавателей, обратитесь в поддержку');
             }

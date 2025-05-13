@@ -165,7 +165,7 @@ class SurveyService
                 $this->transactionManager->rollback();
                 throw $e;
             }
-            $this->logger->error($e);
+            $this->logger->error('An error occurred', ['exception' => $e]);
             $this->transactionManager->rollback();
             throw ErrorException::new(
                 'Не удалось сохранить опрос, обратитесь в поддержку',
@@ -292,7 +292,7 @@ class SurveyService
                 $this->transactionManager->rollback();
                 throw $e;
             }
-            $this->logger->error($e);
+            $this->logger->error('An error occurred', ['exception' => $e]);
             $this->transactionManager->rollback();
             throw ErrorException::new(
                 'Не удалось сохранить опрос, обратитесь в поддержку',
@@ -549,7 +549,7 @@ class SurveyService
             if ($e instanceof ValidationException || $e instanceof ErrorException) {
                 throw $e;
             }
-            $this->logger->error($e);
+            $this->logger->error('An error occurred', ['exception' => $e]);
             throw ErrorException::new('Не удалось создать опрос из шаблона, обратитесь в поддержку');
         }
     }

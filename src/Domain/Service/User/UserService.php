@@ -247,7 +247,7 @@ class UserService
             }
             return 0;
         } catch (Throwable $e) {
-            $this->logger->error($e);
+            $this->logger->error('An error occurred', ['exception' => $e]);
             if ($transaction) {
                 $this->transactionManager->rollback();
             }
@@ -467,7 +467,7 @@ class UserService
                 throw $e;
             }
             $this->transactionManager->rollback();
-            $this->logger->error($e);
+            $this->logger->error('An error occurred', ['exception' => $e]);
             throw ErrorException::new('Не удалось обновить запись');
         }
     }

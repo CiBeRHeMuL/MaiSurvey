@@ -53,7 +53,7 @@ class UserMultiUpdater
         try {
             $this->dataImport->openFile($dto->getFile());
         } catch (InvalidArgumentException $e) {
-            $this->logger->error($e);
+            $this->logger->error('An error occurred', ['exception' => $e]);
             throw ValidationException::new([
                 new ValidationError(
                     'file',
@@ -249,7 +249,7 @@ class UserMultiUpdater
             $this->transactionManager->commit();
             return $updated;
         } catch (Throwable $e) {
-            $this->logger->error($e);
+            $this->logger->error('An error occurred', ['exception' => $e]);
             $this->transactionManager->rollback();
             throw $e;
         }

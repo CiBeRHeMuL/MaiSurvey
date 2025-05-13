@@ -53,7 +53,7 @@ abstract class AbstractRepository implements RepositoryInterface
             $this->entityManager->flush();
             return true;
         } catch (Exception $e) {
-            $this->logger->error($e);
+            $this->logger->error('An error occurred', ['exception' => $e]);
             return false;
         }
     }
@@ -64,7 +64,7 @@ abstract class AbstractRepository implements RepositoryInterface
             $this->entityManager->flush();
             return true;
         } catch (Exception $e) {
-            $this->logger->error($e);
+            $this->logger->error('An error occurred', ['exception' => $e]);
             return false;
         }
     }
@@ -76,7 +76,7 @@ abstract class AbstractRepository implements RepositoryInterface
             $this->entityManager->flush();
             return true;
         } catch (Exception $e) {
-            $this->logger->error($e);
+            $this->logger->error('An error occurred', ['exception' => $e]);
             return false;
         }
     }

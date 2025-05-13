@@ -13,6 +13,7 @@ use App\Domain\Entity\MyTeacherSubject;
 use App\Domain\Entity\TeacherSubject;
 use App\Domain\Entity\User;
 use App\Domain\Enum\ValidationErrorSlugEnum;
+use App\Domain\Exception\ErrorException;
 use App\Domain\Exception\ValidationException;
 use App\Domain\Repository\TeacherSubjectRepositoryInterface;
 use App\Domain\Service\Db\TransactionManagerInterface;
@@ -129,7 +130,9 @@ class TeacherSubjectService
 
             return $created;
         } catch (Throwable $e) {
-            $this->logger->error($e);
+            if (!$e instanceof ValidationError && !$e instanceof ErrorException) {
+                $this->logger->error('An error occurred', ['exception' => $e]);
+            }
             if ($transaction) {
                 $this->transactionManager->rollback();
             }

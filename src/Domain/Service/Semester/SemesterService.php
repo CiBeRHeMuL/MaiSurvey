@@ -8,6 +8,7 @@ use App\Domain\Dto\Semester\GetAllSemestersDto;
 use App\Domain\Dto\Semester\GetSemesterByIndexDto;
 use App\Domain\Entity\Semester;
 use App\Domain\Enum\ValidationErrorSlugEnum;
+use App\Domain\Exception\ErrorException;
 use App\Domain\Exception\ValidationException;
 use App\Domain\Repository\SemesterRepositoryInterface;
 use App\Domain\Service\Db\TransactionManagerInterface;
@@ -117,7 +118,9 @@ class SemesterService
 
             return $created;
         } catch (Throwable $e) {
-            $this->logger->error($e);
+            if (!$e instanceof ValidationError && !$e instanceof ErrorException) {
+                $this->logger->error('An error occurred', ['exception' => $e]);
+            }
             $this->transactionManager->rollback();
             if ($throwOnError) {
                 throw $e;

@@ -131,7 +131,7 @@ class SurveyTemplateService
                 $this->transactionManager->rollback();
                 throw $e;
             }
-            $this->logger->error($e);
+            $this->logger->error('An error occurred', ['exception' => $e]);
             $this->transactionManager->rollback();
             throw ErrorException::new(
                 'Не удалось сохранить шаблон опроса, обратитесь в поддержку',

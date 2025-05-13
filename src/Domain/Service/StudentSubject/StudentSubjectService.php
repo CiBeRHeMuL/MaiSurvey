@@ -11,6 +11,7 @@ use App\Domain\Dto\StudentSubject\GetSSByIndexRawDto;
 use App\Domain\Entity\StudentSubject;
 use App\Domain\Entity\User;
 use App\Domain\Enum\ValidationErrorSlugEnum;
+use App\Domain\Exception\ErrorException;
 use App\Domain\Exception\ValidationException;
 use App\Domain\Repository\StudentSubjectRepositoryInterface;
 use App\Domain\Service\Db\TransactionManagerInterface;
@@ -135,7 +136,9 @@ class StudentSubjectService
 
             return $created;
         } catch (Throwable $e) {
-            $this->logger->error($e);
+            if (!$e instanceof ValidationError && !$e instanceof ErrorException) {
+                $this->logger->error('An error occurred', ['exception' => $e]);
+            }
             $this->transactionManager->rollback();
             if ($throwOnError) {
                 throw $e;

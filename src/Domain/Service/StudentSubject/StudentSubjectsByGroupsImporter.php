@@ -48,7 +48,7 @@ class StudentSubjectsByGroupsImporter
         try {
             $this->fileReader->openFile($dto->getFile());
         } catch (InvalidArgumentException $e) {
-            $this->logger->error($e);
+            $this->logger->error('An error occurred', ['exception' => $e]);
             throw ValidationException::new([
                 new ValidationError(
                     'file',

@@ -81,7 +81,9 @@ class UserDataGroupService
 
             return $created;
         } catch (Throwable $e) {
-            $this->logger->error($e);
+            if (!$e instanceof ValidationError && !$e instanceof ErrorException) {
+                $this->logger->error('An error occurred', ['exception' => $e]);
+            }
             if ($transaction) {
                 $this->transactionManager->rollback();
             }
@@ -119,7 +121,9 @@ class UserDataGroupService
             }
             return $updated;
         } catch (Throwable $e) {
-            $this->logger->error($e);
+            if (!$e instanceof ValidationError && !$e instanceof ErrorException) {
+                $this->logger->error('An error occurred', ['exception' => $e]);
+            }
             if ($transaction) {
                 $this->transactionManager->rollback();
             }

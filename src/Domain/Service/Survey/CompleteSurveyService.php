@@ -158,7 +158,9 @@ class CompleteSurveyService
                         ),
                     );
                 } catch (Throwable $e) {
-                    $this->logger->error($e);
+                    if (!$e instanceof ValidationError && !$e instanceof ErrorException) {
+                        $this->logger->error('An error occurred', ['exception' => $e]);
+                    }
                     throw ErrorException::new('Что-то пошло не так, обратитесь в поддержку');
                 }
             }
@@ -181,7 +183,9 @@ class CompleteSurveyService
             $this->statRefresher->refreshStats([$survey->getSurvey()], true);
         } catch (Throwable $e) {
             $this->transactionManager->rollback();
-            $this->logger->error($e);
+            if (!$e instanceof ValidationError && !$e instanceof ErrorException) {
+                $this->logger->error('An error occurred', ['exception' => $e]);
+            }
             throw ErrorException::new('Не удалось сохранить ответы, обратитесь в поддержку');
         }
     }

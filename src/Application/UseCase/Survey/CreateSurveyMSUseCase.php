@@ -77,7 +77,7 @@ class CreateSurveyMSUseCase
                 $this->transactionManager->rollback();
                 throw $e;
             } catch (Throwable $e) {
-                $this->logger->error($e);
+                $this->logger->error('An error occurred', ['exception' => $e]);
                 $this->transactionManager->rollback();
                 throw ErrorException::new('Не удалось создать опросы, обратитесь в поддержку');
             }

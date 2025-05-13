@@ -56,7 +56,7 @@ class ErrorResponseListener
                 ),
             );
         } else {
-            $this->logger->error($e);
+            $this->logger->error('An error occurred', ['exception' => $e]);
             if ($this->debug) {
                 $event->setResponse(Response::critical(new CriticalResponse($e)));
             } else {

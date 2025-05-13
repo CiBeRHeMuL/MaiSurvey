@@ -125,6 +125,10 @@ services:
     arguments:
       $includeStacktraces: true
       $ignoreEmptyContextAndExtra: true
+
+  Monolog\Processor\PsrLogMessageProcessor:
+    tags:
+      - { name: monolog.processor, channel: 'app' }
   # --- end monolog
 
 when@dev:

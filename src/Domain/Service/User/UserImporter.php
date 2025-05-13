@@ -89,7 +89,7 @@ class UserImporter
             try {
                 $this->fileReader->openFile($dto->getFile());
             } catch (InvalidArgumentException $e) {
-                $this->logger->error($e);
+                $this->logger->error('An error occurred', ['exception' => $e]);
                 throw ValidationException::new([
                     new ValidationError(
                         'file',
@@ -326,7 +326,7 @@ class UserImporter
             throw $e;
         } catch (Throwable $e) {
             $this->transactionManager->rollback();
-            $this->logger->error($e);
+            $this->logger->error('An error occurred', ['exception' => $e]);
             throw ErrorException::new(
                 'Не удалось создать пользователей, обратитесь в поддержку',
             );

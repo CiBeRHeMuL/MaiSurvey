@@ -15,6 +15,7 @@ use App\Domain\Dto\SurveyItemAnswer\RatingAnswerData;
 use App\Domain\Entity\SurveyItemAnswer;
 use App\Domain\Enum\SurveyItemTypeEnum;
 use App\Domain\Enum\ValidationErrorSlugEnum;
+use App\Domain\Exception\ErrorException;
 use App\Domain\Exception\ValidationException;
 use App\Domain\Repository\SurveyItemAnswerRepositoryInterface;
 use App\Domain\Service\Db\TransactionManagerInterface;
@@ -193,7 +194,9 @@ class SurveyItemAnswerService
 
             return $created;
         } catch (Throwable $e) {
-            $this->logger->error($e);
+            if (!$e instanceof ValidationError && !$e instanceof ErrorException) {
+                $this->logger->error('An error occurred', ['exception' => $e]);
+            }
             $this->transactionManager->rollback();
             if ($throwOnError) {
                 throw $e;

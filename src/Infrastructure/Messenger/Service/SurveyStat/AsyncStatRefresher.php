@@ -5,6 +5,7 @@ namespace App\Infrastructure\Messenger\Service\SurveyStat;
 use App\Domain\Entity\Survey;
 use App\Domain\Exception\ErrorException;
 use App\Domain\Service\SurveyStat\StatRefresherInterface;
+use App\Domain\Validation\ValidationError;
 use App\Infrastructure\Messenger\Message\RefreshStatsMessage;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
@@ -46,7 +47,9 @@ class AsyncStatRefresher implements StatRefresherInterface
                 );
             }
         } catch (Throwable $e) {
-            $this->logger->error($e);
+            if (!$e instanceof ValidationError && !$e instanceof ErrorException) {
+                $this->logger->error('An error occurred', ['exception' => $e]);
+            }
             throw ErrorException::new('Не удалось обновить статистику');
         }
     }

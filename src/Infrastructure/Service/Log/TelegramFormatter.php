@@ -7,7 +7,6 @@ use App\Infrastructure\Service\Log\TextEntityProcessor\Config\PreMarkdownV2Entit
 use App\Infrastructure\Service\Log\TextEntityProcessor\TextEntitiesProcessor;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Level;
-use Monolog\Logger;
 use Monolog\LogRecord;
 use Monolog\Utils;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -17,7 +16,7 @@ class TelegramFormatter extends LineFormatter
     private const MAX_MESSAGE_LENGTH = 4096;
 
     public ?RequestStack $requestStack;
-    public const SIMPLE_FORMAT = "%icon% *%url%*\n%ip%\n```text\n%message%\n%context.exception%\n%context%\n%extra%\n```";
+    public const SIMPLE_FORMAT = "%icon% *%url%*\n%ip%\n```text\n%message%\n%context.exception%```";
 
     public function __construct(
         RequestStack $requestStack,
@@ -25,7 +24,7 @@ class TelegramFormatter extends LineFormatter
         ?string $dateFormat = null,
         bool $allowInlineLineBreaks = false,
         bool $ignoreEmptyContextAndExtra = false,
-        bool $includeStacktraces = false
+        bool $includeStacktraces = false,
     ) {
         $this->requestStack = $requestStack;
         parent::__construct($format, $dateFormat, $allowInlineLineBreaks, $ignoreEmptyContextAndExtra, $includeStacktraces);
@@ -80,11 +79,11 @@ class TelegramFormatter extends LineFormatter
 
     private function getIcon(Level $level): string
     {
-        return match ($level->value) {
-            Logger::ERROR, Logger::CRITICAL, Logger::ALERT, Logger::EMERGENCY => '☠️',
-            Logger::WARNING => '⚠️',
-            Logger::INFO => 'ℹ️',
-            Logger::DEBUG => '🐛',
+        return match ($level) {
+            Level::Error, Level::Critical, Level::Alert, Level::Emergency => '☠️',
+            Level::Warning => '⚠️',
+            Level::Info => 'ℹ️',
+            Level::Debug => '🐛',
             default => '',
         };
     }

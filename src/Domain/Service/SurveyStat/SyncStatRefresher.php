@@ -34,7 +34,7 @@ class SyncStatRefresher implements StatRefresherInterface
         try {
             $this->surveyStatService->refreshStats($surveys, false, $force);
         } catch (Throwable $e) {
-            $this->logger->error($e);
+            $this->logger->error('An error occurred', ['exception' => $e]);
             throw ErrorException::new('Не удалось обновить статистику по опросам');
         }
     }
