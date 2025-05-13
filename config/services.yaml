@@ -57,6 +57,9 @@ services:
 
   App\Domain\Service\SurveyStat\StatRefresherInterface:
     factory: '@=env("STAT_REFRESH_TYPE") == "async" ? service("stat_refresher.async") : service("stat_refresher.sync")'
+
+  AndrewGos\ClassBuilder\ClassBuilderInterface:
+    class: AndrewGos\ClassBuilder\ClassBuilder
   # --- end services
 
   # --- start repositories
@@ -90,6 +93,8 @@ services:
     class: App\Infrastructure\Repository\SurveyStatRepository
   App\Domain\Repository\SurveyStatItemRepositoryInterface:
     class: App\Infrastructure\Repository\SurveyStatItemRepository
+  App\Domain\Repository\TelegramUserRepositoryInterface:
+    class: App\Infrastructure\Repository\TelegramUserRepository
   # --- end repositories
 
   # --- start serializer
@@ -131,11 +136,44 @@ services:
       - { name: monolog.processor, channel: 'app' }
   # --- end monolog
 
-when@dev:
-  services:
-    # --- start event listeners
-    App\Presentation\Web\Listener\ProfilerListener:
-      tags:
-        - {name: 'kernel.event_listener', event: Symfony\Component\HttpKernel\Event\ResponseEvent, priority: -1000}
-      autowire: true
-    # --- end event listeners
+  # --- start telegram
+  telegram_bot.token:
+    class: AndrewGos\TelegramBot\ValueObject\BotToken
+    arguments:
+      $token: '%env(TELEGRAM_CONFIG_ERROR_BOT_KEY)%'
+
+  telegram_bot.processors.start:
+    class: App\Presentation\Telegram\UpdateProcessor\StartCommandProcessor
+
+  telegram_bot.handler.sync:
+    class: AndrewGos\TelegramBot\UpdateHandler\UpdateHandler
+    factory: ['App\Presentation\Telegram\Factory\TelegramFactory', 'createSyncHandler']
+    arguments:
+      $token: '@telegram_bot.token'
+      $logger: '@logger'
+    calls:
+      - addCommandMessageProcess: [start, '@telegram_bot.processors.start']
+
+  telegram_bot.sync:
+    class: AndrewGos\TelegramBot\Telegram
+    factory: ['AndrewGos\TelegramBot\TelegramFactory', 'getDefaultTelegram']
+    arguments: ['@telegram_bot.token']
+    calls:
+      - setLogger: ['@logger']
+      - setUpdateHandler: ['@telegram_bot.handler.sync']
+
+  telegram_bot.async:
+    class: AndrewGos\TelegramBot\Telegram
+    factory: ['App\Presentation\Telegram\Factory\TelegramFactory', 'createAsync']
+    arguments:
+      $token: '@telegram_bot.token'
+      $messageBus: '@messenger.bus.default'
+      $logger: '@logger'
+
+  AndrewGos\TelegramBot\Telegram:
+    factory: '@=env("TELEGRAM_PROCESS_TYPE") == "async" ? service("telegram_bot.async") : service("telegram_bot.sync")'
+
+  App\Presentation\Telegram\Messenger\Handler\TelegramRequestHandler:
+    arguments:
+      $telegram: '@telegram_bot.sync'
+  # --- end telegram

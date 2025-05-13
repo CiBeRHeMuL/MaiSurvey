@@ -14,6 +14,11 @@ security:
     api_unsecured_area:
       pattern: ^/(auth/sign-in|auth/sign-up/1|auth/refresh|health)
       security: false
+    telegram_area:
+      pattern: ^/telegram/default
+      security: true
+      stateless: true
+      provider: null
     api_secured_area:
       security: true
       stateless: true
@@ -33,6 +38,13 @@ security:
   access_control:
   # - { path: ^/admin, roles: ROLE_ADMIN }
   # - { path: ^/profile, roles: ROLE_USER }
+    -
+      path: ^/telegram/default
+      roles: PUBLIC_ACCESS
+      ips: '%env(TRUSTED_TELEGRAM_IPS)%'
+      requires_channel: '%env(REQUIRES_TELEGRAM_SCHEMA)%'
+      methods: [POST]
+    - { path: ^/telegram/default, roles: ROLE_NO_ACCESS }
 
 when@test:
   security:

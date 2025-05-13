@@ -4,9 +4,9 @@ framework:
   #csrf_protection: true
 
   # Note that the session will be started ONLY if you read or write from it.
-  session: true
+  session: false
 
-  trusted_proxies: '127.0.0.1,REMOTE_ADDR'
+  trusted_proxies: '%env(TRUSTED_PROXIES)%'
   trusted_headers: [ 'x-forwarded-for', 'x-forwarded-proto' ]
 
   #esi: true
@@ -15,5 +15,3 @@ framework:
 when@test:
   framework:
     test: true
-    session:
-      storage_factory_id: session.storage.factory.mock_file

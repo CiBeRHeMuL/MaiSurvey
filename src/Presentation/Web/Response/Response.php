@@ -7,7 +7,6 @@ use App\Presentation\Web\Enum\HttpStatusCodeEnum;
 use App\Presentation\Web\Response\Model\Common\CriticalResponse;
 use App\Presentation\Web\Response\Model\Common\Error;
 use App\Presentation\Web\Response\Model\Common\ErrorResponse;
-use App\Presentation\Web\Response\Model\Common\ProfileResponse;
 use App\Presentation\Web\Response\Model\Common\SuccessResponse;
 use App\Presentation\Web\Response\Model\Common\SuccessWithPaginationResponse;
 use App\Presentation\Web\Response\Model\Common\ValidationResponse;
@@ -60,13 +59,6 @@ class Response
     public static function critical(
         CriticalResponse $response = new CriticalResponse(new Exception('Unknown exception')),
         HttpStatusCodeEnum $statusCode = HttpStatusCodeEnum::InternalServerError,
-    ): JsonResponse {
-        return self::response($response, $statusCode);
-    }
-
-    public static function profile(
-        ProfileResponse $response,
-        HttpStatusCodeEnum $statusCode = HttpStatusCodeEnum::Ok,
     ): JsonResponse {
         return self::response($response, $statusCode);
     }

@@ -14,6 +14,7 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\Security\Core\Exception\ExceptionInterface;
 
 #[AsEventListener(event: ExceptionEvent::class, priority: 10)]
 class ErrorResponseListener
@@ -47,6 +48,16 @@ class ErrorResponseListener
             );
         } elseif ($e instanceof ErrorException) {
             $code = HttpStatusCodeEnum::tryFrom($e->getCode()) ?? HttpStatusCodeEnum::InternalServerError;
+            $event->setResponse(
+                Response::error(
+                    new ErrorResponse(
+                        new Error(ErrorSlugEnum::{$code->name}->getSlug(), $e->getMessage()),
+                    ),
+                    $code,
+                ),
+            );
+        } elseif ($e instanceof ExceptionInterface) {
+            $code = HttpStatusCodeEnum::tryFrom($e->getCode()) ?? HttpStatusCodeEnum::Unauthorized;
             $event->setResponse(
                 Response::error(
                     new ErrorResponse(

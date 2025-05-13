@@ -17,6 +17,7 @@ doctrine:
       stat_nc_user[]: App\Infrastructure\Db\Dbal\Types\StatNCUserArrayType
       counts_by_group[]: App\Infrastructure\Db\Dbal\Types\CountsByGroupArrayType
       notice_context: App\Infrastructure\Db\Dbal\Types\NoticeContextType
+      telegram_chat_id: App\Infrastructure\Db\Dbal\Types\TelegramChatIdType
   orm:
     auto_generate_proxy_classes: true
     enable_lazy_ghost_objects: true

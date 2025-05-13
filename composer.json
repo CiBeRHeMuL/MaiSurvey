@@ -9,6 +9,7 @@
     "ext-iconv": "*",
     "ext-intl": "*",
     "andrew-gos/class-builder": "^1.2",
+    "andrew-gos/telegram-bot": "^2.0",
     "doctrine/doctrine-bundle": "^2",
     "doctrine/doctrine-migrations-bundle": "^3",
     "doctrine/orm": "^3.3.0",

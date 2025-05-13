@@ -3,3 +3,9 @@ controllers:
     path: ../src/Presentation/Web/Controller/
     namespace: App\Presentation\Web\Controller
   type: attribute
+
+telegram:
+  resource:
+    path: ../src/Presentation/Telegram/Controller/
+    namespace: App\Presentation\Telegram\Controller
+  type: attribute
