@@ -9,6 +9,7 @@ use App\Domain\DataProvider\DataSort;
 use App\Domain\DataProvider\DataSortInterface;
 use App\Domain\DataProvider\LimitOffset;
 use App\Domain\DataProvider\SortColumnInterface;
+use App\Domain\Entity\User;
 use App\Domain\Helper\HArray;
 use App\Domain\Repository\Common\RepositoryInterface;
 use App\Infrastructure\DataProvider\LazyBatchedDataProvider;
@@ -115,7 +116,9 @@ abstract class AbstractRepository implements RepositoryInterface
         $entityFieldCounts = [];
         foreach ($entities as $k => &$entity) {
             $metadata = $em->getClassMetadata($entity::class);
-            $this->logger->error(serialize($metadata));
+            if ($entity instanceof User) {
+                $this->logger->error(json_encode($metadata));
+            }
             $tableName = $metadata->getTableName();
             // Если есть таблица для замены, то используем ее
             if (isset($replaceTables[$tableName])) {
