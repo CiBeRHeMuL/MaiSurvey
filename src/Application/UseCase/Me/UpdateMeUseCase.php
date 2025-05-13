@@ -2,6 +2,7 @@
 
 namespace App\Application\UseCase\Me;
 
+use App\Application\Aggregate\Me;
 use App\Application\Dto\Me\UpdateMeDto;
 use App\Domain\Dto\Me\UpdateMeDto as DomainUpdateMeDto;
 use App\Domain\Entity\User;
@@ -17,6 +18,7 @@ class UpdateMeUseCase
     public function __construct(
         LoggerInterface $logger,
         private UserService $userService,
+        private GetMeUseCase $meUseCase,
     ) {
         $this->setLogger($logger);
     }
@@ -28,9 +30,9 @@ class UpdateMeUseCase
         return $this;
     }
 
-    public function execute(User $me, UpdateMeDto $dto): User
+    public function execute(User $me, UpdateMeDto $dto): Me
     {
-        return $this->userService->updateMe(
+        $user = $this->userService->updateMe(
             $me,
             new DomainUpdateMeDto(
                 $dto->first_name,
@@ -41,5 +43,6 @@ class UpdateMeUseCase
                 array_map(NoticeChannelEnum::from(...), $dto->notice_channels),
             ),
         );
+        return $this->meUseCase->execute($user);
     }
 }

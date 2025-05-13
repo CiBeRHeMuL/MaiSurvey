@@ -2,7 +2,7 @@
 
 namespace App\Presentation\Web\Response\Model;
 
-use App\Domain\Entity\User as DomainUser;
+use App\Application\Aggregate\Me as DomainMe;
 use App\Domain\Enum\NoticeChannelEnum;
 use App\Domain\Enum\NoticeTypeEnum;
 use App\Domain\Enum\PermissionEnum;
@@ -11,7 +11,7 @@ use App\Domain\Enum\UserStatusEnum;
 use App\Presentation\Web\OpenApi\Attribute as LOA;
 use OpenApi\Attributes as OA;
 
-readonly class User
+readonly class Me
 {
     /**
      * @param string $id
@@ -27,6 +27,9 @@ readonly class User
      * @param bool $notices_enabled
      * @param array<value-of<NoticeTypeEnum>, int> $notice_types
      * @param array<value-of<NoticeChannelEnum>, int> $notice_channels
+     * @param bool $telegram_connected
+     * @param bool $can_connect_telegram
+     * @param string|null $telegram_connect_link
      */
     public function __construct(
         public string $id,
@@ -50,11 +53,15 @@ readonly class User
         public array $notice_types,
         #[LOA\EnumItems(NoticeChannelEnum::class)]
         public array $notice_channels,
+        public bool $telegram_connected,
+        public bool $can_connect_telegram,
+        public string|null $telegram_connect_link,
     ) {
     }
 
-    public static function fromUser(DomainUser $user): self
+    public static function fromMe(DomainMe $me): self
     {
+        $user = $me->getUser();
         $roles = $user->getRoles();
         return new self(
             $user->getId()->toRfc4122(),
@@ -81,6 +88,9 @@ readonly class User
             $user->isNoticesEnabled(),
             array_map(static fn(NoticeTypeEnum $t) => $t->value, $user->getNoticeTypes()),
             array_map(static fn(NoticeChannelEnum $t) => $t->value, $user->getNoticeChannels()),
+            $user->isTelegramConnected(),
+            $user->canConnectTelegram(),
+            $me->getTelegramConnectLink(),
         );
     }
 }

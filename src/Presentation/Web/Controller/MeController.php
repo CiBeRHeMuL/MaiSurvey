@@ -4,10 +4,11 @@ namespace App\Presentation\Web\Controller;
 
 use App\Application\Dto\Me\UpdateMeDto;
 use App\Application\UseCase\Me\DeleteMeUseCase;
+use App\Application\UseCase\Me\GetMeUseCase;
 use App\Application\UseCase\Me\UpdateMeUseCase;
 use App\Presentation\Web\OpenApi\Attribute as LOA;
 use App\Presentation\Web\Response\Model\Common\SuccessResponse;
-use App\Presentation\Web\Response\Model\User;
+use App\Presentation\Web\Response\Model\Me;
 use App\Presentation\Web\Response\Response;
 use OpenApi\Attributes as OA;
 use Psr\Log\LoggerInterface;
@@ -22,14 +23,14 @@ class MeController extends BaseController
     /** Информация обо мне. */
     #[Route('/me', 'get-me', methods: ['GET'])]
     #[OA\Tag('me')]
-    #[LOA\SuccessResponse(User::class)]
+    #[LOA\SuccessResponse(Me::class)]
     #[LOA\ErrorResponse]
     #[LOA\ErrorResponse(500)]
-    public function me(): JsonResponse
+    public function me(GetMeUseCase $useCase): JsonResponse
     {
         return Response::success(
             new SuccessResponse(
-                User::fromUser($this->getUser()->getUser()),
+                Me::fromMe($useCase->execute($this->getUser()->getUser())),
             ),
         );
     }
@@ -37,7 +38,7 @@ class MeController extends BaseController
     /** Обновить себя. */
     #[Route('/me', 'update-me', methods: ['PUT'])]
     #[OA\Tag('me')]
-    #[LOA\SuccessResponse(User::class)]
+    #[LOA\SuccessResponse(Me::class)]
     #[LOA\ErrorResponse]
     #[LOA\ValidationResponse]
     #[LOA\ErrorResponse(500)]
@@ -54,7 +55,7 @@ class MeController extends BaseController
         );
         return Response::success(
             new SuccessResponse(
-                User::fromUser($me),
+                Me::fromMe($me),
             ),
         );
     }
@@ -71,7 +72,7 @@ class MeController extends BaseController
         DeleteMeUseCase $useCase,
     ): JsonResponse {
         $useCase->setLogger($logger);
-        $me = $useCase->execute($this->getUser()->getUser());
+        $useCase->execute($this->getUser()->getUser());
         return Response::success(new SuccessResponse(true));
     }
 }

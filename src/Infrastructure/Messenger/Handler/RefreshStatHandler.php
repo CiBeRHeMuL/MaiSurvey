@@ -12,7 +12,6 @@ use App\Domain\Validation\ValidationError;
 use App\Infrastructure\Messenger\Message\RefreshStatsMessage;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
-use Symfony\Contracts\Cache\CacheInterface;
 use Throwable;
 
 #[AsMessageHandler]
@@ -22,7 +21,6 @@ class RefreshStatHandler
 
     public function __construct(
         LoggerInterface $logger,
-        private CacheInterface $cache,
         private GetSurveysByIdsUseCase $surveysByIdsUseCase,
         private GetSurveysUseCase $surveysUseCase,
         private GenerateForSurveysUseCase $generateForSurveysUseCase,

@@ -446,7 +446,7 @@ paths:
               schema:
                 allOf:
                   - { $ref: '#/components/schemas/SuccessResponse' }
-                  - { properties: { data: { $ref: '#/components/schemas/User' } }, type: object }
+                  - { properties: { data: { $ref: '#/components/schemas/Me' } }, type: object }
         '400':
           description: 'Bad Request'
           content:
@@ -478,7 +478,7 @@ paths:
               schema:
                 allOf:
                   - { $ref: '#/components/schemas/SuccessResponse' }
-                  - { properties: { data: { $ref: '#/components/schemas/User' } }, type: object }
+                  - { properties: { data: { $ref: '#/components/schemas/Me' } }, type: object }
         '400':
           description: 'Bad Request'
           content:
@@ -3344,6 +3344,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+  /telegram/default:
+    post:
+      operationId: post_app_presentation_telegram_telegram_index
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/SuccessResponse' }
+                  - { properties: { data: { type: boolean } }, type: object }
 components:
   schemas:
     SignInDto:
@@ -3936,6 +3948,54 @@ components:
           nullable: true
       type: object
     GetSurveysDto:
+      properties:
+        subject_ids:
+          title: 'Предметы для фильтрации'
+          type: array
+          items: {  }
+          default: null
+          maxItems: 50
+          nullable: true
+        title:
+          title: 'Название опроса'
+          type: string
+          default: null
+          nullable: true
+        sort_by:
+          title: 'Сортировка по'
+          type: string
+          default: name
+          enum:
+            - name
+            - title
+            - created_at
+            - status
+        sort_type:
+          $ref: '#/components/schemas/SortTypeEnum'
+        offset:
+          type: integer
+          default: 0
+          minimum: 0
+        limit:
+          type: integer
+          default: 100
+          maximum: 100
+          minimum: 0
+          nullable: true
+        actual:
+          title: 'Актуален ли опрос'
+          type: boolean
+          default: null
+          nullable: true
+        statuses:
+          title: 'Статусы для фильтрации'
+          type: array
+          items:
+            $ref: '#/components/schemas/SurveyStatusEnum'
+          default: null
+          nullable: true
+      type: object
+    GetSurveysDto2:
       properties:
         subject_ids:
           title: 'Предметы для фильтрации'
@@ -4699,6 +4759,71 @@ components:
       properties:
         created:
           type: integer
+      type: object
+    Me:
+      required:
+        - id
+        - email
+        - status
+        - deleted
+        - permissions
+        - roles
+        - need_change_password
+        - notices_enabled
+        - notice_types
+        - notice_channels
+        - telegram_connected
+        - can_connect_telegram
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+          format: email
+        data:
+          nullable: true
+          oneOf:
+            -
+              $ref: '#/components/schemas/UserData'
+        status:
+          $ref: '#/components/schemas/UserStatusEnum'
+        deleted:
+          type: boolean
+        deleted_at:
+          type: string
+          format: date-time
+          nullable: true
+        permissions:
+          type: array
+          items:
+            $ref: '#/components/schemas/PermissionEnum'
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoleEnum'
+        need_change_password:
+          type: boolean
+        password_changed_at:
+          type: string
+          format: date-time
+          nullable: true
+        notices_enabled:
+          type: boolean
+        notice_types:
+          type: array
+          items:
+            $ref: '#/components/schemas/NoticeTypeEnum'
+        notice_channels:
+          type: array
+          items:
+            $ref: '#/components/schemas/NoticeChannelEnum'
+        telegram_connected:
+          type: boolean
+        can_connect_telegram:
+          type: boolean
+        telegram_connect_link:
+          type: string
+          nullable: true
       type: object
     Role:
       required:

@@ -3,6 +3,8 @@
 namespace App\Presentation\Telegram\Controller;
 
 use AndrewGos\TelegramBot\Telegram;
+use App\Presentation\Web\OpenApi\Attribute as LOA;
+use App\Presentation\Web\Response\Model\Common\SuccessResponse;
 use App\Presentation\Web\Response\Response;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -13,6 +15,7 @@ use Throwable;
 class TelegramController extends AbstractController
 {
     #[Route('/telegram/default', methods: ['POST'])]
+    #[LOA\SuccessResponse('boolean')]
     public function index(
         Telegram $telegram,
         LoggerInterface $logger,
@@ -23,6 +26,6 @@ class TelegramController extends AbstractController
             $logger->error($e->getMessage());
         }
 
-        return Response::success();
+        return Response::success(new SuccessResponse(true));
     }
 }

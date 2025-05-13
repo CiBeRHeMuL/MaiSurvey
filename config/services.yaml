@@ -60,6 +60,9 @@ services:
 
   AndrewGos\ClassBuilder\ClassBuilderInterface:
     class: AndrewGos\ClassBuilder\ClassBuilder
+
+  App\Domain\Service\TelegramUser\TelegramLinkServiceInterface:
+    class: App\Infrastructure\Service\TelegramUser\TelegramLinkService
   # --- end services
 
   # --- start repositories
@@ -140,7 +143,7 @@ services:
   telegram_bot.token:
     class: AndrewGos\TelegramBot\ValueObject\BotToken
     arguments:
-      $token: '%env(TELEGRAM_CONFIG_ERROR_BOT_KEY)%'
+      $token: '%env(TELEGRAM_BOT_KEY)%'
 
   telegram_bot.processors.start:
     class: App\Presentation\Telegram\UpdateProcessor\StartCommandProcessor

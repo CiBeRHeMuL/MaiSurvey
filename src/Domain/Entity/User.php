@@ -79,6 +79,8 @@ class User
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(name: 'updater_id', referencedColumnName: 'id', nullable: true)]
     private User|null $updater = null;
+    #[ORM\OneToOne(targetEntity: TelegramUser::class, mappedBy: 'user')]
+    private TelegramUser|null $telegramUser = null;
 
     public function __construct()
     {
@@ -419,5 +421,26 @@ class User
     {
         $this->telegramConnectId = $telegramConnectId;
         return $this;
+    }
+
+    public function getTelegramUser(): ?TelegramUser
+    {
+        return $this->telegramUser;
+    }
+
+    public function setTelegramUser(?TelegramUser $telegramUser): User
+    {
+        $this->telegramUser = $telegramUser;
+        return $this;
+    }
+
+    public function canConnectTelegram(): bool
+    {
+        return $this->telegramUser === null;
+    }
+
+    public function isTelegramConnected(): bool
+    {
+        return $this->telegramUser !== null;
     }
 }

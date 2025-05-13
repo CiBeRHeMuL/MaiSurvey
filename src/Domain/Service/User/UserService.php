@@ -280,7 +280,7 @@ class UserService
             ->findILikeEmails($emails);
     }
 
-    public function deleteMe(User $me): User
+    public function deleteMe(User $me): void
     {
         if ($me->isDeleted()) {
             throw ErrorException::new('Нельзя удалить профиль', 400);
@@ -289,7 +289,7 @@ class UserService
             ->setDeletedAt(new DateTimeImmutable());
         if ($this->userRepository->update($me)) {
             $this->statRefresher->refreshStats(force: true);
-            return $me;
+            return;
         }
         throw ErrorException::new('Не удалось удалить профиль');
     }

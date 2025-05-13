@@ -24,8 +24,8 @@ class DeleteMeUseCase
         return $this;
     }
 
-    public function execute(User $me): User
+    public function execute(User $me): void
     {
-        return $this->userService->deleteMe($me);
+        $this->userService->deleteMe($me);
     }
 }
