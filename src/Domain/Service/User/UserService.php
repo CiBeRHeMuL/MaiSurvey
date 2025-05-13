@@ -300,8 +300,7 @@ class UserService
         $refreshToken = $this->securityService->generateRefreshToken();
 
         $user = new User();
-        $user
-            ->setEmail($dto->getEmail())
+        $user->setEmail($dto->getEmail())
             ->setAccessToken($accessToken->getToken())
             ->setAccessTokenExpiresAt($accessToken->getExpiresAt())
             ->setRefreshToken($refreshToken->getToken())

@@ -115,6 +115,7 @@ abstract class AbstractRepository implements RepositoryInterface
         $entityFieldCounts = [];
         foreach ($entities as $k => &$entity) {
             $metadata = $em->getClassMetadata($entity::class);
+            $this->logger->error(serialize($metadata));
             $tableName = $metadata->getTableName();
             // Если есть таблица для замены, то используем ее
             if (isset($replaceTables[$tableName])) {
