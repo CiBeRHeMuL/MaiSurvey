@@ -232,7 +232,6 @@ class UserService
                 $users[] = $this->entityFromCreateDto($dto);
             }
 
-            $this->logger->error(serialize($users));
             $created = $this->userRepository->createMulti($users);
 
             if ($transaction) {
