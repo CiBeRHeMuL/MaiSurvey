@@ -9,7 +9,6 @@ use App\Domain\DataProvider\DataSort;
 use App\Domain\DataProvider\DataSortInterface;
 use App\Domain\DataProvider\LimitOffset;
 use App\Domain\DataProvider\SortColumnInterface;
-use App\Domain\Entity\User;
 use App\Domain\Helper\HArray;
 use App\Domain\Repository\Common\RepositoryInterface;
 use App\Infrastructure\DataProvider\LazyBatchedDataProvider;
@@ -159,9 +158,6 @@ abstract class AbstractRepository implements RepositoryInterface
             }
             $entityFieldCounts[$tableName] = $fieldsCount;
             $inserts[$tableName][$k] = $rowData;
-        }
-        if ($entities[0] instanceof User) {
-            throw new \RuntimeException(json_encode($inserts));
         }
 
         // Выполнение SQL-запроса
