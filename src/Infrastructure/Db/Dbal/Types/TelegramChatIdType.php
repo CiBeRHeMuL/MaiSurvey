@@ -7,12 +7,12 @@ use App\Domain\Dto\TelegramUser\ChatId;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Types\Exception\SerializationFailed;
 use Doctrine\DBAL\Types\Exception\ValueNotConvertible;
-use Doctrine\DBAL\Types\StringType;
+use Doctrine\DBAL\Types\Type;
 use Throwable;
 
-class TelegramChatIdType extends StringType
+class TelegramChatIdType extends Type
 {
-    public function convertToDatabaseValue(mixed $value, AbstractPlatform $platform): ?string
+    public function convertToDatabaseValue(mixed $value, AbstractPlatform $platform): ?int
     {
         if ($value === null || is_string($value)) {
             return $value;
@@ -44,5 +44,10 @@ class TelegramChatIdType extends StringType
                 $e,
             );
         }
+    }
+
+    public function getSQLDeclaration(array $column, AbstractPlatform $platform): string
+    {
+        return $platform->getBigIntTypeDeclarationSQL($column);
     }
 }
