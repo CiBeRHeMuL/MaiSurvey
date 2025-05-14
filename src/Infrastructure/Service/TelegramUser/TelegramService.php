@@ -2,13 +2,16 @@
 
 namespace App\Infrastructure\Service\TelegramUser;
 
+use AndrewGos\TelegramBot\Request\GetChatRequest;
 use AndrewGos\TelegramBot\Telegram;
+use AndrewGos\TelegramBot\ValueObject\ChatId as AGChatId;
+use App\Domain\Dto\TelegramUser\ChatId;
 use App\Domain\Entity\User;
-use App\Domain\Service\TelegramUser\TelegramLinkServiceInterface;
+use App\Domain\Service\TelegramUser\TelegramServiceInterface;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
 
-class TelegramLinkService implements TelegramLinkServiceInterface
+class TelegramService implements TelegramServiceInterface
 {
     public function __construct(
         private Telegram $telegram,
@@ -19,9 +22,27 @@ class TelegramLinkService implements TelegramLinkServiceInterface
     public function getConnectLink(User $user): string|null
     {
         if ($user->canConnectTelegram()) {
-            return "https://t.me/{$this->getTelegramMe()->getFirstName()}?start={$user->getTelegramConnectId()->toRfc4122()}";
+            return "https://t.me/{$this->getTelegramMe()->getUsername()}?start={$user->getTelegramConnectId()->toRfc4122()}";
         }
         return null;
+    }
+
+    public function checkChat(ChatId $chatId): bool
+    {
+        return $this->cache->get(
+            $this->computeCacheKey("chat-{$chatId->getId()}"),
+            function (ItemInterface $item) use ($chatId) {
+                $item->expiresAfter(3600 * 72);
+
+                $response = $this->telegram->getApi()
+                    ->getChat(
+                        new GetChatRequest(
+                            new AGChatId($chatId->getId()),
+                        ),
+                    );
+                return $response->getChatFullInfo() !== null;
+            },
+        );
     }
 
     private function getTelegramMe(): \AndrewGos\TelegramBot\Entity\User

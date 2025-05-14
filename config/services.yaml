@@ -61,8 +61,8 @@ services:
   AndrewGos\ClassBuilder\ClassBuilderInterface:
     class: AndrewGos\ClassBuilder\ClassBuilder
 
-  App\Domain\Service\TelegramUser\TelegramLinkServiceInterface:
-    class: App\Infrastructure\Service\TelegramUser\TelegramLinkService
+  App\Domain\Service\TelegramUser\TelegramServiceInterface:
+    class: App\Infrastructure\Service\TelegramUser\TelegramService
   # --- end services
 
   # --- start repositories

@@ -294,6 +294,13 @@ class UserService
         throw ErrorException::new('Не удалось удалить профиль');
     }
 
+    public function getByTelegramConnectId(Uuid $id): User|null
+    {
+        return $this
+            ->userRepository
+            ->findByTelegramConnectId($id);
+    }
+
     private function entityFromCreateDto(CreateUserDto $dto): User
     {
         $accessToken = $this->securityService->generateAccessToken();

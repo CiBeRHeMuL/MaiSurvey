@@ -195,4 +195,12 @@ class UserRepository extends AbstractRepository implements UserRepositoryInterfa
         return $this
             ->findColumnByQuery($q);
     }
+
+    public function findByTelegramConnectId(Uuid $id): User|null
+    {
+        $q = Query::select()
+            ->from($this->getClassTable(User::class))
+            ->where(['telegram_connect_id' => $id->toRfc4122()]);
+        return $this->findOneByQuery($q, User::class);
+    }
 }

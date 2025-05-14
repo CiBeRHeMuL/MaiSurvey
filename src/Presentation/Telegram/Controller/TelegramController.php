@@ -14,7 +14,7 @@ use Throwable;
 
 class TelegramController extends AbstractController
 {
-    #[Route('/telegram/default', methods: ['POST'])]
+    #[Route('/telegram/webhook', name: 'telegram-webhook', methods: ['POST'])]
     #[LOA\SuccessResponse('boolean')]
     public function index(
         Telegram $telegram,

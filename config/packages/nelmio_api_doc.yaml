@@ -31,6 +31,8 @@ nelmio_api_doc:
         description: Ручки для работы с семестрами
       - name: survey-stats
         description: Ручки для работы со статистикой по опросам
+      - name: telegram
+        description: Telegram API
     servers:
       - url: https://api.mai-survey.ru
       - url: http://mai-survey.loc

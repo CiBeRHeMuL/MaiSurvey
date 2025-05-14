@@ -55,4 +55,6 @@ interface UserRepositoryInterface extends RepositoryInterface
      * @return string[]
      */
     public function findILikeEmails(array $emails): array;
+
+    public function findByTelegramConnectId(Uuid $id): User|null;
 }
