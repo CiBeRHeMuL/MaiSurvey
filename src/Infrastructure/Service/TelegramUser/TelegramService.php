@@ -37,7 +37,7 @@ class TelegramService implements TelegramServiceInterface
                 $response = $this->telegram->getApi()
                     ->getChat(
                         new GetChatRequest(
-                            new AGChatId($chatId->getId()),
+                            new AGChatId(ctype_digit($chatId->getId()) ? (int)$chatId->getId() : $chatId->getId()),
                         ),
                     );
                 return $response->getChatFullInfo() !== null;
